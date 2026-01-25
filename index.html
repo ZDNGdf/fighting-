@@ -3,113 +3,124 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เว็บกำลังใจปั่นๆ 🤪</title>
+<title>เว็บผีปั่น 🤯</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
 body {
-  margin: 0;
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Press Start 2P', cursive;
-  overflow: hidden;
-  background: black;
+  margin:0;
+  padding:0;
+  height:100vh;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #000000, #1a1a1a);
+  color: white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+}
+
+#container {
+  text-align:center;
 }
 
 h1 {
-  font-size: 2.5em;
-  color: lime;
-  text-shadow: 0 0 10px #fff, 0 0 20px #f0f, 0 0 30px #0ff, 0 0 40px yellow;
-  animation: spinColor 1s infinite alternate, shake 0.5s infinite;
-  text-align: center;
+  font-size:2em;
+  margin-bottom:20px;
+  animation: glow 1.5s infinite alternate;
+}
+
+@keyframes glow {
+  0% {text-shadow: 0 0 5px red;}
+  50% {text-shadow: 0 0 20px purple;}
+  100% {text-shadow: 0 0 40px lime;}
 }
 
 button {
-  position: absolute;
-  bottom: 50px;
-  padding: 15px 30px;
-  font-size: 1em;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  background: hotpink;
-  color: yellow;
-  animation: rainbowBG 1s infinite;
+  padding:10px 20px;
+  font-size:1em;
+  border:none;
+  border-radius:10px;
+  margin-top:20px;
+  cursor:pointer;
+  background: red;
+  color:white;
+  box-shadow:0 0 10px #fff;
 }
 
-@keyframes spinColor {
-  0% {color: red;}
-  25% {color: yellow;}
-  50% {color: lime;}
-  75% {color: cyan;}
-  100% {color: magenta;}
+#jumpScare {
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background:black url('https://i.ibb.co/8zrS0X5/scary.png') center/cover no-repeat;
+  display:none;
+  z-index:999;
 }
 
-@keyframes rainbowBG {
-  0%{background: red;}
-  20%{background: orange;}
-  40%{background: yellow;}
-  60%{background: green;}
-  80%{background: blue;}
-  100%{background: purple;}
-}
-
-@keyframes shake {
-  0%{transform: translate(0px,0px) rotate(0deg);}
-  25%{transform: translate(5px,-5px) rotate(5deg);}
-  50%{transform: translate(-5px,5px) rotate(-5deg);}
-  75%{transform: translate(5px,5px) rotate(5deg);}
-  100%{transform: translate(0px,0px) rotate(0deg);}
-}
-
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: white;
-  border-radius: 50%;
-  animation: fall 2s linear infinite;
-}
-
-@keyframes fall {
-  0% {transform: translateY(0) rotate(0deg);}
-  100% {transform: translateY(100vh) rotate(720deg);}
+input {
+  padding:10px;
+  font-size:1em;
+  border-radius:5px;
+  border:none;
+  margin-top:10px;
 }
 </style>
 </head>
 <body>
 
-<h1 id="message">คุณคือเทพแห่งความปั่น! 🤪</h1>
-<button onclick="surprise()">ปั่นต่อ!</button>
+<div id="container">
+  <h1 id="question">คุณโดนผีจับแล้ว! 😱</h1>
+  <input type="text" id="answer" placeholder="พิมพ์คำตอบ...">
+  <br>
+  <button onclick="checkAnswer()">ส่งคำตอบ</button>
+</div>
+
+<div id="jumpScare"></div>
 
 <script>
-const messages = [
-  "คุณทำได้! แต่ยังปั่นกว่าเดิม! 🤯",
-  "วันนี้เป็นวันของคุณ! 🌈",
-  "ปั่นไปเลย! 🚀",
-  "ทุกอย่างมันบ้า แต่คุณเก่ง! 💥",
-  "Confetti เยอะๆ ให้กำลังใจ! 🎉"
+const questions = [
+  {q:"มดบนโลกมีกี่ตัว?", a:"เยอะมาก"},
+  {q:"พิษซ่าใส่สัปปะรดไหม?", a:"ไม่"},
+  {q:"ผีเมื่อกี้มีตาสีอะไร?", a:"แดง"},
+  {q:"เสียงหัวเราะผีดังข้างหลังคุณกี่ครั้ง?", a:"หลายครั้ง"},
+  {q:"ผีชอบกินช็อกโกแลตไหม?", a:"ใช่"},
+  {q:"ถ้าคุณก้าวไป 3 ก้าว ผีจะอยู่ซ้ายหรือขวา?", a:"ซ้าย"},
+  {q:"ผีมีหมวกไหม?", a:"ไม่มี"},
+  {q:"วันนี้วันอะไร?", a:"วันศุกร์"},
+  {q:"ผีชอบร้องเพลงแนวอะไร?", a:"ฮาโลวีน"},
+  {q:"ผีเมื่อกี้หัวเราะแบบไหน?", a:"แหลม"},
+  {q:"คุณเห็นผีหรือแค่เงา?", a:"ผี"},
+  {q:"ผีชอบน้ำแข็งใสไหม?", a:"ไม่"},
+  {q:"ผีใส่รองเท้าสีอะไร?", a:"ดำ"},
+  {q:"ผีชอบดื่มชา หรือ กาแฟ?", a:"ชา"},
+  {q:"ผีเมื่อกี้ทำท่าทางแปลกๆ กี่ครั้ง?", a:"สาม"},
+  {q:"ผีมีหางไหม?", a:"ไม่มี"},
+  {q:"ผีเคยบอกชื่อคุณไหม?", a:"ไม่"},
+  {q:"ผีชอบเต้นรำไหม?", a:"ใช่"},
+  {q:"ผีเมื่อกี้พ่นไฟหรือไม่?", a:"ไม่"},
+  {q:"ผีทำท่าทางแบบไหนก่อนโดนจับ?", a:"กระโดด"}
 ];
 
-function surprise() {
-  const msg = messages[Math.floor(Math.random() * messages.length)];
-  const msgEl = document.getElementById('message');
-  msgEl.textContent = msg;
-  msgEl.style.transform = `rotate(${Math.random()*60-30}deg) scale(${1+Math.random()})`;
-  createConfetti();
+let currentQ = Math.floor(Math.random() * questions.length);
+
+document.getElementById("question").innerText = questions[currentQ].q;
+
+function checkAnswer() {
+  const ans = document.getElementById("answer").value.toLowerCase().trim();
+  const correct = questions[currentQ].a.toLowerCase();
+  if(ans === correct) {
+    alert("คุณรอดแล้ว! 😎");
+    currentQ = Math.floor(Math.random() * questions.length);
+    document.getElementById("question").innerText = questions[currentQ].q;
+    document.getElementById("answer").value = "";
+  } else {
+    jumpScare();
+  }
 }
 
-function createConfetti() {
-  for (let i=0; i<30; i++) {
-    const conf = document.createElement('div');
-    conf.classList.add('confetti');
-    conf.style.left = Math.random() * window.innerWidth + 'px';
-    conf.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
-    document.body.appendChild(conf);
-    setTimeout(()=>conf.remove(), 2000);
-  }
+function jumpScare() {
+  const scare = document.getElementById("jumpScare");
+  scare.style.display = "block";
+  const audio = new Audio("https://www.myinstants.com/media/sounds/scary-laugh.mp3");
+  audio.play();
+  setTimeout(()=>{scare.style.display="none"}, 1500);
 }
 </script>
 
