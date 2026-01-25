@@ -3,226 +3,221 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>แบบทดสอบวัดความหื่น</title>
+<title>Quiz วัดความชอบดนตรี</title>
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Kanit', sans-serif;
-    background: linear-gradient(to right, #ff9a9e, #fad0c4);
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
-  .container {
-    background: #fff;
-    border-radius: 20px;
-    padding: 20px 30px;
-    max-width: 700px;
-    width: 90%;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  }
-  h1 {
-    text-align: center;
-    color: #ff4d6d;
-    margin-bottom: 20px;
-  }
-  .question {
-    margin-bottom: 25px;
-  }
-  .question img {
-    display: block;
-    max-width: 100%;
-    margin: 10px 0;
-    border-radius: 10px;
-  }
-  input[type="range"] {
-    width: 100%;
-    margin-top: 10px;
-  }
-  .range-labels {
-    display: flex;
-    justify-content: space-between;
-    font-size: 14px;
-    margin-top: 5px;
-  }
-  button {
-    display: block;
-    margin: 20px auto 0;
-    padding: 12px 30px;
-    background: #ff4d6d;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.3s;
-  }
-  button:hover {
-    background: #ff1f4b;
-  }
-  #result {
-    text-align: center;
-    margin-top: 20px;
-    font-size: 20px;
-    font-weight: bold;
-    color: #ff4d6d;
-  }
-  @media (max-width: 500px){
-    .container { padding: 15px 20px; }
-  }
+* { box-sizing: border-box; }
+body {
+  font-family: 'Kanit', sans-serif;
+  background: linear-gradient(to right, #a1c4fd, #c2e9fb);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+.container {
+  background: #fff;
+  border-radius: 20px;
+  padding: 20px 30px;
+  max-width: 700px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+h1 {
+  text-align: center;
+  color: #3b3b98;
+  margin-bottom: 20px;
+}
+.question {
+  margin-bottom: 25px;
+}
+.question img {
+  display: block;
+  max-width: 100%;
+  margin: 10px 0;
+  border-radius: 10px;
+}
+input[type="range"] {
+  width: 100%;
+  margin-top: 10px;
+}
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-top: 5px;
+}
+button {
+  display: block;
+  margin: 20px auto 0;
+  padding: 12px 30px;
+  background: #3b3b98;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+button:hover { background: #2c2c72; }
+#result {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #3b3b98;
+}
+@media (max-width: 500px){ .container { padding: 15px 20px; } }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>แบบทดสอบวัดความหื่น</h1>
+  <h1>แบบทดสอบความชอบดนตรี</h1>
   <form id="quizForm">
-    <!-- คำถามตัวอย่าง 20 ข้อ -->
-    <div class="question">
-      <p>1. เวลาผ่านรูปเซ็กซี่บนโซเชียล คุณรู้สึกอย่างไร?</p>
-      <img src="https://via.placeholder.com/400x200?text=รูปตัวอย่าง" alt="รูปประกอบ">
-      <input type="range" min="1" max="5" value="1" class="slider" id="q1">
-      <div class="range-labels"><span>เฉยๆ</span><span>ตื่นเต้นสุดๆ</span></div>
-    </div>
 
-    <div class="question">
-      <p>2. คุณชอบดูเนื้อหาแบบ 18+ หรือไม่?</p>
-      <input type="range" min="1" max="5" value="1" class="slider" id="q2">
-      <div class="range-labels"><span>ไม่เลย</span><span>ชอบมาก</span></div>
-    </div>
+<!-- ตัวอย่าง 30 ข้อ -->
+<div class="question"><p>1. คุณฟังเพลงบ่อยแค่ไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q1">
+<div class="range-labels"><span>น้อยมาก</span><span>ทุกวัน</span></div></div>
 
-    <div class="question">
-      <p>3. เวลาเห็นคนสวย/หล่อเดินผ่าน คุณจะมองกี่ครั้ง?</p>
-      <input type="range" min="1" max="5" value="1" class="slider" id="q3">
-      <div class="range-labels"><span>ไม่มอง</span><span>มองทุกครั้ง</span></div>
-    </div>
+<div class="question"><p>2. คุณชอบแนวเพลง Pop มากแค่ไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q2">
+<div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div></div>
 
-    <div class="question">
-      <p>4. คุณเคยคิดอะไรหื่นๆ ในที่สาธารณะไหม?</p>
-      <input type="range" min="1" max="5" value="1" class="slider" id="q4">
-      <div class="range-labels"><span>ไม่เคย</span><span>บ่อยมาก</span></div>
-    </div>
+<div class="question"><p>3. คุณฟังเพลง Rock หรือ Metal บ่อยแค่ไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q3">
+<div class="range-labels"><span>ไม่เคย</span><span>ทุกวัน</span></div></div>
 
-    <div class="question">
-      <p>5. เวลาคุยกับแฟน/เพื่อน คุณเคยพูดเชิงหื่นไหม?</p>
-      <input type="range" min="1" max="5" value="1" class="slider" id="q5">
-      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
-    </div>
+<div class="question"><p>4. คุณสนใจเพลงคลาสสิกหรือ Jazz มากแค่ไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q4">
+<div class="range-labels"><span>ไม่สนใจ</span><span>ชอบมาก</span></div></div>
 
-    <!-- ต่อไปจนถึงข้อ 20 -->
-    <div class="question">
-      <p>6. คุณชอบจินตนาการเรื่องหื่นๆ เวลาอยู่คนเดียวไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q6">
-      <div class="range-labels"><span>ไม่เลย</span><span>มาก</span></div>
-    </div>
+<div class="question"><p>5. คุณเคยเล่นเครื่องดนตรีไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q5">
+<div class="range-labels"><span>ไม่เคย</span><span>เล่นได้คล่อง</span></div></div>
 
-    <div class="question">
-      <p>7. คุณเคยส่งข้อความหื่นๆ ไปหาแฟนหรือเพื่อนไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q7">
-      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
-    </div>
+<div class="question"><p>6. คุณชอบร้องเพลงไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q6">
+<div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div></div>
 
-    <div class="question">
-      <p>8. คุณสนใจเรื่องหื่นๆ ในหนังหรืออนิเมะไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q8">
-      <div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div>
-    </div>
+<div class="question"><p>7. คุณเคยไปคอนเสิร์ตหรือเทศกาลดนตรีไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q7">
+<div class="range-labels"><span>ไม่เคย</span><span>หลายครั้ง</span></div></div>
 
-    <div class="question">
-      <p>9. คุณเคยดูอะไร 18+ มากกว่า 1 ชั่วโมงต่อวันไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q9">
-      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
-    </div>
+<div class="question"><p>8. คุณสามารถจำเนื้อเพลงได้ดีแค่ไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q8">
+<div class="range-labels"><span>จำไม่ได้</span><span>จำได้หมด</span></div></div>
 
-    <div class="question">
-      <p>10. คุณคิดว่าเรื่องหื่นเป็นเรื่องสนุกไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q10">
-      <div class="range-labels"><span>ไม่สนุก</span><span>สนุกมาก</span></div>
-    </div>
+<div class="question"><p>9. คุณสนใจอัปเดตเพลงใหม่ๆ แค่ไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q9">
+<div class="range-labels"><span>ไม่สนใจ</span><span>ติดตามทุกวัน</span></div></div>
 
-    <!-- 11-20 -->
-    <div class="question">
-      <p>11. คุณเคยฝันเรื่องหื่นๆ บ่อยไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q11">
-      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
-    </div>
+<div class="question"><p>10. คุณชอบฟังเพลงระหว่างทำงาน/เรียนไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q10">
+<div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div></div>
 
-    <div class="question">
-      <p>12. คุณเคยแอบดูแฟน/เพื่อนเวลาส่วนตัวไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q12">
-      <div class="range-labels"><span>ไม่เคย</span><span>เคยมาก</span></div>
-    </div>
+<!-- 11-20 -->
+<div class="question"><p>11. คุณชอบฟังเพลงไทยหรือสากลมากกว่า?</p>
+<input type="range" min="1" max="5" value="1" id="q11">
+<div class="range-labels"><span>ไทย</span><span>สากล</span></div></div>
 
-    <div class="question">
-      <p>13. เวลาผ่านรูปหรือวิดีโอ 18+ คุณใช้เวลากี่นาที?</p>
-      <input type="range" min="1" max="5" value="1" id="q13">
-      <div class="range-labels"><span>น้อย</span><span>มาก</span></div>
-    </div>
+<div class="question"><p>12. คุณฟังเพลงระหว่างเดินทางบ่อยไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q12">
+<div class="range-labels"><span>ไม่เคย</span><span>ทุกวัน</span></div></div>
 
-    <div class="question">
-      <p>14. คุณชอบจินตนาการเรื่องหื่นกับคนในฝูงไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q14">
-      <div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div>
-    </div>
+<div class="question"><p>13. คุณชอบฟังเพลงที่มีเนื้อหาเศร้าไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q13">
+<div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div></div>
 
-    <div class="question">
-      <p>15. คุณเคยคิดหื่นๆ เวลาคุยงาน/เรียนไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q15">
-      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
-    </div>
+<div class="question"><p>14. คุณสนใจเรียนรู้ทฤษฎีดนตรีไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q14">
+<div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div></div>
 
-    <div class="question">
-      <p>16. คุณสนใจเรื่องหื่นๆ กับเพื่อนสนิทไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q16">
-      <div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div>
-    </div>
+<div class="question"><p>15. คุณชอบแต่งเพลงหรือทำบีทเองไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q15">
+<div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div></div>
 
-    <div class="question">
-      <p>17. คุณเคยแอบจินตนาการกับเพื่อนร่วมงาน/เพื่อนเรียนไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q17">
-      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
-    </div>
+<div class="question"><p>16. คุณฟังเพลงแนว EDM/Trap บ่อยไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q16">
+<div class="range-labels"><span>ไม่เคย</span><span>ทุกวัน</span></div></div>
 
-    <div class="question">
-      <p>18. เวลาผ่านเนื้อหา 18+ คุณชอบแบบไหน?</p>
-      <input type="range" min="1" max="5" value="1" id="q18">
-      <div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div>
-    </div>
+<div class="question"><p>17. คุณชอบฟังเพลงเพื่อผ่อนคลายไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q17">
+<div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div></div>
 
-    <div class="question">
-      <p>19. คุณเคยพูดคำหื่นกับแฟน/เพื่อนผ่านเสียงไหม?</p>
-      <input type="range" min="1" max="5" value="1" id="q19">
-      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
-    </div>
+<div class="question"><p>18. คุณสนใจเทคนิคการร้องหรือเล่นดนตรีไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q18">
+<div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div></div>
 
-    <div class="question">
-      <p>20. คุณคิดว่าตัวเองหื่นขนาดไหน?</p>
-      <input type="range" min="1" max="5" value="1" id="q20">
-      <div class="range-labels"><span>น้อย</span><span>มากที่สุด</span></div>
-    </div>
+<div class="question"><p>19. คุณติดตามศิลปินโปรดบ่อยแค่ไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q19">
+<div class="range-labels"><span>ไม่ติดตาม</span><span>ติดตามทุกวัน</span></div></div>
 
-    <button type="button" onclick="calculateScore()">ดูผลคะแนน</button>
-  </form>
+<div class="question"><p>20. คุณชอบฟังเพลงแบบสด (Live) หรือเวอร์ชันสตูดิโอมากกว่า?</p>
+<input type="range" min="1" max="5" value="1" id="q20">
+<div class="range-labels"><span>สตูดิโอ</span><span>สด</span></div></div>
 
-  <div id="result"></div>
+<!-- 21-30 -->
+<div class="question"><p>21. คุณชอบฟังเพลงในช่วงเวลาไหนมากที่สุด?</p>
+<input type="range" min="1" max="5" value="1" id="q21">
+<div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div></div>
+
+<div class="question"><p>22. คุณเคยใช้แอปฟังเพลงแบบพรีเมียมไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q22">
+<div class="range-labels"><span>ไม่เคย</span><span>ใช้ประจำ</span></div></div>
+
+<div class="question"><p>23. คุณสนใจเนื้อเพลงและความหมายไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q23">
+<div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div></div>
+
+<div class="question"><p>24. คุณชอบฟังเพลงเก่าหรือเพลงใหม่?</p>
+<input type="range" min="1" max="5" value="1" id="q24">
+<div class="range-labels"><span>เก่า</span><span>ใหม่</span></div></div>
+
+<div class="question"><p>25. คุณชอบดู MV/คลิปดนตรีมากแค่ไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q25">
+<div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div></div>
+
+<div class="question"><p>26. คุณชอบเล่นดนตรีกับเพื่อนไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q26">
+<div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div></div>
+
+<div class="question"><p>27. คุณสนใจเรียนรู้เครื่องดนตรีใหม่ๆ ไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q27">
+<div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div></div>
+
+<div class="question"><p>28. คุณฟังเพลงขณะออกกำลังกายไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q28">
+<div class="range-labels"><span>ไม่เคย</span><span>ทุกครั้ง</span></div></div>
+
+<div class="question"><p>29. คุณชอบสร้าง Playlist เพลงของตัวเองไหม?</p>
+<input type="range" min="1" max="5" value="1" id="q29">
+<div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div></div>
+
+<div class="question"><p>30. คุณคิดว่าตัวเองเป็นคนรักดนตรีขนาดไหน?</p>
+<input type="range" min="1" max="5" value="1" id="q30">
+<div class="range-labels"><span>น้อย</span><span>มากที่สุด</span></div></div>
+
+<button type="button" onclick="calculateScore()">ดูผลคะแนน</button>
+</form>
+
+<div id="result"></div>
 </div>
 
 <script>
 function calculateScore() {
   let score = 0;
-  for(let i=1;i<=20;i++){
-    let val = document.getElementById('q'+i).value;
-    score += parseInt(val);
+  for(let i=1;i<=30;i++){
+    score += parseInt(document.getElementById('q'+i).value);
   }
   let level = '';
-  if(score <= 40) level = 'หื่นน้อย';
-  else if(score <= 70) level = 'หื่นปานกลาง';
-  else if(score <= 90) level = 'หื่นมาก';
-  else level = 'หื่นสุดๆ';
+  if(score <= 50) level = 'สนใจดนตรีน้อย';
+  else if(score <= 90) level = 'สนใจดนตรีปานกลาง';
+  else if(score <= 120) level = 'สนใจดนตรีมาก';
+  else level = 'รักดนตรีสุดๆ';
   document.getElementById('result').innerText = `คะแนนรวม: ${score}\nระดับ: ${level}`;
 }
 </script>
