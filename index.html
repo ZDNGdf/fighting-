@@ -13,9 +13,8 @@ body {
   padding: 0;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
+  align-items: center;
   min-height: 100vh;
-  padding-top: 30px;
 }
 .container {
   background: #fff;
@@ -25,20 +24,22 @@ body {
   width: 90%;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   text-align: center;
-  margin-bottom: 20px;
 }
 h1 {
   color: #ff4d6d;
   margin-bottom: 20px;
 }
-input[type=text] {
-  padding: 10px;
-  font-size: 16px;
-  width: 80%;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+.question {
+  margin-bottom: 25px;
+  font-size: 18px;
 }
-button {
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+button.answer {
   padding: 10px 25px;
   font-size: 16px;
   border: none;
@@ -47,42 +48,33 @@ button {
   background-color: #ff4d6d;
   color: white;
   transition: 0.3s;
-  margin-top: 10px;
 }
-button:hover { background-color: #ff1f4b; }
-button.answer {
-  margin-top: 10px;
-  width: 100px;
+button.answer:hover {
+  background-color: #ff1f4b;
 }
-button.hidden { display: none; }
-.question { font-size: 18px; margin-bottom: 15px; }
-.button-group { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
-#result { margin-top: 20px; font-size: 20px; font-weight: bold; color: #ff4d6d; }
-#dataList { margin-top: 20px; text-align: left; }
-@media (max-width:500px){ .button-group{flex-direction: column;} }
+button.hidden {
+  display: none;
+}
+#result {
+  margin-top: 20px;
+  font-size: 20px;
+  font-weight: bold;
+  color: #ff4d6d;
+}
+@media (max-width: 500px){
+  .button-group { flex-direction: column; gap: 10px; }
+}
 </style>
 </head>
 <body>
 
-<div class="container" id="nameContainer">
-<h1>กรอกชื่อของคุณ</h1>
-<input type="text" id="userName" placeholder="ชื่อของคุณ">
-<br>
-<button onclick="submitName()">ส่งข้อมูล</button>
-</div>
-
-<div class="container" id="quizContainer" style="display:none;"></div>
-<div class="container" id="resultContainer" style="display:none;"></div>
-
-<div class="container" id="dataList">
-<h2>รายชื่อผู้เล่น:</h2>
-<ul id="userList"></ul>
+<div class="container">
+<h1>แบบทดสอบ: คุณเจ้าชู้ไหม?</h1>
+<div id="quizContainer"></div>
+<div id="result"></div>
 </div>
 
 <script>
-// เก็บข้อมูลผู้เล่น
-let users = [];
-
 // คำถาม
 const questions = [
   "1. คุณมักแอบคุยกับคนที่สนใจอยู่บ่อยไหม?",
@@ -97,69 +89,44 @@ const questions = [
   "10. คุณคิดว่าตัวเองเจ้าชู้มากแค่ไหน?"
 ];
 
-const hideButtonQuestions = [8]; // ข้อที่ปุ่มจะหาย
+// ข้อที่จะซ่อนปุ่ม
+const hideButtonQuestions = [8]; // ตัวอย่างข้อ 8
 
 let currentQuestion = 0;
 let score = 0;
-let answered = false;
-let currentUser = "";
 
-function submitName(){
-  const nameInput = document.getElementById("userName").value.trim();
-  if(nameInput === "") { alert("กรุณากรอกชื่อ"); return; }
+const quizContainer = document.getElementById("quizContainer");
+const resultDiv = document.getElementById("result");
 
-  // เก็บชื่อ
-  currentUser = nameInput;
-  users.push(nameInput);
-  updateUserList();
-
-  // ซ่อนหน้าใส่ชื่อ
-  document.getElementById("nameContainer").style.display = "none";
-
-  // แสดง quiz
-  document.getElementById("quizContainer").style.display = "block";
-  showQuestion();
-}
-
-function updateUserList(){
-  const ul = document.getElementById("userList");
-  ul.innerHTML = "";
-  users.forEach(u=>{
-    const li = document.createElement("li");
-    li.textContent = u;
-    ul.appendChild(li);
-  });
-}
-
-function showQuestion(){
+function showQuestion() {
   if(currentQuestion >= questions.length){
-    document.getElementById("quizContainer").style.display = "none";
-    document.getElementById("resultContainer").style.display = "block";
+    // จบ quiz
     let level = '';
     if(score <= 3) level = 'ไม่เจ้าชู้';
     else if(score <= 6) level = 'เจ้าชู้ปานกลาง';
     else level = 'เจ้าชู้มาก';
-    document.getElementById("resultContainer").innerHTML = `<h1>${currentUser} คะแนนรวม: ${score}</h1><p>ระดับ: ${level}</p>`;
-    answered = true;
+    resultDiv.innerText = `คะแนนรวม: ${score}\nระดับ: ${level}`;
     return;
   }
 
-  if(answered) return; // ป้องกันตอบซ้ำ
-
+  // สร้างคำถามและปุ่ม
   quizContainer.innerHTML = `
     <div class="question">${questions[currentQuestion]}</div>
     <div class="button-group">
-      <button class="answer ${hideButtonQuestions.includes(currentQuestion+1)? 'hidden':''}" onclick="answerQuestion(true)">ใช่</button>
-      <button class="answer ${hideButtonQuestions.includes(currentQuestion+1)? 'hidden':''}" onclick="answerQuestion(false)">ไม่ใช่</button>
+      <button class="answer" onclick="answerQuestion(true)" ${hideButtonQuestions.includes(currentQuestion+1)? 'class="answer hidden"':''}>ใช่</button>
+      <button class="answer" onclick="answerQuestion(false)" ${hideButtonQuestions.includes(currentQuestion+1)? 'class="answer hidden"':''}>ไม่ใช่</button>
     </div>
   `;
 }
 
 function answerQuestion(isYes){
-  score += isYes ? 1 : 0;
+  // บางข้อเรากำหนดว่า "ถูก" คือไม่เจ้าชู้ เช่น hideButtonQuestions
+  if(isYes) score += 1;
   currentQuestion++;
   showQuestion();
 }
+
+showQuestion();
 </script>
 
 </body>
