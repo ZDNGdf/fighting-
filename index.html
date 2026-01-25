@@ -3,120 +3,114 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>กำลังใจเซอร์ไพรส์ 💖</title>
+<title>เว็บกำลังใจปั่นๆ 🤪</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Pacifico&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
-  body {
-    margin: 0;
-    padding: 0;
-    font-family: 'Pacifico', cursive;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: linear-gradient(135deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb);
-    background-size: 400% 400%;
-    animation: gradientBG 15s ease infinite;
-    overflow: hidden;
-  }
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Press Start 2P', cursive;
+  overflow: hidden;
+  background: black;
+}
 
-  @keyframes gradientBG {
-    0% {background-position: 0% 50%;}
-    50% {background-position: 100% 50%;}
-    100% {background-position: 0% 50%;}
-  }
+h1 {
+  font-size: 2.5em;
+  color: lime;
+  text-shadow: 0 0 10px #fff, 0 0 20px #f0f, 0 0 30px #0ff, 0 0 40px yellow;
+  animation: spinColor 1s infinite alternate, shake 0.5s infinite;
+  text-align: center;
+}
 
-  h1 {
-    font-size: 3em;
-    color: white;
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
-    text-align: center;
-    margin-bottom: 20px;
-    animation: fadeIn 2s ease forwards;
-  }
+button {
+  position: absolute;
+  bottom: 50px;
+  padding: 15px 30px;
+  font-size: 1em;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  background: hotpink;
+  color: yellow;
+  animation: rainbowBG 1s infinite;
+}
 
-  @keyframes fadeIn {
-    0% {opacity: 0; transform: scale(0.5);}
-    100% {opacity: 1; transform: scale(1);}
-  }
+@keyframes spinColor {
+  0% {color: red;}
+  25% {color: yellow;}
+  50% {color: lime;}
+  75% {color: cyan;}
+  100% {color: magenta;}
+}
 
-  button {
-    padding: 15px 30px;
-    font-size: 1.5em;
-    border: none;
-    border-radius: 50px;
-    background: #fff;
-    color: #ff6f91;
-    cursor: pointer;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    transition: all 0.3s ease;
-  }
+@keyframes rainbowBG {
+  0%{background: red;}
+  20%{background: orange;}
+  40%{background: yellow;}
+  60%{background: green;}
+  80%{background: blue;}
+  100%{background: purple;}
+}
 
-  button:hover {
-    transform: scale(1.1);
-    background: #ff6f91;
-    color: white;
-  }
+@keyframes shake {
+  0%{transform: translate(0px,0px) rotate(0deg);}
+  25%{transform: translate(5px,-5px) rotate(5deg);}
+  50%{transform: translate(-5px,5px) rotate(-5deg);}
+  75%{transform: translate(5px,5px) rotate(5deg);}
+  100%{transform: translate(0px,0px) rotate(0deg);}
+}
 
-  .confetti {
-    position: absolute;
-    width: 10px;
-    height: 10px;
-    background: gold;
-    top: 0;
-    animation: fall 3s linear infinite;
-    border-radius: 50%;
-  }
+.confetti {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: white;
+  border-radius: 50%;
+  animation: fall 2s linear infinite;
+}
 
-  @keyframes fall {
-    0% {transform: translateY(0) rotate(0deg);}
-    100% {transform: translateY(100vh) rotate(360deg);}
-  }
-
+@keyframes fall {
+  0% {transform: translateY(0) rotate(0deg);}
+  100% {transform: translateY(100vh) rotate(720deg);}
+}
 </style>
 </head>
 <body>
 
-<h1 id="message">คุณทำได้! 🌟</h1>
-<button onclick="surprise()">เซอร์ไพรส์ฉันอีก!</button>
+<h1 id="message">คุณคือเทพแห่งความปั่น! 🤪</h1>
+<button onclick="surprise()">ปั่นต่อ!</button>
 
 <script>
-  const messages = [
-    "วันนี้คุณเก่งที่สุดแล้ว! 💪",
-    "ทุกความพยายามมีค่า 🌈",
-    "คุณคือแรงบันดาลใจของตัวเอง ✨",
-    "อย่ายอมแพ้! 🌟",
-    "รอยยิ้มของคุณสำคัญมาก 😄"
-  ];
+const messages = [
+  "คุณทำได้! แต่ยังปั่นกว่าเดิม! 🤯",
+  "วันนี้เป็นวันของคุณ! 🌈",
+  "ปั่นไปเลย! 🚀",
+  "ทุกอย่างมันบ้า แต่คุณเก่ง! 💥",
+  "Confetti เยอะๆ ให้กำลังใจ! 🎉"
+];
 
-  function surprise() {
-    const randomMsg = messages[Math.floor(Math.random() * messages.length)];
-    const msgEl = document.getElementById('message');
-    msgEl.textContent = randomMsg;
-    animateMessage(msgEl);
-    createConfetti();
-  }
+function surprise() {
+  const msg = messages[Math.floor(Math.random() * messages.length)];
+  const msgEl = document.getElementById('message');
+  msgEl.textContent = msg;
+  msgEl.style.transform = `rotate(${Math.random()*60-30}deg) scale(${1+Math.random()})`;
+  createConfetti();
+}
 
-  function animateMessage(el) {
-    el.style.transform = "scale(1.2)";
-    el.style.opacity = "0.5";
-    setTimeout(() => {
-      el.style.transform = "scale(1)";
-      el.style.opacity = "1";
-    }, 500);
+function createConfetti() {
+  for (let i=0; i<30; i++) {
+    const conf = document.createElement('div');
+    conf.classList.add('confetti');
+    conf.style.left = Math.random() * window.innerWidth + 'px';
+    conf.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
+    document.body.appendChild(conf);
+    setTimeout(()=>conf.remove(), 2000);
   }
-
-  function createConfetti() {
-    for (let i = 0; i < 20; i++) {
-      const conf = document.createElement('div');
-      conf.classList.add('confetti');
-      conf.style.left = Math.random() * window.innerWidth + 'px';
-      conf.style.background = `hsl(${Math.random()*360}, 100%, 50%)`;
-      document.body.appendChild(conf);
-      setTimeout(() => conf.remove(), 3000);
-    }
-  }
+}
 </script>
 
 </body>
