@@ -3,124 +3,227 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เว็บผีปั่น 🤯</title>
+<title>แบบทดสอบวัดความหื่น</title>
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
 <style>
-body {
-  margin:0;
-  padding:0;
-  height:100vh;
-  font-family: 'Arial', sans-serif;
-  background: linear-gradient(135deg, #000000, #1a1a1a);
-  color: white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  overflow:hidden;
-}
-
-#container {
-  text-align:center;
-}
-
-h1 {
-  font-size:2em;
-  margin-bottom:20px;
-  animation: glow 1.5s infinite alternate;
-}
-
-@keyframes glow {
-  0% {text-shadow: 0 0 5px red;}
-  50% {text-shadow: 0 0 20px purple;}
-  100% {text-shadow: 0 0 40px lime;}
-}
-
-button {
-  padding:10px 20px;
-  font-size:1em;
-  border:none;
-  border-radius:10px;
-  margin-top:20px;
-  cursor:pointer;
-  background: red;
-  color:white;
-  box-shadow:0 0 10px #fff;
-}
-
-#jumpScare {
-  position:fixed;
-  top:0; left:0; right:0; bottom:0;
-  background:black url('https://i.ibb.co/8zrS0X5/scary.png') center/cover no-repeat;
-  display:none;
-  z-index:999;
-}
-
-input {
-  padding:10px;
-  font-size:1em;
-  border-radius:5px;
-  border:none;
-  margin-top:10px;
-}
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Kanit', sans-serif;
+    background: linear-gradient(to right, #ff9a9e, #fad0c4);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+  }
+  .container {
+    background: #fff;
+    border-radius: 20px;
+    padding: 20px 30px;
+    max-width: 700px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+  h1 {
+    text-align: center;
+    color: #ff4d6d;
+    margin-bottom: 20px;
+  }
+  .question {
+    margin-bottom: 25px;
+  }
+  .question img {
+    display: block;
+    max-width: 100%;
+    margin: 10px 0;
+    border-radius: 10px;
+  }
+  input[type="range"] {
+    width: 100%;
+    margin-top: 10px;
+  }
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  button {
+    display: block;
+    margin: 20px auto 0;
+    padding: 12px 30px;
+    background: #ff4d6d;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #ff1f4b;
+  }
+  #result {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #ff4d6d;
+  }
+  @media (max-width: 500px){
+    .container { padding: 15px 20px; }
+  }
 </style>
 </head>
 <body>
 
-<div id="container">
-  <h1 id="question">คุณโดนผีจับแล้ว! 😱</h1>
-  <input type="text" id="answer" placeholder="พิมพ์คำตอบ...">
-  <br>
-  <button onclick="checkAnswer()">ส่งคำตอบ</button>
+<div class="container">
+  <h1>แบบทดสอบวัดความหื่น</h1>
+  <form id="quizForm">
+    <!-- คำถามตัวอย่าง 20 ข้อ -->
+    <div class="question">
+      <p>1. เวลาผ่านรูปเซ็กซี่บนโซเชียล คุณรู้สึกอย่างไร?</p>
+      <img src="https://via.placeholder.com/400x200?text=รูปตัวอย่าง" alt="รูปประกอบ">
+      <input type="range" min="1" max="5" value="1" class="slider" id="q1">
+      <div class="range-labels"><span>เฉยๆ</span><span>ตื่นเต้นสุดๆ</span></div>
+    </div>
+
+    <div class="question">
+      <p>2. คุณชอบดูเนื้อหาแบบ 18+ หรือไม่?</p>
+      <input type="range" min="1" max="5" value="1" class="slider" id="q2">
+      <div class="range-labels"><span>ไม่เลย</span><span>ชอบมาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>3. เวลาเห็นคนสวย/หล่อเดินผ่าน คุณจะมองกี่ครั้ง?</p>
+      <input type="range" min="1" max="5" value="1" class="slider" id="q3">
+      <div class="range-labels"><span>ไม่มอง</span><span>มองทุกครั้ง</span></div>
+    </div>
+
+    <div class="question">
+      <p>4. คุณเคยคิดอะไรหื่นๆ ในที่สาธารณะไหม?</p>
+      <input type="range" min="1" max="5" value="1" class="slider" id="q4">
+      <div class="range-labels"><span>ไม่เคย</span><span>บ่อยมาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>5. เวลาคุยกับแฟน/เพื่อน คุณเคยพูดเชิงหื่นไหม?</p>
+      <input type="range" min="1" max="5" value="1" class="slider" id="q5">
+      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
+    </div>
+
+    <!-- ต่อไปจนถึงข้อ 20 -->
+    <div class="question">
+      <p>6. คุณชอบจินตนาการเรื่องหื่นๆ เวลาอยู่คนเดียวไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q6">
+      <div class="range-labels"><span>ไม่เลย</span><span>มาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>7. คุณเคยส่งข้อความหื่นๆ ไปหาแฟนหรือเพื่อนไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q7">
+      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
+    </div>
+
+    <div class="question">
+      <p>8. คุณสนใจเรื่องหื่นๆ ในหนังหรืออนิเมะไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q8">
+      <div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>9. คุณเคยดูอะไร 18+ มากกว่า 1 ชั่วโมงต่อวันไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q9">
+      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
+    </div>
+
+    <div class="question">
+      <p>10. คุณคิดว่าเรื่องหื่นเป็นเรื่องสนุกไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q10">
+      <div class="range-labels"><span>ไม่สนุก</span><span>สนุกมาก</span></div>
+    </div>
+
+    <!-- 11-20 -->
+    <div class="question">
+      <p>11. คุณเคยฝันเรื่องหื่นๆ บ่อยไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q11">
+      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
+    </div>
+
+    <div class="question">
+      <p>12. คุณเคยแอบดูแฟน/เพื่อนเวลาส่วนตัวไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q12">
+      <div class="range-labels"><span>ไม่เคย</span><span>เคยมาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>13. เวลาผ่านรูปหรือวิดีโอ 18+ คุณใช้เวลากี่นาที?</p>
+      <input type="range" min="1" max="5" value="1" id="q13">
+      <div class="range-labels"><span>น้อย</span><span>มาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>14. คุณชอบจินตนาการเรื่องหื่นกับคนในฝูงไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q14">
+      <div class="range-labels"><span>ไม่ชอบ</span><span>ชอบมาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>15. คุณเคยคิดหื่นๆ เวลาคุยงาน/เรียนไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q15">
+      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
+    </div>
+
+    <div class="question">
+      <p>16. คุณสนใจเรื่องหื่นๆ กับเพื่อนสนิทไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q16">
+      <div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>17. คุณเคยแอบจินตนาการกับเพื่อนร่วมงาน/เพื่อนเรียนไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q17">
+      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
+    </div>
+
+    <div class="question">
+      <p>18. เวลาผ่านเนื้อหา 18+ คุณชอบแบบไหน?</p>
+      <input type="range" min="1" max="5" value="1" id="q18">
+      <div class="range-labels"><span>ไม่สนใจ</span><span>สนใจมาก</span></div>
+    </div>
+
+    <div class="question">
+      <p>19. คุณเคยพูดคำหื่นกับแฟน/เพื่อนผ่านเสียงไหม?</p>
+      <input type="range" min="1" max="5" value="1" id="q19">
+      <div class="range-labels"><span>ไม่เคย</span><span>บ่อย</span></div>
+    </div>
+
+    <div class="question">
+      <p>20. คุณคิดว่าตัวเองหื่นขนาดไหน?</p>
+      <input type="range" min="1" max="5" value="1" id="q20">
+      <div class="range-labels"><span>น้อย</span><span>มากที่สุด</span></div>
+    </div>
+
+    <button type="button" onclick="calculateScore()">ดูผลคะแนน</button>
+  </form>
+
+  <div id="result"></div>
 </div>
 
-<div id="jumpScare"></div>
-
 <script>
-const questions = [
-  {q:"มดบนโลกมีกี่ตัว?", a:"เยอะมาก"},
-  {q:"พิษซ่าใส่สัปปะรดไหม?", a:"ไม่"},
-  {q:"ผีเมื่อกี้มีตาสีอะไร?", a:"แดง"},
-  {q:"เสียงหัวเราะผีดังข้างหลังคุณกี่ครั้ง?", a:"หลายครั้ง"},
-  {q:"ผีชอบกินช็อกโกแลตไหม?", a:"ใช่"},
-  {q:"ถ้าคุณก้าวไป 3 ก้าว ผีจะอยู่ซ้ายหรือขวา?", a:"ซ้าย"},
-  {q:"ผีมีหมวกไหม?", a:"ไม่มี"},
-  {q:"วันนี้วันอะไร?", a:"วันศุกร์"},
-  {q:"ผีชอบร้องเพลงแนวอะไร?", a:"ฮาโลวีน"},
-  {q:"ผีเมื่อกี้หัวเราะแบบไหน?", a:"แหลม"},
-  {q:"คุณเห็นผีหรือแค่เงา?", a:"ผี"},
-  {q:"ผีชอบน้ำแข็งใสไหม?", a:"ไม่"},
-  {q:"ผีใส่รองเท้าสีอะไร?", a:"ดำ"},
-  {q:"ผีชอบดื่มชา หรือ กาแฟ?", a:"ชา"},
-  {q:"ผีเมื่อกี้ทำท่าทางแปลกๆ กี่ครั้ง?", a:"สาม"},
-  {q:"ผีมีหางไหม?", a:"ไม่มี"},
-  {q:"ผีเคยบอกชื่อคุณไหม?", a:"ไม่"},
-  {q:"ผีชอบเต้นรำไหม?", a:"ใช่"},
-  {q:"ผีเมื่อกี้พ่นไฟหรือไม่?", a:"ไม่"},
-  {q:"ผีทำท่าทางแบบไหนก่อนโดนจับ?", a:"กระโดด"}
-];
-
-let currentQ = Math.floor(Math.random() * questions.length);
-
-document.getElementById("question").innerText = questions[currentQ].q;
-
-function checkAnswer() {
-  const ans = document.getElementById("answer").value.toLowerCase().trim();
-  const correct = questions[currentQ].a.toLowerCase();
-  if(ans === correct) {
-    alert("คุณรอดแล้ว! 😎");
-    currentQ = Math.floor(Math.random() * questions.length);
-    document.getElementById("question").innerText = questions[currentQ].q;
-    document.getElementById("answer").value = "";
-  } else {
-    jumpScare();
+function calculateScore() {
+  let score = 0;
+  for(let i=1;i<=20;i++){
+    let val = document.getElementById('q'+i).value;
+    score += parseInt(val);
   }
-}
-
-function jumpScare() {
-  const scare = document.getElementById("jumpScare");
-  scare.style.display = "block";
-  const audio = new Audio("https://www.myinstants.com/media/sounds/scary-laugh.mp3");
-  audio.play();
-  setTimeout(()=>{scare.style.display="none"}, 1500);
+  let level = '';
+  if(score <= 40) level = 'หื่นน้อย';
+  else if(score <= 70) level = 'หื่นปานกลาง';
+  else if(score <= 90) level = 'หื่นมาก';
+  else level = 'หื่นสุดๆ';
+  document.getElementById('result').innerText = `คะแนนรวม: ${score}\nระดับ: ${level}`;
 }
 </script>
 
