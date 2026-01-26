@@ -3,154 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เกมแต่งตัวอนิเมชั่น</title>
-<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@700&display=swap" rel="stylesheet">
+<title>แกล้งเพื่อน 😈</title>
 <style>
-body {
-  margin:0;
-  font-family: 'Comic Neue', cursive;
-  background: linear-gradient(to bottom, #ffe6f0, #ffccf2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  overflow-x: hidden;
-}
-
-h1 {
-  color: #ff4d6d;
-  text-shadow: 1px 1px 5px #fff;
-}
-
-#game {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  justify-content: center;
-  margin-top: 20px;
-}
-
-#character-container {
-  width: 300px;
-  height: 500px;
-  position: relative;
-  perspective: 1000px;
-}
-
-#character {
-  width: 100%;
-  height: 100%;
-  background: #ffe6f0;
-  border-radius: 20px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  position: relative;
-  overflow: hidden;
-  transform-style: preserve-3d;
-  animation: float 3s ease-in-out infinite alternate;
-}
-
-@keyframes float {
-  0% { transform: translateY(0px); }
-  100% { transform: translateY(-10px); }
-}
-
-/* Layer ของตัวละคร */
-.layer {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  transition: all 0.3s ease;
-}
-
-/* Item panel */
-#items {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-height: 500px;
-  overflow-y: auto;
-  background: rgba(255,255,255,0.7);
-  padding: 10px;
-  border-radius: 20px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.item {
-  width: 60px;
-  height: 60px;
-  border-radius: 15px;
-  border: 2px solid #fff;
-  cursor: grab;
-  background-size: cover;
-  background-position: center;
-  transition: transform 0.2s;
-}
-.item:hover {
-  transform: scale(1.1) rotate(-3deg);
-}
-
-/* Hover effect ของ character */
-.layer img {
-  width: 100%;
-  height: auto;
-  animation: pulse 2s infinite alternate;
-}
-@keyframes pulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.02); }
-}
-
+    body {
+        font-family: 'Comic Sans MS', cursive;
+        text-align: center;
+        background: #ffe6e6;
+        color: #ff1a1a;
+        padding: 50px;
+    }
+    #container {
+        position: relative;
+        height: 80vh;
+    }
+    button {
+        position: absolute;
+        padding: 15px 30px;
+        font-size: 18px;
+        cursor: pointer;
+        background: #ff6666;
+        border: none;
+        border-radius: 10px;
+        color: white;
+    }
+    #message {
+        margin-top: 20px;
+        font-size: 22px;
+        font-weight: bold;
+    }
 </style>
 </head>
 <body>
 
-<h1>เกมแต่งตัวสุดเฟี้ยว</h1>
-
-<div id="game">
-  <div id="character-container">
-    <div id="character">
-      <div id="hair" class="layer"></div>
-      <div id="eyes" class="layer"></div>
-      <div id="mouth" class="layer"></div>
-      <div id="clothes" class="layer"></div>
-      <div id="accessories" class="layer"></div>
-    </div>
-  </div>
-
-  <div id="items">
-    <h3>เลือกไอเทม</h3>
-    <div class="item" draggable="true" data-target="hair" style="background-image:url('https://i.imgur.com/4L3Q4Ky.png');"></div>
-    <div class="item" draggable="true" data-target="eyes" style="background-image:url('https://i.imgur.com/yMqYxX6.png');"></div>
-    <div class="item" draggable="true" data-target="mouth" style="background-image:url('https://i.imgur.com/4wZK0xB.png');"></div>
-    <div class="item" draggable="true" data-target="clothes" style="background-image:url('https://i.imgur.com/v7XcvzT.png');"></div>
-    <div class="item" draggable="true" data-target="accessories" style="background-image:url('https://i.imgur.com/k9vVQmz.png');"></div>
-  </div>
+<h1>ลองกดสิ 🤭</h1>
+<div id="container">
+    <button id="trickBtn">กดสิ!</button>
 </div>
+<div id="message"></div>
 
 <script>
-// Drag & Drop
-const items = document.querySelectorAll('.item');
-items.forEach(item => {
-  item.addEventListener('dragstart', e => {
-    e.dataTransfer.setData('target', item.dataset.target);
-    e.dataTransfer.setData('bg', item.style.backgroundImage);
-  });
+let clickCount = 0;
+const btn = document.getElementById('trickBtn');
+const container = document.getElementById('container');
+const message = document.getElementById('message');
+
+btn.addEventListener('mouseenter', () => {
+    // ขยับปุ่มแบบสุ่ม
+    const x = Math.random() * (container.clientWidth - btn.offsetWidth);
+    const y = Math.random() * (container.clientHeight - btn.offsetHeight);
+    btn.style.left = x + 'px';
+    btn.style.top = y + 'px';
 });
 
-const layers = document.querySelectorAll('.layer');
-layers.forEach(layer => {
-  layer.addEventListener('dragover', e => e.preventDefault());
-  layer.addEventListener('drop', e => {
-    e.preventDefault();
-    const target = e.dataTransfer.getData('target');
-    const bg = e.dataTransfer.getData('bg');
-    if(layer.id === target){
-      layer.style.backgroundImage = bg;
-      layer.style.backgroundSize = 'contain';
-      layer.style.backgroundRepeat = 'no-repeat';
-      layer.style.backgroundPosition = 'center bottom';
+btn.addEventListener('click', () => {
+    clickCount++;
+    if(clickCount < 10) {
+        message.textContent = `พยายามครั้งที่ ${clickCount} 😏`;
+    } else {
+        message.textContent = "กดเข้ามาหาพ่องมึงอ่ะ มันไม่มีไรความชิบหาย 🖕🏻";
+        btn.style.display = 'none'; // ซ่อนปุ่มเมื่อถึงข้อความสุดท้าย
     }
-  });
 });
 </script>
 
