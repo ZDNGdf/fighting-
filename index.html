@@ -5,80 +5,95 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>เว็บวาดรูปพรีเมียม</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
-  body {
-    margin:0;
-    font-family:'Inter', sans-serif;
-    background: linear-gradient(135deg,#f9f3ff,#f0fcff);
-    display:flex;
-    flex-direction:column;
-    height:100vh;
-    overflow:hidden;
-  }
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+body {
+  margin:0;
+  font-family:'Inter', sans-serif;
+  background: linear-gradient(145deg,#fdf6ff,#f0fcff);
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+  overflow:hidden;
+}
 
-  /* Toolbar แบบ Floating */
-  #toolbar {
-    display:flex;
-    flex-wrap:wrap;
-    align-items:center;
-    gap:10px;
-    padding:12px;
-    background: rgba(255,255,255,0.8);
-    backdrop-filter: blur(10px);
-    border-radius:20px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index:10;
-  }
+/* Floating Toolbar */
+#toolbar {
+  display:flex;
+  flex-wrap:wrap;
+  align-items:center;
+  gap:10px;
+  padding:12px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(10px);
+  border-radius:20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  position: absolute;
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index:10;
+  transition:0.3s;
+}
 
-  #toolbar button, #toolbar input {
-    padding:8px 14px;
-    font-size:16px;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
-    background:#fff;
-    box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.7);
-    transition:0.2s;
-  }
+/* ปุ่ม Neumorphism */
+#toolbar button, #toolbar input {
+  padding:8px 14px;
+  font-size:16px;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  background:#fff;
+  box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.7);
+  transition:0.3s;
+}
+#toolbar button:hover, #toolbar input:hover {
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 25px rgba(0,0,0,0.2), -5px -5px 25px rgba(255,255,255,0.85);
+}
+#toolbar button:active {
+  transform: translateY(1px);
+  box-shadow: inset 5px 5px 10px rgba(0,0,0,0.15), inset -5px -5px 10px rgba(255,255,255,0.6);
+}
 
-  #toolbar button:hover, #toolbar input:hover {
-    transform: translateY(-2px);
-    box-shadow: 5px 5px 20px rgba(0,0,0,0.15), -5px -5px 20px rgba(255,255,255,0.8);
-  }
+#canvasContainer {
+  flex:1;
+  overflow:hidden;
+  position:relative;
+}
 
-  #canvasContainer {
-    flex:1;
-    overflow:hidden;
-    position:relative;
-  }
+canvas {
+  background:#fff;
+  display:block;
+  cursor:crosshair;
+  transform-origin:0 0;
+  border-radius:20px;
+  margin:10px auto;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+  touch-action: none;
+  transition: 0.2s;
+}
 
-  canvas {
-    background:#fff;
-    display:block;
-    cursor:crosshair;
-    transform-origin:0 0;
-    border-radius:20px;
-    margin:10px auto;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-    touch-action: none;
-  }
+/* Save button floating bottom */
+#saveBtn {
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:12px 20px;
+  border:none;
+  border-radius:16px;
+  background:linear-gradient(135deg,#ff9ce5,#8d5eff);
+  color:#fff;
+  font-weight:bold;
+  box-shadow: 5px 5px 20px rgba(0,0,0,0.25);
+  cursor:pointer;
+  transition:0.3s;
+}
+#saveBtn:hover { transform: translateY(-3px); box-shadow: 5px 5px 25px rgba(0,0,0,0.35); }
 
-  /* ปรับปุ่มใหญ่สำหรับมือถือ */
-  @media(max-width:768px){
-    #toolbar{
-      flex-wrap:wrap;
-      padding:8px;
-    }
-    #toolbar button, #toolbar input{
-      font-size:14px;
-      padding:6px 10px;
-    }
-  }
-
+@media(max-width:768px){
+  #toolbar{flex-wrap:wrap;padding:8px;}
+  #toolbar button, #toolbar input{font-size:14px;padding:6px 10px;}
+}
 </style>
 </head>
 <body>
@@ -91,11 +106,14 @@
   <button id="clearBtn">🗑️ Clear</button>
   Color: <input type="color" id="colorPicker" value="#ff0000">
   Size: <input type="range" id="sizePicker" min="1" max="50" value="5">
+  Opacity: <input type="range" id="opacityPicker" min="0.1" max="1" step="0.1" value="1">
 </div>
 
 <div id="canvasContainer">
   <canvas id="drawingCanvas" width="2000" height="2000"></canvas>
 </div>
+
+<button id="saveBtn">💾 Save PNG</button>
 
 <script>
 const canvas = document.getElementById('drawingCanvas');
@@ -103,6 +121,7 @@ const ctx = canvas.getContext('2d');
 let drawing=false, erasing=false;
 let brushColor=document.getElementById('colorPicker').value;
 let brushSize=document.getElementById('sizePicker').value;
+let brushOpacity=document.getElementById('opacityPicker').value;
 ctx.lineCap='round';
 ctx.lineJoin='round';
 
@@ -125,7 +144,9 @@ function draw(e){
   let x = e.clientX ? e.clientX - rect.left : e.touches[0].clientX - rect.left;
   let y = e.clientY ? e.clientY - rect.top : e.touches[0].clientY - rect.top;
   ctx.lineWidth=brushSize;
-  ctx.strokeStyle=erasing?'#fff':brushColor;
+  ctx.strokeStyle=brushColor;
+  ctx.globalAlpha=erasing?1:brushOpacity;
+  if(erasing) ctx.strokeStyle='#fff';
   ctx.lineTo(x/scale - offsetX/scale, y/scale - offsetY/scale);
   ctx.stroke();
   ctx.beginPath();
@@ -146,8 +167,17 @@ document.getElementById('eraserBtn').onclick=()=>erasing=true;
 document.getElementById('clearBtn').onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height); saveHistory();};
 document.getElementById('colorPicker').onchange=(e)=>brushColor=e.target.value;
 document.getElementById('sizePicker').oninput=(e)=>brushSize=e.target.value;
+document.getElementById('opacityPicker').oninput=(e)=>brushOpacity=e.target.value;
 document.getElementById('undoBtn').onclick=undo;
 document.getElementById('redoBtn').onclick=redo;
+
+// Save PNG
+document.getElementById('saveBtn').onclick=()=>{
+  const link=document.createElement('a');
+  link.download='my_drawing.png';
+  link.href=canvas.toDataURL();
+  link.click();
+}
 
 // Zoom / Pan
 let scale=1, offsetX=0, offsetY=0, panning=false, startX=0, startY=0;
