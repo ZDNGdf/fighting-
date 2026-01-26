@@ -3,61 +3,94 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เว็บวาดรูปสมูท + ซูมได้</title>
+<title>เว็บวาดรูปพรีเมียม</title>
 <style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
   body {
     margin:0;
-    font-family: 'Arial', sans-serif;
-    background: #f0f0f0;
+    font-family:'Inter', sans-serif;
+    background: linear-gradient(135deg,#f9f3ff,#f0fcff);
     display:flex;
     flex-direction:column;
     height:100vh;
     overflow:hidden;
   }
+
+  /* Toolbar แบบ Floating */
   #toolbar {
     display:flex;
+    flex-wrap:wrap;
     align-items:center;
     gap:10px;
-    padding:10px;
-    background:#ffffff;
-    box-shadow:0 2px 5px rgba(0,0,0,0.2);
+    padding:12px;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(10px);
+    border-radius:20px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
     z-index:10;
   }
+
   #toolbar button, #toolbar input {
-    padding:5px 10px;
+    padding:8px 14px;
     font-size:16px;
     border:none;
-    border-radius:8px;
+    border-radius:12px;
     cursor:pointer;
-    background:#eee;
+    background:#fff;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.7);
     transition:0.2s;
   }
+
   #toolbar button:hover, #toolbar input:hover {
-    background:#ddd;
+    transform: translateY(-2px);
+    box-shadow: 5px 5px 20px rgba(0,0,0,0.15), -5px -5px 20px rgba(255,255,255,0.8);
   }
+
   #canvasContainer {
     flex:1;
     overflow:hidden;
     position:relative;
   }
+
   canvas {
     background:#fff;
     display:block;
     cursor:crosshair;
     transform-origin:0 0;
+    border-radius:20px;
+    margin:10px auto;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+    touch-action: none;
   }
+
+  /* ปรับปุ่มใหญ่สำหรับมือถือ */
+  @media(max-width:768px){
+    #toolbar{
+      flex-wrap:wrap;
+      padding:8px;
+    }
+    #toolbar button, #toolbar input{
+      font-size:14px;
+      padding:6px 10px;
+    }
+  }
+
 </style>
 </head>
 <body>
 
 <div id="toolbar">
-  <button id="penBtn">🖊️ แปรง</button>
-  <button id="eraserBtn">🩹 ยางลบ</button>
+  <button id="penBtn">🖊️ Brush</button>
+  <button id="eraserBtn">🩹 Eraser</button>
   <button id="undoBtn">↩️ Undo</button>
   <button id="redoBtn">↪️ Redo</button>
-  <button id="clearBtn">🗑️ ล้าง</button>
-  สี: <input type="color" id="colorPicker" value="#ff0000">
-  ขนาด: <input type="range" id="sizePicker" min="1" max="50" value="5">
+  <button id="clearBtn">🗑️ Clear</button>
+  Color: <input type="color" id="colorPicker" value="#ff0000">
+  Size: <input type="range" id="sizePicker" min="1" max="50" value="5">
 </div>
 
 <div id="canvasContainer">
@@ -73,35 +106,17 @@ let brushSize=document.getElementById('sizePicker').value;
 ctx.lineCap='round';
 ctx.lineJoin='round';
 
-// สำหรับ Undo/Redo
-let history = [];
-let historyStep = -1;
-
+// Undo/Redo
+let history=[], historyStep=-1;
 function saveHistory(){
-  history = history.slice(0, historyStep+1);
+  history=history.slice(0,historyStep+1);
   history.push(canvas.toDataURL());
   historyStep++;
 }
+function undo(){ if(historyStep>0){historyStep--; let img=new Image(); img.src=history[historyStep]; img.onload=()=>ctx.drawImage(img,0,0);}}
+function redo(){ if(historyStep<history.length-1){historyStep++; let img=new Image(); img.src=history[historyStep]; img.onload=()=>ctx.drawImage(img,0,0);}}
 
-function undo(){
-  if(historyStep>0){
-    historyStep--;
-    let img = new Image();
-    img.src = history[historyStep];
-    img.onload = ()=>ctx.drawImage(img,0,0);
-  }
-}
-
-function redo(){
-  if(historyStep<history.length-1){
-    historyStep++;
-    let img = new Image();
-    img.src = history[historyStep];
-    img.onload = ()=>ctx.drawImage(img,0,0);
-  }
-}
-
-// การวาด
+// Draw
 function startPos(e){ drawing=true; draw(e); saveHistory();}
 function endPos(){ drawing=false; ctx.beginPath();}
 function draw(e){
@@ -128,66 +143,45 @@ canvas.addEventListener('touchmove', draw);
 // Toolbar
 document.getElementById('penBtn').onclick=()=>erasing=false;
 document.getElementById('eraserBtn').onclick=()=>erasing=true;
-document.getElementById('clearBtn').onclick=()=>{
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  saveHistory();
-};
+document.getElementById('clearBtn').onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height); saveHistory();};
 document.getElementById('colorPicker').onchange=(e)=>brushColor=e.target.value;
 document.getElementById('sizePicker').oninput=(e)=>brushSize=e.target.value;
 document.getElementById('undoBtn').onclick=undo;
 document.getElementById('redoBtn').onclick=redo;
 
 // Zoom / Pan
-let scale=1;
-let offsetX=0;
-let offsetY=0;
-let panning=false;
-let startX=0, startY=0;
-
+let scale=1, offsetX=0, offsetY=0, panning=false, startX=0, startY=0;
 const container = document.getElementById('canvasContainer');
 
 container.addEventListener('wheel', e=>{
   e.preventDefault();
-  const zoom = e.deltaY < 0 ? 1.1 : 0.9;
-  scale *= zoom;
-  canvas.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+  const zoom = e.deltaY<0?1.1:0.9;
+  scale*=zoom;
+  canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale})`;
 });
 
 container.addEventListener('mousedown', e=>{
-  if(e.button===1){ // middle mouse for pan
-    panning=true;
-    startX=e.clientX - offsetX;
-    startY=e.clientY - offsetY;
-  }
+  if(e.button===1){panning=true; startX=e.clientX-offsetX; startY=e.clientY-offsetY;}
 });
 container.addEventListener('mouseup', e=>panning=false);
 container.addEventListener('mousemove', e=>{
-  if(panning){
-    offsetX=e.clientX - startX;
-    offsetY=e.clientY - startY;
-    canvas.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
-  }
+  if(panning){offsetX=e.clientX-startX; offsetY=e.clientY-startY; canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale})`;}
 });
 
+// Pinch Zoom มือถือ
+let lastDist=0;
 container.addEventListener('touchstart', e=>{
-  if(e.touches.length===2){ // pinch zoom
-    lastDist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
+  if(e.touches.length===2){
+    lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
   }
 });
-let lastDist=0;
 container.addEventListener('touchmove', e=>{
   if(e.touches.length===2){
-    let dist = Math.hypot(
-      e.touches[0].clientX - e.touches[1].clientX,
-      e.touches[0].clientY - e.touches[1].clientY
-    );
-    let zoom = dist / lastDist;
-    scale *= zoom;
-    lastDist = dist;
-    canvas.style.transform = `translate(${offsetX}px, ${offsetY}px) scale(${scale})`;
+    let dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+    let zoom=dist/lastDist;
+    scale*=zoom;
+    lastDist=dist;
+    canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale})`;
   }
 });
 </script>
