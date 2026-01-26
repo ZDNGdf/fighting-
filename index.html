@@ -3,29 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Candy Crush Fruit</title>
+<title>Candy Crush Fruit Full</title>
 <style>
-    body { font-family:sans-serif; display:flex; flex-direction:column; align-items:center; background:#ffe6f0; margin:0; padding:0; }
-    #score { font-size:24px; margin:10px; color:#ff3366; font-weight:bold; }
-    #gameBoard { display:grid; grid-template-columns: repeat(8, 60px); grid-template-rows: repeat(8, 60px); gap:2px; }
-    .candy { width:60px; height:60px; border-radius:10px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:36px; cursor:pointer; transition:0.2s; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.2);}
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    background: #ffe6f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+}
+#score, #quest {
+    font-size: 20px;
+    margin: 5px;
+    font-weight: bold;
+    color: #ff3366;
+}
+#gameBoard {
+    display: grid;
+    grid-template-columns: repeat(8, 60px);
+    grid-template-rows: repeat(8, 60px);
+    gap: 2px;
+    touch-action: none;
+}
+.candy {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 36px;
+    background: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transition: transform 0.2s ease, background 0.2s ease;
+    cursor: pointer;
+}
+.special {
+    box-shadow: 0 0 15px 3px #ff0;
+}
 </style>
 </head>
 <body>
 
 <div id="score">คะแนน: 0</div>
+<div id="quest">เควส: เก็บ 🍎 0/10</div>
 <div id="gameBoard"></div>
 
 <script>
-const fruits = ['🍎','🍌','🍇','🍓','🍍']; // ผลไม้
+const fruits = ['🍎','🍌','🍇','🍓','🍍'];
 const boardSize = 8;
 let board = [];
 let score = 0;
 let selected = null;
+let questTarget = '🍎';
+let questCount = 0;
+let moveAllowed = true;
+
 const boardEl = document.getElementById('gameBoard');
 const scoreEl = document.getElementById('score');
+const questEl = document.getElementById('quest');
 
-// สร้างบอร์ด
 function initBoard() {
     board = [];
     boardEl.innerHTML = '';
@@ -38,51 +78,12 @@ function initBoard() {
             candy.innerText = fruit;
             candy.dataset.row = r;
             candy.dataset.col = c;
-            candy.addEventListener('click', () => selectCandy(r,c));
             boardEl.appendChild(candy);
             row.push(fruit);
         }
         board.push(row);
     }
 }
-
-// เลือกและสลับลูกกวาด
-function selectCandy(r,c){
-    if(!selected){
-        selected = {r,c};
-    } else {
-        if(isAdjacent(selected,{r,c})){
-            swap(selected,{r,c});
-            selected = null;
-        } else {
-            selected = {r,c};
-        }
-    }
-}
-
-// ตรวจว่าติดกันหรือไม่
-function isAdjacent(a,b){
-    return (Math.abs(a.r-b.r) + Math.abs(a.c-b.c)) === 1;
-}
-
-// สลับลูกกวาด
-function swap(a,b){
-    let temp = board[a.r][a.c];
-    board[a.r][a.c] = board[b.r][b.c];
-    board[b.r][b.c] = temp;
-    renderBoard();
-    setTimeout(() => {
-        if(!checkMatches()){
-            // ถ้าไม่ match กลับสลับ
-            temp = board[a.r][a.c];
-            board[a.r][a.c] = board[b.r][b.c];
-            board[b.r][b.c] = temp;
-            renderBoard();
-        }
-    }, 200);
-}
-
-// วาดบอร์ด
 function renderBoard(){
     for(let r=0;r<boardSize;r++){
         for(let c=0;c<boardSize;c++){
@@ -92,10 +93,54 @@ function renderBoard(){
     }
 }
 
-// ตรวจ match 3+
+function isAdjacent(a,b){
+    return (Math.abs(a.r-b.r) + Math.abs(a.c-b.c)) === 1;
+}
+
+function swap(a,b,check=true){
+    [board[a.r][a.c], board[b.r][b.c]] = [board[b.r][b.c], board[a.r][a.c]];
+    renderBoard();
+    if(check){
+        setTimeout(()=>{
+            if(!checkMatches()){
+                // กลับถ้าไม่ match
+                [board[a.r][a.c], board[b.r][b.c]] = [board[b.r][b.c], board[a.r][a.c]];
+                renderBoard();
+            }
+        },200);
+    }
+}
+
+function selectCandy(r,c){
+    if(!moveAllowed) return;
+    if(!selected){
+        selected = {r,c};
+        highlight(selected,true);
+    } else {
+        highlight(selected,false);
+        if(isAdjacent(selected,{r,c})){
+            moveAllowed = false;
+            swap(selected,{r,c});
+            selected = null;
+            setTimeout(()=> moveAllowed = true, 250);
+        } else {
+            selected = {r,c};
+            highlight(selected,true);
+        }
+    }
+}
+
+function highlight(pos,on=true){
+    const candy = boardEl.children[pos.r*boardSize + pos.c];
+    if(on) candy.classList.add('special');
+    else candy.classList.remove('special');
+}
+
+// Match check
 function checkMatches(){
     let matchFound = false;
     let remove = [];
+
     // แถว
     for(let r=0;r<boardSize;r++){
         for(let c=0;c<boardSize-2;c++){
@@ -116,34 +161,86 @@ function checkMatches(){
     }
     if(matchFound){
         remove.forEach(([r,c])=>{
-            board[r][c] = '';
-            score += 10;
+            if(board[r][c]===questTarget) questCount++;
+            board[r][c]='';
+            score+=10;
         });
-        scoreEl.innerText = 'คะแนน: ' + score;
+        scoreEl.innerText = 'คะแนน: '+score;
+        questEl.innerText = `เควส: เก็บ ${questTarget} ${questCount}/10`;
         collapseBoard();
     }
     return matchFound;
 }
 
-// ให้ลูกกวาดตกลงมา
+// ลูกกวาดตก
 function collapseBoard(){
     for(let c=0;c<boardSize;c++){
-        let empty = 0;
+        let empty=0;
         for(let r=boardSize-1;r>=0;r--){
             if(board[r][c]==='') empty++;
             else if(empty>0){
-                board[r+empty][c] = board[r][c];
-                board[r][c] = '';
+                board[r+empty][c]=board[r][c];
+                board[r][c]='';
             }
         }
-        // เติมลูกกวาดใหม่
         for(let r=0;r<empty;r++){
-            board[r][c] = fruits[Math.floor(Math.random()*fruits.length)];
+            board[r][c]=fruits[Math.floor(Math.random()*fruits.length)];
         }
     }
     renderBoard();
-    setTimeout(checkMatches, 200);
+    setTimeout(checkMatches,200);
 }
+
+// Swipe สำหรับมือถือ
+let touchStart = null;
+boardEl.addEventListener('touchstart', e=>{
+    const rect = boardEl.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const c = Math.floor(x/62);
+    const r = Math.floor(y/62);
+    selectCandy(r,c);
+});
+boardEl.addEventListener('touchmove', e=>{
+    if(!selected) return;
+    const rect = boardEl.getBoundingClientRect();
+    const touch = e.touches[0];
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    const c = Math.floor(x/62);
+    const r = Math.floor(y/62);
+    if(isAdjacent(selected,{r,c})){
+        swap(selected,{r,c});
+        selected = null;
+    }
+});
+
+// Keyboard สำหรับ PC
+boardEl.addEventListener('click', e=>{
+    const target = e.target;
+    if(!target.classList.contains('candy')) return;
+    const r = parseInt(target.dataset.row);
+    const c = parseInt(target.dataset.col);
+    selectCandy(r,c);
+});
+
+// Special Item: Chocolate Lightning
+function useChocolate(fruit){
+    for(let r=0;r<boardSize;r++){
+        for(let c=0;c<boardSize;c++){
+            if(board[r][c]===fruit) board[r][c]='';
+        }
+    }
+    collapseBoard();
+}
+
+// ตัวอย่างใช้ chocolate เมื่อกดคีย์ C
+window.addEventListener('keydown', e=>{
+    if(e.key.toLowerCase()==='c'){
+        useChocolate(questTarget);
+    }
+});
 
 initBoard();
 renderBoard();
