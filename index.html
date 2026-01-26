@@ -23,7 +23,7 @@ button:active { transform: scale(0.96); }
 
 <div class="container">
     <h1>👁️ วัดความไวสายตา</h1>
-    <p>แตะวงกลมให้ทันก่อนมันหาย! ความเร็วคงที่ 1 วิ</p>
+    <p>แตะวงกลมเท่านั้น! กดผิด = จบเกมทันที</p>
     <div id="gameArea"></div>
     <button onclick="startGame()">▶ เริ่มทดสอบ</button>
     <div id="result"></div>
@@ -62,16 +62,25 @@ const gameArea = document.getElementById("gameArea");
 const result = document.getElementById("result");
 const certificate = document.getElementById("certificate");
 const body = document.body;
-const container = document.querySelector(".container");
-const title = document.querySelector("h1");
-const btn = document.querySelector("button");
 
 function startGame(){
     score = 0;
     result.innerHTML = "";
     certificate.innerHTML = "";
     body.style.backgroundImage = `url(${bgImages[0]})`;
+    gameArea.addEventListener("click", clickOutsideCircle);
     nextRound();
+}
+
+// ฟังก์ชันตรวจจับว่ากดผิด
+function clickOutsideCircle(e){
+    if(!active) return;
+    // ถ้า target ไม่ใช่ .circle = จบเกม
+    if(!e.target.classList.contains("circle")){
+        active = false;
+        clearTimeout(timeout);
+        endGame();
+    }
 }
 
 function nextRound(){
@@ -94,7 +103,9 @@ function nextRound(){
     circle.style.left = Math.random()*maxX + "px";
     circle.style.top = Math.random()*maxY + "px";
 
-    circle.onclick = () => {
+    // กดวงกลมสำเร็จ
+    circle.onclick = (e) => {
+        e.stopPropagation(); // ป้องกันฟังก์ชัน clickOutsideCircle
         if(!active) return;
         active = false;
         score++;
