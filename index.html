@@ -1,14 +1,14 @@
-ฃ<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Candy Crush Mini</title>
+<title>Candy Crush Fruit</title>
 <style>
     body { font-family:sans-serif; display:flex; flex-direction:column; align-items:center; background:#ffe6f0; margin:0; padding:0; }
     #score { font-size:24px; margin:10px; color:#ff3366; font-weight:bold; }
-    #gameBoard { display:grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px); gap:2px; }
-    .candy { width:50px; height:50px; border-radius:10px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:24px; cursor:pointer; transition:0.2s; }
+    #gameBoard { display:grid; grid-template-columns: repeat(8, 60px); grid-template-rows: repeat(8, 60px); gap:2px; }
+    .candy { width:60px; height:60px; border-radius:10px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:36px; cursor:pointer; transition:0.2s; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.2);}
 </style>
 </head>
 <body>
@@ -17,7 +17,7 @@
 <div id="gameBoard"></div>
 
 <script>
-const colors = ['#ff0000','#00ff00','#0000ff','#ffff00','#ff00ff'];
+const fruits = ['🍎','🍌','🍇','🍓','🍍']; // ผลไม้
 const boardSize = 8;
 let board = [];
 let score = 0;
@@ -32,15 +32,15 @@ function initBoard() {
     for(let r=0;r<boardSize;r++){
         let row = [];
         for(let c=0;c<boardSize;c++){
-            let color = colors[Math.floor(Math.random()*colors.length)];
+            let fruit = fruits[Math.floor(Math.random()*fruits.length)];
             let candy = document.createElement('div');
             candy.classList.add('candy');
-            candy.style.background = color;
+            candy.innerText = fruit;
             candy.dataset.row = r;
             candy.dataset.col = c;
             candy.addEventListener('click', () => selectCandy(r,c));
             boardEl.appendChild(candy);
-            row.push(color);
+            row.push(fruit);
         }
         board.push(row);
     }
@@ -87,7 +87,7 @@ function renderBoard(){
     for(let r=0;r<boardSize;r++){
         for(let c=0;c<boardSize;c++){
             const candy = boardEl.children[r*boardSize + c];
-            candy.style.background = board[r][c];
+            candy.innerText = board[r][c];
         }
     }
 }
@@ -99,7 +99,7 @@ function checkMatches(){
     // แถว
     for(let r=0;r<boardSize;r++){
         for(let c=0;c<boardSize-2;c++){
-            if(board[r][c]===board[r][c+1] && board[r][c]===board[r][c+2]){
+            if(board[r][c]!=='' && board[r][c]===board[r][c+1] && board[r][c]===board[r][c+2]){
                 matchFound = true;
                 remove.push([r,c],[r,c+1],[r,c+2]);
             }
@@ -108,7 +108,7 @@ function checkMatches(){
     // คอลัมน์
     for(let c=0;c<boardSize;c++){
         for(let r=0;r<boardSize-2;r++){
-            if(board[r][c]===board[r+1][c] && board[r][c]===board[r+2][c]){
+            if(board[r][c]!=='' && board[r][c]===board[r+1][c] && board[r][c]===board[r+2][c]){
                 matchFound = true;
                 remove.push([r,c],[r+1,c],[r+2,c]);
             }
@@ -138,7 +138,7 @@ function collapseBoard(){
         }
         // เติมลูกกวาดใหม่
         for(let r=0;r<empty;r++){
-            board[r][c] = colors[Math.floor(Math.random()*colors.length)];
+            board[r][c] = fruits[Math.floor(Math.random()*fruits.length)];
         }
     }
     renderBoard();
