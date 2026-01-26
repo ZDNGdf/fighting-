@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iPhone เสมือนจริง</title>
+<title>iPhone เสมือนจริง All-in-One</title>
 <style>
 body {
     margin: 0;
@@ -42,6 +42,21 @@ body {
     align-items: center;
     padding: 0 12px;
     font-size: 14px;
+}
+.battery-bar {
+    width: 50px;
+    height: 12px;
+    border: 2px solid #fff;
+    border-radius: 4px;
+    position: relative;
+    margin-left: 5px;
+}
+.battery-fill {
+    height: 100%;
+    background: #4cd137;
+    width: 100%;
+    border-radius: 2px;
+    transition: width 0.5s ease;
 }
 .apps {
     flex: 1;
@@ -115,21 +130,6 @@ body {
 .shutter:active {
     transform: scale(0.9);
 }
-.battery-bar {
-    width: 50px;
-    height: 12px;
-    border: 2px solid #fff;
-    border-radius: 4px;
-    position: relative;
-    margin-left: 5px;
-}
-.battery-fill {
-    height: 100%;
-    background: #4cd137;
-    width: 100%;
-    border-radius: 2px;
-    transition: width 0.5s ease;
-}
 </style>
 </head>
 <body>
@@ -159,13 +159,13 @@ body {
     <div class="app-window" id="chat">
         <div class="close-btn">×</div>
         <h2>แชท</h2>
-        <p>พิมพ์ข้อความได้จริง (สมมุติ)!</p>
+        <textarea style="width:100%;height:300px;">พิมพ์ข้อความได้จริง!</textarea>
     </div>
 
     <div class="app-window" id="camera">
         <div class="close-btn">×</div>
         <h2>กล้อง</h2>
-        <video id="video" width="100%" autoplay playsinline style="border-radius:20px;"></video>
+        <video id="cameraPreview" width="100%" autoplay playsinline style="border-radius:20px;"></video>
         <div class="shutter" id="snap"></div>
     </div>
 
@@ -185,10 +185,18 @@ body {
 </div>
 
 <script>
+// เวลาอัปเดต
+function updateTime(){
+    const now = new Date();
+    document.getElementById('time').textContent = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+}
+setInterval(updateTime,1000);
+
 // เปิด/ปิดแอพ
 document.querySelectorAll('.app').forEach(app => {
     app.addEventListener('click', () => {
-        const id = app.getAttribute('data-app');
+        const id = app.dataset.app;
+        document.querySelectorAll('.app-window').forEach(a => a.classList.remove('active'));
         document.getElementById(id).classList.add('active');
     });
 });
@@ -200,37 +208,31 @@ document.querySelectorAll('.close-btn').forEach(btn => {
 
 // แบตเตอรี่
 let batteryLevel = 100;
+let charging = false;
 const batteryFill = document.getElementById('battery');
 function updateBattery() {
+    if (!charging) {
+        batteryLevel -= 0.1;
+        if (batteryLevel < 0) batteryLevel = 0;
+    }
     batteryFill.style.width = batteryLevel + '%';
-    if(batteryLevel>50) batteryFill.style.background="#4cd137";
-    else if(batteryLevel>20) batteryFill.style.background="#fbc531";
-    else batteryFill.style.background="#e84118";
+    batteryFill.style.background = batteryLevel>50?"#4cd137":batteryLevel>20?"#fbc531":"#e84118";
 }
-function drainBattery() {
-    batteryLevel -= 1;
-    if(batteryLevel<0) batteryLevel=0;
-    updateBattery();
-}
-setInterval(drainBattery,10000);
-function chargeBattery(){
-    batteryLevel += 10;
-    if(batteryLevel>100) batteryLevel=100;
-    updateBattery();
+setInterval(updateBattery,10000);
+function chargeBattery() {
+    charging = true;
+    let charge = setInterval(()=>{
+        batteryLevel+=1;
+        if(batteryLevel>=100){batteryLevel=100;charging=false;clearInterval(charge);}
+    },1000);
 }
 
-// กล้อง
-const video = document.getElementById('video');
+// กล้องจริง
+const video = document.getElementById('cameraPreview');
 navigator.mediaDevices.getUserMedia({video:true})
-.then(stream => {video.srcObject = stream;})
-.catch(err=>alert("ไม่สามารถเข้าถึงกล้องได้"));
+.then(stream => video.srcObject = stream)
+.catch(err => alert("ไม่สามารถเข้าถึงกล้องได้"));
 
-// เวลาอัปเดต
-function updateTime(){
-    const now = new Date();
-    document.getElementById('time').textContent = now.getHours().toString().padStart(2,'0')+":"+now.getMinutes().toString().padStart(2,'0');
-}
-setInterval(updateTime,1000);
 </script>
 </body>
 </html>
