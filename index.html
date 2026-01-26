@@ -1,185 +1,152 @@
-<!DOCTYPE html>
+ฃ<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เกมขวดโออิชิ</title>
+<title>Candy Crush Mini</title>
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        font-family: sans-serif;
-        background: #a0e0ff;
-        touch-action: none;
-    }
-    #gameCanvas {
-        background: #a0e0ff;
-        display: block;
-        margin: 0 auto;
-    }
-    #score {
-        position: absolute;
-        top: 10px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 24px;
-        color: #ff3300;
-        font-weight: bold;
-    }
-    /* ปุ่มควบคุมมือถือ */
-    .btn {
-        position: fixed;
-        width: 60px;
-        height: 60px;
-        background: rgba(255,255,255,0.7);
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 30px;
-        user-select: none;
-    }
-    #up { bottom: 130px; left: 80px; }
-    #down { bottom: 50px; left: 80px; }
-    #left { bottom: 90px; left: 20px; }
-    #right { bottom: 90px; left: 140px; }
+    body { font-family:sans-serif; display:flex; flex-direction:column; align-items:center; background:#ffe6f0; margin:0; padding:0; }
+    #score { font-size:24px; margin:10px; color:#ff3366; font-weight:bold; }
+    #gameBoard { display:grid; grid-template-columns: repeat(8, 50px); grid-template-rows: repeat(8, 50px); gap:2px; }
+    .candy { width:50px; height:50px; border-radius:10px; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:24px; cursor:pointer; transition:0.2s; }
 </style>
 </head>
 <body>
 
-<canvas id="gameCanvas" width="400" height="600"></canvas>
 <div id="score">คะแนน: 0</div>
-
-<!-- ปุ่มมือถือ -->
-<div class="btn" id="up">↑</div>
-<div class="btn" id="down">↓</div>
-<div class="btn" id="left">←</div>
-<div class="btn" id="right">→</div>
+<div id="gameBoard"></div>
 
 <script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-
-const width = canvas.width;
-const height = canvas.height;
-
+const colors = ['#ff0000','#00ff00','#0000ff','#ffff00','#ff00ff'];
+const boardSize = 8;
+let board = [];
 let score = 0;
-let gameOver = false;
+let selected = null;
+const boardEl = document.getElementById('gameBoard');
+const scoreEl = document.getElementById('score');
 
-// ตัวผู้เล่น (ขวดโออิชิ)
-const player = {
-    x: width/2 - 25,
-    y: height - 80,
-    w: 50,
-    h: 50,
-    speed: 5
-};
-
-// อุปสรรค
-const obstacles = [];
-const obstacleSize = 40;
-let obstacleSpeed = 3;
-
-// สร้างอุปสรรค
-function spawnObstacle() {
-    const x = Math.random() * (width - obstacleSize);
-    obstacles.push({x: x, y: -obstacleSize, w: obstacleSize, h: obstacleSize});
+// สร้างบอร์ด
+function initBoard() {
+    board = [];
+    boardEl.innerHTML = '';
+    for(let r=0;r<boardSize;r++){
+        let row = [];
+        for(let c=0;c<boardSize;c++){
+            let color = colors[Math.floor(Math.random()*colors.length)];
+            let candy = document.createElement('div');
+            candy.classList.add('candy');
+            candy.style.background = color;
+            candy.dataset.row = r;
+            candy.dataset.col = c;
+            candy.addEventListener('click', () => selectCandy(r,c));
+            boardEl.appendChild(candy);
+            row.push(color);
+        }
+        board.push(row);
+    }
 }
 
-// ตรวจชน
-function checkCollision(a, b) {
-    return a.x < b.x + b.w &&
-           a.x + a.w > b.x &&
-           a.y < b.y + b.h &&
-           a.y + a.h > b.y;
-}
-
-// วาดผู้เล่น
-function drawPlayer() {
-    ctx.fillStyle = '#ff3300';
-    ctx.fillRect(player.x, player.y, player.w, player.h);
-    // วาดฝา/โลโก้แบบง่าย
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(player.x+10, player.y+5, 30, 10);
-}
-
-// วาดอุปสรรค
-function drawObstacles() {
-    ctx.fillStyle = '#006600';
-    obstacles.forEach(o => ctx.fillRect(o.x, o.y, o.w, o.h));
-}
-
-// อัปเดตเกม
-function update() {
-    if(gameOver) return;
-
-    // อัปเดตอุปสรรค
-    obstacles.forEach(o => o.y += obstacleSpeed);
-
-    // ตรวจชน
-    for(let o of obstacles){
-        if(checkCollision(player, o)){
-            gameOver = true;
-            alert('เกมจบ! คะแนนของคุณ: ' + score);
-            location.reload();
+// เลือกและสลับลูกกวาด
+function selectCandy(r,c){
+    if(!selected){
+        selected = {r,c};
+    } else {
+        if(isAdjacent(selected,{r,c})){
+            swap(selected,{r,c});
+            selected = null;
+        } else {
+            selected = {r,c};
         }
     }
+}
 
-    // ลบอุปสรรคออกนอกจอ
-    for(let i=obstacles.length-1; i>=0; i--){
-        if(obstacles[i].y > height) obstacles.splice(i,1);
+// ตรวจว่าติดกันหรือไม่
+function isAdjacent(a,b){
+    return (Math.abs(a.r-b.r) + Math.abs(a.c-b.c)) === 1;
+}
+
+// สลับลูกกวาด
+function swap(a,b){
+    let temp = board[a.r][a.c];
+    board[a.r][a.c] = board[b.r][b.c];
+    board[b.r][b.c] = temp;
+    renderBoard();
+    setTimeout(() => {
+        if(!checkMatches()){
+            // ถ้าไม่ match กลับสลับ
+            temp = board[a.r][a.c];
+            board[a.r][a.c] = board[b.r][b.c];
+            board[b.r][b.c] = temp;
+            renderBoard();
+        }
+    }, 200);
+}
+
+// วาดบอร์ด
+function renderBoard(){
+    for(let r=0;r<boardSize;r++){
+        for(let c=0;c<boardSize;c++){
+            const candy = boardEl.children[r*boardSize + c];
+            candy.style.background = board[r][c];
+        }
     }
-
-    // เพิ่มคะแนน
-    score += 1;
-    document.getElementById('score').innerText = 'คะแนน: ' + score;
 }
 
-// วาดเกม
-function draw() {
-    ctx.clearRect(0,0,width,height);
-    drawPlayer();
-    drawObstacles();
+// ตรวจ match 3+
+function checkMatches(){
+    let matchFound = false;
+    let remove = [];
+    // แถว
+    for(let r=0;r<boardSize;r++){
+        for(let c=0;c<boardSize-2;c++){
+            if(board[r][c]===board[r][c+1] && board[r][c]===board[r][c+2]){
+                matchFound = true;
+                remove.push([r,c],[r,c+1],[r,c+2]);
+            }
+        }
+    }
+    // คอลัมน์
+    for(let c=0;c<boardSize;c++){
+        for(let r=0;r<boardSize-2;r++){
+            if(board[r][c]===board[r+1][c] && board[r][c]===board[r+2][c]){
+                matchFound = true;
+                remove.push([r,c],[r+1,c],[r+2,c]);
+            }
+        }
+    }
+    if(matchFound){
+        remove.forEach(([r,c])=>{
+            board[r][c] = '';
+            score += 10;
+        });
+        scoreEl.innerText = 'คะแนน: ' + score;
+        collapseBoard();
+    }
+    return matchFound;
 }
 
-// Loop
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
+// ให้ลูกกวาดตกลงมา
+function collapseBoard(){
+    for(let c=0;c<boardSize;c++){
+        let empty = 0;
+        for(let r=boardSize-1;r>=0;r--){
+            if(board[r][c]==='') empty++;
+            else if(empty>0){
+                board[r+empty][c] = board[r][c];
+                board[r][c] = '';
+            }
+        }
+        // เติมลูกกวาดใหม่
+        for(let r=0;r<empty;r++){
+            board[r][c] = colors[Math.floor(Math.random()*colors.length)];
+        }
+    }
+    renderBoard();
+    setTimeout(checkMatches, 200);
 }
 
-// ปุ่มคีย์บอร์ด
-const keys = {};
-window.addEventListener('keydown', e => keys[e.key] = true);
-window.addEventListener('keyup', e => keys[e.key] = false);
-
-// ปุ่มมือถือ
-document.getElementById('up').addEventListener('touchstart', e => keys['ArrowUp']=true);
-document.getElementById('up').addEventListener('touchend', e => keys['ArrowUp']=false);
-document.getElementById('down').addEventListener('touchstart', e => keys['ArrowDown']=true);
-document.getElementById('down').addEventListener('touchend', e => keys['ArrowDown']=false);
-document.getElementById('left').addEventListener('touchstart', e => keys['ArrowLeft']=true);
-document.getElementById('left').addEventListener('touchend', e => keys['ArrowLeft']=false);
-document.getElementById('right').addEventListener('touchstart', e => keys['ArrowRight']=true);
-document.getElementById('right').addEventListener('touchend', e => keys['ArrowRight']=false);
-
-// อัปเดตผู้เล่น
-function movePlayer() {
-    if(keys['ArrowUp'] && player.y>0) player.y -= player.speed;
-    if(keys['ArrowDown'] && player.y<height-player.h) player.y += player.speed;
-    if(keys['ArrowLeft'] && player.x>0) player.x -= player.speed;
-    if(keys['ArrowRight'] && player.x<width-player.w) player.x += player.speed;
-    requestAnimationFrame(movePlayer);
-}
-
-// spawn obstacles ทุก 1.2 วินาที
-setInterval(spawnObstacle, 1200);
-
-// เริ่มเกม
-gameLoop();
-movePlayer();
+initBoard();
+renderBoard();
 </script>
 
 </body>
