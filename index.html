@@ -3,34 +3,36 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Block Blast</title>
+<title>Block Blast Mobile</title>
 <style>
+*{box-sizing:border-box;}
 body{
+    margin:0;
     background:#0b0f1a;
-    color:white;
-    font-family:sans-serif;
     display:flex;
     justify-content:center;
     align-items:center;
     height:100vh;
+    font-family:sans-serif;
 }
 .game{
+    width:360px;
     background:#111;
-    padding:20px;
     border-radius:16px;
-    width:350px;
+    padding:15px;
+    color:white;
 }
 h2{text-align:center;color:#00f7ff;}
 .board{
     display:grid;
     grid-template-columns:repeat(8,1fr);
     gap:6px;
-    margin:15px 0;
+    margin:10px 0;
 }
 .cell{
-    width:36px;
-    height:36px;
-    background:#1f1f1f;
+    width:38px;
+    height:38px;
+    background:#222;
     border-radius:6px;
 }
 .cell.filled{
@@ -40,19 +42,24 @@ h2{text-align:center;color:#00f7ff;}
 .blocks{
     display:flex;
     justify-content:space-between;
+    margin-top:10px;
 }
 .block{
     display:grid;
     gap:4px;
-    cursor:pointer;
+    touch-action:none;
 }
 .block div{
-    width:28px;
-    height:28px;
+    width:30px;
+    height:30px;
     background:#ff4df0;
-    border-radius:5px;
+    border-radius:6px;
 }
-.selected{outline:3px solid yellow;}
+.dragging{
+    opacity:.7;
+    position:absolute;
+    z-index:1000;
+}
 </style>
 </head>
 <body>
@@ -72,52 +79,37 @@ const scoreEl = document.getElementById("score");
 
 let grid = Array(64).fill(0);
 let score = 0;
-let selectedShape = null;
+let draggingBlock = null;
+let currentShape = null;
 
 const shapes = [
-    [[1,1,1]],
-    [[1],[1],[1]],
-    [[1,1],[1,1]],
-    [[1,1,1],[0,1,0]],
-    [[1,1,1,1]],
-    [[1],[1]]
+  [[1,1,1]],
+  [[1],[1],[1]],
+  [[1,1],[1,1]],
+  [[1,1,1],[0,1,0]],
+  [[1,1,1,1]]
 ];
 
 function drawBoard(){
     board.innerHTML="";
-    grid.forEach((v,i)=>{
+    grid.forEach(v=>{
         const c=document.createElement("div");
         c.className="cell"+(v?" filled":"");
-        c.onclick=()=>place(i);
         board.appendChild(c);
     });
 }
 
-function randomUniqueShapes(){
-    let pool=[...shapes];
-    let result=[];
-    for(let i=0;i<3;i++){
-        const r=Math.floor(Math.random()*pool.length);
-        result.push(pool[r]);
-        pool.splice(r,1);
-    }
-    return result;
-}
-
-function newBlocks(){
+function randomBlocks(){
     blocksDiv.innerHTML="";
-    selectedShape=null;
+    let pool=[...shapes];
+    for(let i=0;i<3;i++){
+        let idx=Math.floor(Math.random()*pool.length);
+        let shape=pool.splice(idx,1)[0];
 
-    const set = randomUniqueShapes();
-
-    set.forEach(shape=>{
         const b=document.createElement("div");
         b.className="block";
-        b.onclick=()=>{
-            document.querySelectorAll(".block").forEach(x=>x.classList.remove("selected"));
-            b.classList.add("selected");
-            selectedShape=shape;
-        };
+        b.dataset.shape=JSON.stringify(shape);
+
         shape.forEach(r=>{
             r.forEach(v=>{
                 if(v){
@@ -126,48 +118,75 @@ function newBlocks(){
                 }
             });
         });
+
+        enableDrag(b);
         blocksDiv.appendChild(b);
+    }
+}
+
+function enableDrag(el){
+    let offsetX,offsetY;
+
+    el.addEventListener("pointerdown",e=>{
+        draggingBlock=el;
+        currentShape=JSON.parse(el.dataset.shape);
+        el.classList.add("dragging");
+        offsetX=e.offsetX;
+        offsetY=e.offsetY;
+    });
+
+    document.addEventListener("pointermove",e=>{
+        if(!draggingBlock) return;
+        draggingBlock.style.left=e.pageX-offsetX+"px";
+        draggingBlock.style.top=e.pageY-offsetY+"px";
+    });
+
+    document.addEventListener("pointerup",e=>{
+        if(!draggingBlock) return;
+
+        const rect=board.getBoundingClientRect();
+        if(e.clientX>rect.left && e.clientX<rect.right &&
+           e.clientY>rect.top && e.clientY<rect.bottom){
+
+            const x=Math.floor((e.clientX-rect.left)/(rect.width/8));
+            const y=Math.floor((e.clientY-rect.top)/(rect.height/8));
+
+            if(place(y,x)){
+                draggingBlock.remove();
+                checkGameOver();
+            }
+        }
+
+        draggingBlock.classList.remove("dragging");
+        draggingBlock.style.left="";
+        draggingBlock.style.top="";
+        draggingBlock=null;
     });
 }
 
-function place(index){
-    if(!selectedShape) return;
-
-    const r=Math.floor(index/8);
-    const c=index%8;
-
-    for(let y=0;y<selectedShape.length;y++){
-        for(let x=0;x<selectedShape[y].length;x++){
-            if(selectedShape[y][x]){
+function place(r,c){
+    for(let y=0;y<currentShape.length;y++){
+        for(let x=0;x<currentShape[y].length;x++){
+            if(currentShape[y][x]){
                 let i=(r+y)*8+(c+x);
-                if(i>=64||grid[i]) return;
+                if(i>=64 || grid[i]) return false;
             }
         }
     }
 
-    for(let y=0;y<selectedShape.length;y++){
-        for(let x=0;x<selectedShape[y].length;x++){
-            if(selectedShape[y][x]){
-                grid[(r+y)*8+(c+x)]=1;
+    for(let y=0;y<currentShape.length;y++){
+        for(let x=0;x<currentShape[y].length;x++){
+            if(currentShape[y][x]){
+                grid[(r+y)*8+(c+x)] = 1;
             }
         }
     }
 
     score+=10;
     scoreEl.textContent=score;
-
     clearLine();
     drawBoard();
-    newBlocks();
-
-    if(!canPlaceAny()){
-        alert("เกมโอเวอร์! คะแนนถูกรีเซ็ต");
-        grid=Array(64).fill(0);
-        score=0;
-        scoreEl.textContent=0;
-        drawBoard();
-        newBlocks();
-    }
+    return true;
 }
 
 function clearLine(){
@@ -179,28 +198,14 @@ function clearLine(){
     }
 }
 
-function canPlaceAny(){
-    for(let i=0;i<64;i++){
-        for(let s of shapes){
-            let ok=true;
-            const r=Math.floor(i/8);
-            const c=i%8;
-            for(let y=0;y<s.length;y++){
-                for(let x=0;x<s[y].length;x++){
-                    if(s[y][x]){
-                        let idx=(r+y)*8+(c+x);
-                        if(idx>=64||grid[idx]) ok=false;
-                    }
-                }
-            }
-            if(ok) return true;
-        }
+function checkGameOver(){
+    if(blocksDiv.children.length===0){
+        randomBlocks();
     }
-    return false;
 }
 
 drawBoard();
-newBlocks();
+randomBlocks();
 </script>
 </body>
 </html>
