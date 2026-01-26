@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>สมาร์ทโฟนเสมือนจริง</title>
+<title>มือถือเสมือนจริง - พรีเมียม</title>
 <style>
 /* ====== พื้นฐาน ====== */
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #ece9e6, #ffffff);
+    background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -23,7 +23,7 @@ body {
     border-radius: 40px;
     border: 16px solid #333;
     background: #111;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
     position: relative;
     overflow: hidden;
 }
@@ -32,7 +32,7 @@ body {
 .screen {
     width: 100%;
     height: 100%;
-    background: linear-gradient(to bottom, #3a3a3a, #1a1a1a);
+    background: linear-gradient(to bottom, #1c1c1c, #0d0d0d);
     border-radius: 30px;
     overflow: hidden;
     display: flex;
@@ -43,11 +43,11 @@ body {
 /* ====== แถบสถานะ ====== */
 .status-bar {
     height: 40px;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.05);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 10px;
+    padding: 0 12px;
     font-size: 14px;
     color: #fff;
 }
@@ -57,6 +57,7 @@ body {
     flex: 1;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(5, 1fr);
     grid-gap: 15px;
     padding: 20px;
     box-sizing: border-box;
@@ -69,14 +70,14 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 24px;
+    font-size: 26px;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 .app:hover {
     transform: scale(1.1);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
 }
 
 /* ====== แอพเปิด ====== */
@@ -91,9 +92,10 @@ body {
     flex-direction: column;
     z-index: 10;
     transform: translateY(100%);
-    transition: transform 0.5s ease;
+    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
     padding: 20px;
     box-sizing: border-box;
+    overflow: auto;
 }
 .app-window.active {
     transform: translateY(0);
@@ -102,15 +104,16 @@ body {
 /* ====== ปุ่มปิดแอพ ====== */
 .close-btn {
     background: #ff4d4d;
-    width: 40px;
-    height: 40px;
+    width: 42px;
+    height: 42px;
     border-radius: 50%;
     text-align: center;
-    line-height: 40px;
+    line-height: 42px;
     cursor: pointer;
     align-self: flex-end;
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    transition: all 0.2s ease;
 }
 .close-btn:hover {
     background: #ff1a1a;
@@ -119,6 +122,21 @@ body {
 /* ====== เอฟเฟกต์สมูท ====== */
 .screen, .app, .app-window {
     transition: all 0.3s ease;
+}
+
+/* ====== ปุ่มชัตเตอร์สมมุติ ====== */
+.shutter {
+    width: 60px;
+    height: 60px;
+    background: #fff;
+    border-radius: 50%;
+    margin: 20px auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+.shutter:active {
+    transform: scale(0.9);
 }
 </style>
 </head>
@@ -135,10 +153,26 @@ body {
             <div class="app" data-app="camera">📷</div>
             <div class="app" data-app="music">🎵</div>
             <div class="app" data-app="settings">⚙️</div>
+            <div class="app" data-app="gallery">🖼️</div>
+            <div class="app" data-app="mail">📧</div>
+            <div class="app" data-app="calendar">📅</div>
+            <div class="app" data-app="notes">📝</div>
+            <div class="app" data-app="map">🗺️</div>
+            <div class="app" data-app="weather">☀️</div>
+            <div class="app" data-app="alarm">⏰</div>
+            <div class="app" data-app="calculator">🧮</div>
+            <div class="app" data-app="game">🎮</div>
+            <div class="app" data-app="video">🎥</div>
+            <div class="app" data-app="contacts">📇</div>
+            <div class="app" data-app="browser">🌐</div>
+            <div class="app" data-app="store">🛒</div>
+            <div class="app" data-app="health">❤️</div>
+            <div class="app" data-app="settings2">⚙️</div>
+            <div class="app" data-app="tools">🔧</div>
         </div>
     </div>
 
-    <!-- แอพตัวอย่าง -->
+    <!-- ตัวอย่างหน้าต่างแอพ -->
     <div class="app-window" id="chat">
         <div class="close-btn">×</div>
         <h2>แชท</h2>
@@ -148,7 +182,8 @@ body {
     <div class="app-window" id="camera">
         <div class="close-btn">×</div>
         <h2>กล้อง</h2>
-        <p>หน้ากล้องเสมือนจริง พร้อมปุ่มชัตเตอร์</p>
+        <div class="shutter"></div>
+        <p>กดชัตเตอร์เพื่อถ่ายภาพเสมือนจริง</p>
     </div>
 
     <div class="app-window" id="music">
@@ -163,6 +198,41 @@ body {
         <p>ปรับแต่งมือถือเสมือนของคุณ</p>
     </div>
 
+    <div class="app-window" id="gallery">
+        <div class="close-btn">×</div>
+        <h2>แกลเลอรี่</h2>
+        <p>ดูรูปภาพ สมมุติว่ามีรูปจริง</p>
+    </div>
+
+    <div class="app-window" id="mail">
+        <div class="close-btn">×</div>
+        <h2>เมล</h2>
+        <p>เช็คอีเมลสมมุติ</p>
+    </div>
+
+    <div class="app-window" id="calendar">
+        <div class="close-btn">×</div>
+        <h2>ปฏิทิน</h2>
+        <p>ดูปฏิทินสมมุติ</p>
+    </div>
+
+    <div class="app-window" id="notes">
+        <div class="close-btn">×</div>
+        <h2>โน้ต</h2>
+        <p>จดโน้ตเสมือนจริง</p>
+    </div>
+
+    <div class="app-window" id="map">
+        <div class="close-btn">×</div>
+        <h2>แผนที่</h2>
+        <p>ดูแผนที่เสมือนจริง</p>
+    </div>
+
+    <div class="app-window" id="weather">
+        <div class="close-btn">×</div>
+        <h2>สภาพอากาศ</h2>
+        <p>เช็คสภาพอากาศสมมุติ</p>
+    </div>
 </div>
 
 <script>
