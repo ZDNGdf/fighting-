@@ -3,83 +3,54 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Candy Crush Fruit Full</title>
+<title>Candy Crush Full Prototype</title>
 <style>
 body {
-    margin: 0;
-    padding: 0;
-    font-family: sans-serif;
-    background: #ffe6f0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    user-select: none;
+    margin:0; padding:0; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; background:#ffe6f0; user-select:none;
 }
-#score, #quest {
-    font-size: 20px;
-    margin: 5px;
-    font-weight: bold;
-    color: #ff3366;
+#score, #quest, #level, #moves {
+    font-size:18px; margin:3px; font-weight:bold; color:#ff3366;
 }
 #gameBoard {
-    display: grid;
-    grid-template-columns: repeat(8, 60px);
-    grid-template-rows: repeat(8, 60px);
-    gap: 2px;
-    touch-action: none;
+    display:grid; grid-template-columns: repeat(8, 60px); grid-template-rows: repeat(8, 60px); gap:2px; touch-action:none;
 }
 .candy {
-    width: 60px;
-    height: 60px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 36px;
-    background: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    width:60px; height:60px; border-radius:10px; display:flex; justify-content:center; align-items:center;
+    font-size:36px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.2); cursor:pointer;
     transition: transform 0.2s ease, background 0.2s ease;
-    cursor: pointer;
 }
 .special {
-    box-shadow: 0 0 15px 3px #ff0;
+    box-shadow:0 0 15px 3px #ff0;
 }
 </style>
 </head>
 <body>
 
 <div id="score">คะแนน: 0</div>
-<div id="quest">เควส: เก็บ 🍎 0/10</div>
+<div id="level">ด่าน: 1</div>
+<div id="moves">เลื่อน: 20</div>
+<div id="quest">เควส: เก็บ 🍎 0/5</div>
 <div id="gameBoard"></div>
 
 <script>
 const fruits = ['🍎','🍌','🍇','🍓','🍍'];
-const boardSize = 8;
-let board = [];
-let score = 0;
-let selected = null;
-let questTarget = '🍎';
-let questCount = 0;
-let moveAllowed = true;
+let boardSize = 8;
+let board = [], boardEl=document.getElementById('gameBoard');
+let score=0, level=1, movesLeft=20, questTarget='🍎', questCount=0, questGoal=5;
+let selected=null, moveAllowed=true;
 
-const boardEl = document.getElementById('gameBoard');
-const scoreEl = document.getElementById('score');
-const questEl = document.getElementById('quest');
-
-function initBoard() {
-    board = [];
-    boardEl.innerHTML = '';
+// สร้างบอร์ดใหม่ตามด่าน
+function initBoard(){
+    board=[]; boardEl.innerHTML='';
     for(let r=0;r<boardSize;r++){
-        let row = [];
+        let row=[];
         for(let c=0;c<boardSize;c++){
-            let fruit = fruits[Math.floor(Math.random()*fruits.length)];
+            let f = fruits[Math.floor(Math.random()*fruits.length)];
             let candy = document.createElement('div');
-            candy.classList.add('candy');
-            candy.innerText = fruit;
-            candy.dataset.row = r;
-            candy.dataset.col = c;
+            candy.classList.add('candy'); candy.innerText=f;
+            candy.dataset.row=r; candy.dataset.col=c;
             boardEl.appendChild(candy);
-            row.push(fruit);
+            row.push(f);
         }
         board.push(row);
     }
@@ -87,163 +58,143 @@ function initBoard() {
 function renderBoard(){
     for(let r=0;r<boardSize;r++){
         for(let c=0;c<boardSize;c++){
-            const candy = boardEl.children[r*boardSize + c];
-            candy.innerText = board[r][c];
+            boardEl.children[r*boardSize+c].innerText = board[r][c];
         }
     }
 }
-
-function isAdjacent(a,b){
-    return (Math.abs(a.r-b.r) + Math.abs(a.c-b.c)) === 1;
+function highlight(pos,on=true){
+    const candy = boardEl.children[pos.r*boardSize + pos.c];
+    if(on) candy.classList.add('special'); else candy.classList.remove('special');
 }
-
+function isAdjacent(a,b){
+    return (Math.abs(a.r-b.r)+Math.abs(a.c-b.c))===1;
+}
+function selectCandy(r,c){
+    if(!moveAllowed) return;
+    if(!selected){ selected={r,c}; highlight(selected,true); }
+    else {
+        highlight(selected,false);
+        if(isAdjacent(selected,{r,c})){
+            moveAllowed=false;
+            swap(selected,{r,c});
+            selected=null;
+            movesLeft--; updateMoves();
+            setTimeout(()=>moveAllowed=true,300);
+        } else { selected={r,c}; highlight(selected,true); }
+    }
+}
 function swap(a,b,check=true){
     [board[a.r][a.c], board[b.r][b.c]] = [board[b.r][b.c], board[a.r][a.c]];
     renderBoard();
     if(check){
         setTimeout(()=>{
             if(!checkMatches()){
-                // กลับถ้าไม่ match
                 [board[a.r][a.c], board[b.r][b.c]] = [board[b.r][b.c], board[a.r][a.c]];
                 renderBoard();
-            }
+            } else { checkWin(); }
         },200);
     }
 }
 
-function selectCandy(r,c){
-    if(!moveAllowed) return;
-    if(!selected){
-        selected = {r,c};
-        highlight(selected,true);
-    } else {
-        highlight(selected,false);
-        if(isAdjacent(selected,{r,c})){
-            moveAllowed = false;
-            swap(selected,{r,c});
-            selected = null;
-            setTimeout(()=> moveAllowed = true, 250);
-        } else {
-            selected = {r,c};
-            highlight(selected,true);
-        }
-    }
-}
-
-function highlight(pos,on=true){
-    const candy = boardEl.children[pos.r*boardSize + pos.c];
-    if(on) candy.classList.add('special');
-    else candy.classList.remove('special');
-}
-
 // Match check
 function checkMatches(){
-    let matchFound = false;
-    let remove = [];
-
-    // แถว
+    let matchFound=false, remove=[];
     for(let r=0;r<boardSize;r++){
         for(let c=0;c<boardSize-2;c++){
             if(board[r][c]!=='' && board[r][c]===board[r][c+1] && board[r][c]===board[r][c+2]){
-                matchFound = true;
-                remove.push([r,c],[r,c+1],[r,c+2]);
+                matchFound=true; remove.push([r,c],[r,c+1],[r,c+2]);
             }
         }
     }
-    // คอลัมน์
     for(let c=0;c<boardSize;c++){
         for(let r=0;r<boardSize-2;r++){
             if(board[r][c]!=='' && board[r][c]===board[r+1][c] && board[r][c]===board[r+2][c]){
-                matchFound = true;
-                remove.push([r,c],[r+1,c],[r+2,c]);
+                matchFound=true; remove.push([r,c],[r+1,c],[r+2,c]);
             }
         }
     }
     if(matchFound){
         remove.forEach(([r,c])=>{
             if(board[r][c]===questTarget) questCount++;
-            board[r][c]='';
-            score+=10;
+            board[r][c]=''; score+=10;
         });
-        scoreEl.innerText = 'คะแนน: '+score;
-        questEl.innerText = `เควส: เก็บ ${questTarget} ${questCount}/10`;
+        document.getElementById('score').innerText='คะแนน: '+score;
+        document.getElementById('quest').innerText=`เควส: เก็บ ${questTarget} ${questCount}/${questGoal}`;
         collapseBoard();
     }
     return matchFound;
 }
-
-// ลูกกวาดตก
 function collapseBoard(){
     for(let c=0;c<boardSize;c++){
         let empty=0;
         for(let r=boardSize-1;r>=0;r--){
             if(board[r][c]==='') empty++;
-            else if(empty>0){
-                board[r+empty][c]=board[r][c];
-                board[r][c]='';
-            }
+            else if(empty>0){ board[r+empty][c]=board[r][c]; board[r][c]=''; }
         }
-        for(let r=0;r<empty;r++){
-            board[r][c]=fruits[Math.floor(Math.random()*fruits.length)];
-        }
+        for(let r=0;r<empty;r++){ board[r][c]=fruits[Math.floor(Math.random()*fruits.length)]; }
     }
     renderBoard();
     setTimeout(checkMatches,200);
 }
 
-// Swipe สำหรับมือถือ
-let touchStart = null;
+// Win/Lose check
+function checkWin(){
+    if(questCount>=questGoal){ level++; startNextLevel(); }
+    if(movesLeft<=0){ alert('แพ้แล้ว! คะแนน:'+score); resetGame(); }
+}
+
+// เริ่มด่านต่อไป
+function startNextLevel(){
+    movesLeft = 20 + level*2; questTarget=fruits[Math.floor(Math.random()*fruits.length)];
+    questCount=0; questGoal=5+level;
+    document.getElementById('level').innerText='ด่าน: '+level;
+    updateMoves();
+    initBoard();
+    renderBoard();
+}
+
+// Update moves UI
+function updateMoves(){ document.getElementById('moves').innerText='เลื่อน: '+movesLeft; }
+
+// Swipe มือถือ
+let touchStart=null;
 boardEl.addEventListener('touchstart', e=>{
     const rect = boardEl.getBoundingClientRect();
     const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    const c = Math.floor(x/62);
-    const r = Math.floor(y/62);
+    const x=touch.clientX-rect.left, y=touch.clientY-rect.top;
+    const c=Math.floor(x/62), r=Math.floor(y/62);
     selectCandy(r,c);
 });
 boardEl.addEventListener('touchmove', e=>{
     if(!selected) return;
     const rect = boardEl.getBoundingClientRect();
     const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    const c = Math.floor(x/62);
-    const r = Math.floor(y/62);
-    if(isAdjacent(selected,{r,c})){
-        swap(selected,{r,c});
-        selected = null;
-    }
+    const x=touch.clientX-rect.left, y=touch.clientY-rect.top;
+    const c=Math.floor(x/62), r=Math.floor(y/62);
+    if(isAdjacent(selected,{r,c})){ swap(selected,{r,c}); selected=null; movesLeft--; updateMoves(); }
 });
 
-// Keyboard สำหรับ PC
+// Click PC
 boardEl.addEventListener('click', e=>{
     const target = e.target;
     if(!target.classList.contains('candy')) return;
-    const r = parseInt(target.dataset.row);
-    const c = parseInt(target.dataset.col);
+    const r=parseInt(target.dataset.row), c=parseInt(target.dataset.col);
     selectCandy(r,c);
 });
 
-// Special Item: Chocolate Lightning
-function useChocolate(fruit){
-    for(let r=0;r<boardSize;r++){
-        for(let c=0;c<boardSize;c++){
-            if(board[r][c]===fruit) board[r][c]='';
-        }
-    }
-    collapseBoard();
-}
-
-// ตัวอย่างใช้ chocolate เมื่อกดคีย์ C
+// Chocolate Lightning ไอเทมพิเศษ กด C
 window.addEventListener('keydown', e=>{
-    if(e.key.toLowerCase()==='c'){
-        useChocolate(questTarget);
+    if(e.key.toLowerCase()==='c'){ 
+        for(let r=0;r<boardSize;r++){ for(let c=0;c<boardSize;c++){
+            if(board[r][c]===questTarget) board[r][c]='';
+        }}
+        collapseBoard();
     }
 });
 
 initBoard();
 renderBoard();
+updateMoves();
 </script>
 
 </body>
