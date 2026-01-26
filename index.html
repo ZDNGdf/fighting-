@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เว็บวาดรูปพรีเมียม</title>
+<title>Premium Drawing App</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
 body {
   margin:0;
-  font-family:'Inter', sans-serif;
+  font-family:'Inter',sans-serif;
   background: linear-gradient(145deg,#fdf6ff,#f0fcff);
   display:flex;
   flex-direction:column;
@@ -32,11 +32,10 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index:10;
-  transition:0.3s;
 }
 
-/* ปุ่ม Neumorphism */
-#toolbar button, #toolbar input {
+/* Buttons Neumorphism */
+#toolbar button, #toolbar select, #toolbar input {
   padding:8px 14px;
   font-size:16px;
   border:none;
@@ -46,7 +45,7 @@ body {
   box-shadow: 5px 5px 15px rgba(0,0,0,0.1), -5px -5px 15px rgba(255,255,255,0.7);
   transition:0.3s;
 }
-#toolbar button:hover, #toolbar input:hover {
+#toolbar button:hover, #toolbar input:hover, #toolbar select:hover {
   transform: translateY(-2px);
   box-shadow: 5px 5px 25px rgba(0,0,0,0.2), -5px -5px 25px rgba(255,255,255,0.85);
 }
@@ -73,57 +72,87 @@ canvas {
   transition: 0.2s;
 }
 
-/* Save button floating bottom */
-#saveBtn {
+/* Floating Buttons: Room Code / Join */
+#roomCode {
+  position:fixed;
+  top:20px;
+  right:20px;
+  padding:10px 14px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#8d5eff,#ff9ce5);
+  color:#fff;
+  font-weight:bold;
+  box-shadow:5px 5px 15px rgba(0,0,0,0.25);
+  cursor:default;
+  z-index:10;
+}
+#joinParty {
   position:fixed;
   bottom:20px;
   right:20px;
-  padding:12px 20px;
-  border:none;
+  padding:12px 16px;
   border-radius:16px;
-  background:linear-gradient(135deg,#ff9ce5,#8d5eff);
+  background:linear-gradient(135deg,#34d1ff,#8d5eff);
   color:#fff;
   font-weight:bold;
-  box-shadow: 5px 5px 20px rgba(0,0,0,0.25);
+  box-shadow:5px 5px 15px rgba(0,0,0,0.25);
   cursor:pointer;
-  transition:0.3s;
+  z-index:10;
 }
-#saveBtn:hover { transform: translateY(-3px); box-shadow: 5px 5px 25px rgba(0,0,0,0.35); }
+#joinParty input {
+  width:80px;
+  margin-left:8px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  padding:4px 6px;
+}
 
+/* Responsive */
 @media(max-width:768px){
   #toolbar{flex-wrap:wrap;padding:8px;}
-  #toolbar button, #toolbar input{font-size:14px;padding:6px 10px;}
+  #toolbar button, #toolbar input, #toolbar select{font-size:14px;padding:6px 10px;}
 }
 </style>
 </head>
 <body>
 
 <div id="toolbar">
-  <button id="penBtn">🖊️ Brush</button>
-  <button id="eraserBtn">🩹 Eraser</button>
+  Brush: <select id="brushType">
+    <option value="normal">Normal</option>
+    <option value="soft">Soft</option>
+    <option value="marker">Marker</option>
+    <option value="spray">Spray</option>
+  </select>
+  Size: <input type="range" id="sizePicker" min="1" max="50" value="5">
+  Opacity: <input type="range" id="opacityPicker" min="0.1" max="1" step="0.1" value="1">
+  Color: <input type="color" id="colorPicker" value="#ff0000">
   <button id="undoBtn">↩️ Undo</button>
   <button id="redoBtn">↪️ Redo</button>
   <button id="clearBtn">🗑️ Clear</button>
-  Color: <input type="color" id="colorPicker" value="#ff0000">
-  Size: <input type="range" id="sizePicker" min="1" max="50" value="5">
-  Opacity: <input type="range" id="opacityPicker" min="0.1" max="1" step="0.1" value="1">
+  <button id="rotateBtn">🔄 Rotate 0°</button>
 </div>
 
 <div id="canvasContainer">
   <canvas id="drawingCanvas" width="2000" height="2000"></canvas>
 </div>
 
-<button id="saveBtn">💾 Save PNG</button>
+<div id="roomCode">Room: 1234</div>
+
+<div id="joinParty">
+  Join Room: <input type="text" id="joinInput" placeholder="1234"><button id="joinBtn">Join</button>
+</div>
 
 <script>
+// Canvas setup
 const canvas = document.getElementById('drawingCanvas');
 const ctx = canvas.getContext('2d');
-let drawing=false, erasing=false;
+let drawing=false, brushType='normal';
 let brushColor=document.getElementById('colorPicker').value;
 let brushSize=document.getElementById('sizePicker').value;
 let brushOpacity=document.getElementById('opacityPicker').value;
 ctx.lineCap='round';
 ctx.lineJoin='round';
+let rotation=0;
 
 // Undo/Redo
 let history=[], historyStep=-1;
@@ -135,85 +164,111 @@ function saveHistory(){
 function undo(){ if(historyStep>0){historyStep--; let img=new Image(); img.src=history[historyStep]; img.onload=()=>ctx.drawImage(img,0,0);}}
 function redo(){ if(historyStep<history.length-1){historyStep++; let img=new Image(); img.src=history[historyStep]; img.onload=()=>ctx.drawImage(img,0,0);}}
 
-// Draw
-function startPos(e){ drawing=true; draw(e); saveHistory();}
-function endPos(){ drawing=false; ctx.beginPath();}
-function draw(e){
-  if(!drawing) return;
-  const rect = canvas.getBoundingClientRect();
-  let x = e.clientX ? e.clientX - rect.left : e.touches[0].clientX - rect.left;
-  let y = e.clientY ? e.clientY - rect.top : e.touches[0].clientY - rect.top;
+// Draw logic with brush types
+function drawBrush(x,y){
   ctx.lineWidth=brushSize;
+  ctx.globalAlpha=brushOpacity;
   ctx.strokeStyle=brushColor;
-  ctx.globalAlpha=erasing?1:brushOpacity;
-  if(erasing) ctx.strokeStyle='#fff';
-  ctx.lineTo(x/scale - offsetX/scale, y/scale - offsetY/scale);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(x/scale - offsetX/scale, y/scale - offsetY/scale);
+  ctx.fillStyle=brushColor;
+
+  switch(brushType){
+    case 'normal':
+      ctx.lineTo(x,y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+      break;
+    case 'soft':
+      ctx.shadowColor=brushColor;
+      ctx.shadowBlur=20;
+      ctx.lineTo(x,y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+      ctx.shadowBlur=0;
+      break;
+    case 'marker':
+      ctx.lineWidth=brushSize*2;
+      ctx.lineTo(x,y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+      break;
+    case 'spray':
+      for(let i=0;i<10;i++){
+        const offsetX=Math.random()*brushSize*2-brushSize;
+        const offsetY=Math.random()*brushSize*2-brushSize;
+        ctx.fillRect(x+offsetX,y+offsetY,1,1);
+      }
+      break;
+  }
 }
 
-// Events
+// Mouse / touch events
+function startPos(e){drawing=true; drawPos(e); saveHistory();}
+function endPos(){drawing=false; ctx.beginPath();}
+function drawPos(e){
+  if(!drawing) return;
+  const rect=canvas.getBoundingClientRect();
+  let x=e.clientX?e.clientX-rect.left:e.touches[0].clientX-rect.left;
+  let y=e.clientY?e.clientY-rect.top:e.touches[0].clientY-rect.top;
+  drawBrush(x/scale - offsetX/scale, y/scale - offsetY/scale);
+}
+
 canvas.addEventListener('mousedown', startPos);
 canvas.addEventListener('mouseup', endPos);
-canvas.addEventListener('mousemove', draw);
+canvas.addEventListener('mousemove', drawPos);
 canvas.addEventListener('touchstart', startPos);
 canvas.addEventListener('touchend', endPos);
-canvas.addEventListener('touchmove', draw);
+canvas.addEventListener('touchmove', drawPos);
 
-// Toolbar
-document.getElementById('penBtn').onclick=()=>erasing=false;
-document.getElementById('eraserBtn').onclick=()=>erasing=true;
-document.getElementById('clearBtn').onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height); saveHistory();};
-document.getElementById('colorPicker').onchange=(e)=>brushColor=e.target.value;
-document.getElementById('sizePicker').oninput=(e)=>brushSize=e.target.value;
-document.getElementById('opacityPicker').oninput=(e)=>brushOpacity=e.target.value;
+// Toolbar events
+document.getElementById('brushType').onchange=e=>brushType=e.target.value;
+document.getElementById('sizePicker').oninput=e=>brushSize=e.target.value;
+document.getElementById('opacityPicker').oninput=e=>brushOpacity=e.target.value;
+document.getElementById('colorPicker').onchange=e=>brushColor=e.target.value;
 document.getElementById('undoBtn').onclick=undo;
 document.getElementById('redoBtn').onclick=redo;
+document.getElementById('clearBtn').onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height); saveHistory();}
 
-// Save PNG
-document.getElementById('saveBtn').onclick=()=>{
-  const link=document.createElement('a');
-  link.download='my_drawing.png';
-  link.href=canvas.toDataURL();
-  link.click();
+// Rotate canvas
+let scale=1, offsetX=0, offsetY=0;
+document.getElementById('rotateBtn').onclick=()=>{
+  rotation=(rotation+15)%360;
+  canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale}) rotate(${rotation}deg)`;
+  document.getElementById('rotateBtn').innerText=`🔄 Rotate ${rotation}°`;
 }
 
 // Zoom / Pan
-let scale=1, offsetX=0, offsetY=0, panning=false, startX=0, startY=0;
-const container = document.getElementById('canvasContainer');
-
+let panning=false, startX=0, startY=0;
+const container=document.getElementById('canvasContainer');
 container.addEventListener('wheel', e=>{
   e.preventDefault();
-  const zoom = e.deltaY<0?1.1:0.9;
+  const zoom=e.deltaY<0?1.1:0.9;
   scale*=zoom;
-  canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale})`;
+  canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale}) rotate(${rotation}deg)`;
 });
-
 container.addEventListener('mousedown', e=>{
   if(e.button===1){panning=true; startX=e.clientX-offsetX; startY=e.clientY-offsetY;}
 });
 container.addEventListener('mouseup', e=>panning=false);
 container.addEventListener('mousemove', e=>{
-  if(panning){offsetX=e.clientX-startX; offsetY=e.clientY-startY; canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale})`;}
+  if(panning){offsetX=e.clientX-startX; offsetY=e.clientY-startY; canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale}) rotate(${rotation}deg)`;}
 });
 
-// Pinch Zoom มือถือ
-let lastDist=0;
-container.addEventListener('touchstart', e=>{
-  if(e.touches.length===2){
-    lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-  }
-});
-container.addEventListener('touchmove', e=>{
-  if(e.touches.length===2){
-    let dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
-    let zoom=dist/lastDist;
-    scale*=zoom;
-    lastDist=dist;
-    canvas.style.transform=`translate(${offsetX}px,${offsetY}px) scale(${scale})`;
-  }
-});
+// Join Party Simulation
+document.getElementById('joinBtn').onclick=()=>{
+  let code=document.getElementById('joinInput').value;
+  if(code) alert(`Joined Room ${code}!\nคุณสามารถวาดร่วมกับเพื่อนได้ (จำลอง Local)`); 
+}
+
+// Save
+document.getElementById('roomCode').onclick=()=>{
+  const link=document.createElement('a');
+  link.download='my_drawing.png';
+  link.href=canvas.toDataURL();
+  link.click();
+}
 </script>
 
 </body>
