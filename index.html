@@ -3,165 +3,105 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ทดสอบความไวสายตา</title>
-
+<title>วัดความไวสายตา</title>
 <style>
-    * {
-        box-sizing: border-box;
-        font-family: 'Segoe UI', sans-serif;
-    }
-
-    body {
-        margin: 0;
-        background: radial-gradient(circle at top, #0f172a, #020617);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-    }
-
-    .container {
-        width: 100%;
-        max-width: 600px;
-        padding: 20px;
-        text-align: center;
-    }
-
-    h1 {
-        color: #38bdf8;
-        margin-bottom: 10px;
-    }
-
-    #gameArea {
-        position: relative;
-        width: 100%;
-        height: 65vh;
-        background: rgba(255,255,255,0.05);
-        border-radius: 20px;
-        border: 2px solid rgba(255,255,255,0.1);
-        overflow: hidden;
-    }
-
-    /* 🔴 วงกลมใหญ่ขึ้น */
-    .circle {
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        background: radial-gradient(circle at top, #ff6b6b, #b91c1c);
-        position: absolute;
-        cursor: pointer;
-        animation: pop 0.2s ease-out;
-    }
-
-    @keyframes pop {
-        from { transform: scale(0.6); }
-        to { transform: scale(1); }
-    }
-
-    /* 🔘 ปุ่มใหญ่ กดง่าย */
-    button {
-        width: 100%;
-        max-width: 300px;
-        padding: 18px;
-        font-size: 20px;
-        border-radius: 40px;
-        border: none;
-        background: linear-gradient(135deg,#38bdf8,#6366f1);
-        color: white;
-        margin-top: 15px;
-        cursor: pointer;
-    }
-
-    button:active {
-        transform: scale(0.96);
-    }
-
-    #result {
-        font-size: 20px;
-        margin-top: 15px;
-        color: #facc15;
-    }
+* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body { margin: 0; background: radial-gradient(circle at top, #0f172a, #020617); color: white; display:flex; justify-content:center; align-items:center; height:100vh; }
+.container { width:100%; max-width:600px; padding:20px; text-align:center; }
+h1 { color:#38bdf8; margin-bottom:5px; }
+p { opacity:0.8; }
+#gameArea { position:relative; width:100%; height:60vh; background: rgba(255,255,255,0.05); border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.1); margin-bottom:15px; }
+.circle { position:absolute; border-radius:50%; background: radial-gradient(circle at top, #ff6b6b, #b91c1c); cursor:pointer; animation:pop 0.2s ease-out; }
+@keyframes pop { from { transform: scale(0.6);} to { transform: scale(1);} }
+button { width:100%; max-width:300px; padding:18px; font-size:20px; border-radius:40px; border:none; background: linear-gradient(135deg,#38bdf8,#6366f1); color:white; cursor:pointer; margin-top:10px; }
+button:active { transform: scale(0.96); }
+#result { font-size:20px; margin-top:15px; color:#facc15; }
+#certificate { margin-top:20px; padding:15px; border:2px dashed #38bdf8; border-radius:15px; background: rgba(0,0,0,0.3); }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>👁️ ทดสอบความไวสายตา</h1>
-    <p>แตะวงกลมให้ทันก่อนมันหาย!</p>
-
+    <h1>👁️ วัดความไวสายตา</h1>
+    <p>แตะวงกลมให้ทันก่อนมันหาย! มันจะหายเร็วขึ้นเรื่อยๆ</p>
     <div id="gameArea"></div>
-
     <button onclick="startGame()">▶ เริ่มทดสอบ</button>
-
     <div id="result"></div>
+    <div id="certificate"></div>
 </div>
 
 <script>
-let times = [5000, 4000, 3000, 2000, 1000, 500];
-let index = 0;
+let baseTime = 5000; // เริ่ม 5 วิ
+let speedDecrease = 0.1; // ลดเวลาลงทุกครั้งที่กดสำเร็จ (ms)
+let minTime = 200; // ความเร็วสูงสุด 0.2 วิ
+let currentTime = baseTime;
 let score = 0;
-let timeout;
 let active = false;
+let timeout;
 
 const gameArea = document.getElementById("gameArea");
 const result = document.getElementById("result");
+const certificate = document.getElementById("certificate");
 
-function startGame() {
-    index = 0;
+function startGame(){
     score = 0;
+    currentTime = baseTime;
     result.innerHTML = "";
+    certificate.innerHTML = "";
     nextRound();
 }
 
-function nextRound() {
+function nextRound(){
     gameArea.innerHTML = "";
-    if (index >= times.length) {
-        showResult();
-        return;
-    }
-
     active = true;
 
     const circle = document.createElement("div");
     circle.className = "circle";
 
-    const size = 90; // ใหญ่พิเศษ
+    // ขนาดวงกลมสุ่ม
+    const size = 70 + Math.random()*30;
+    circle.style.width = size + "px";
+    circle.style.height = size + "px";
+
     const maxX = gameArea.clientWidth - size;
     const maxY = gameArea.clientHeight - size;
-
-    circle.style.left = Math.random() * maxX + "px";
-    circle.style.top = Math.random() * maxY + "px";
+    circle.style.left = Math.random()*maxX + "px";
+    circle.style.top = Math.random()*maxY + "px";
 
     circle.onclick = () => {
-        if (!active) return;
+        if(!active) return;
         active = false;
         score++;
+        // ลดเวลาต่อรอบ
+        currentTime = Math.max(minTime, currentTime - 300); // ลดลง 0.3 วิ ทุกครั้ง
         clearTimeout(timeout);
-        index++;
-        setTimeout(nextRound, 300);
-    };
+        nextRound();
+    }
 
     gameArea.appendChild(circle);
 
     timeout = setTimeout(() => {
         active = false;
-        showResult();
-    }, times[index]);
+        endGame();
+    }, currentTime);
 }
 
-function showResult() {
+function endGame(){
     gameArea.innerHTML = "";
+    result.innerHTML = `คุณกดได้ทั้งหมด ${score} ครั้ง`;
     let level = "";
 
-    if (score <= 1) level = "😴 สายตาช้า ต้องฝึกอีก!";
-    else if (score <= 3) level = "🙂 สายตาปกติ";
-    else if (score <= 5) level = "😎 สายตาไวมาก!";
+    if(score < 20) level = "😴 สายตาช้า ต้องฝึกอีก!";
+    else if(score < 40) level = "🙂 สายตาปกติ";
+    else if(score < 60) level = "😎 สายตาไวมาก!";
     else level = "🔥 ระดับเทพสายตาเหยี่ยว!";
 
-    result.innerHTML = `
-        <p>คุณกดได้ ${score} ครั้ง</p>
-        <p>${level}</p>
+    // สร้างใบรับรองแบบง่ายๆ
+    certificate.innerHTML = `
+        <h2>📜 ใบรับรองความไวสายตา</h2>
+        <p>คะแนนของคุณ: ${score}</p>
+        <p>ระดับสายตา: ${level}</p>
+        <p>ทดสอบโดย: ระบบวัดความไวสายตาออนไลน์</p>
     `;
 }
 </script>
