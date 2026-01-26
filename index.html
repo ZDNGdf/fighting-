@@ -6,7 +6,7 @@
 <title>วัดความไวสายตา</title>
 <style>
 * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-body { margin: 0; background: radial-gradient(circle at top, #0f172a, #020617); color: white; display:flex; justify-content:center; align-items:center; height:100vh; }
+body { margin:0; background: radial-gradient(circle at top, #0f172a, #020617); color:white; display:flex; justify-content:center; align-items:center; height:100vh; }
 .container { width:100%; max-width:600px; padding:20px; text-align:center; }
 h1 { color:#38bdf8; margin-bottom:5px; }
 p { opacity:0.8; }
@@ -23,7 +23,7 @@ button:active { transform: scale(0.96); }
 
 <div class="container">
     <h1>👁️ วัดความไวสายตา</h1>
-    <p>แตะวงกลมให้ทันก่อนมันหาย! มันจะหายเร็วขึ้นเรื่อยๆ</p>
+    <p>แตะวงกลมให้ทันก่อนมันหาย! ความเร็วคงที่ 0.5 วิ</p>
     <div id="gameArea"></div>
     <button onclick="startGame()">▶ เริ่มทดสอบ</button>
     <div id="result"></div>
@@ -31,10 +31,7 @@ button:active { transform: scale(0.96); }
 </div>
 
 <script>
-let baseTime = 5000; // เริ่ม 5 วิ
-let speedDecrease = 0.1; // ลดเวลาลงทุกครั้งที่กดสำเร็จ (ms)
-let minTime = 200; // ความเร็วสูงสุด 0.2 วิ
-let currentTime = baseTime;
+const fixedTime = 500; // 0.5 วิ
 let score = 0;
 let active = false;
 let timeout;
@@ -45,7 +42,6 @@ const certificate = document.getElementById("certificate");
 
 function startGame(){
     score = 0;
-    currentTime = baseTime;
     result.innerHTML = "";
     certificate.innerHTML = "";
     nextRound();
@@ -58,7 +54,6 @@ function nextRound(){
     const circle = document.createElement("div");
     circle.className = "circle";
 
-    // ขนาดวงกลมสุ่ม
     const size = 70 + Math.random()*30;
     circle.style.width = size + "px";
     circle.style.height = size + "px";
@@ -72,8 +67,6 @@ function nextRound(){
         if(!active) return;
         active = false;
         score++;
-        // ลดเวลาต่อรอบ
-        currentTime = Math.max(minTime, currentTime - 300); // ลดลง 0.3 วิ ทุกครั้ง
         clearTimeout(timeout);
         nextRound();
     }
@@ -83,7 +76,7 @@ function nextRound(){
     timeout = setTimeout(() => {
         active = false;
         endGame();
-    }, currentTime);
+    }, fixedTime);
 }
 
 function endGame(){
@@ -96,7 +89,6 @@ function endGame(){
     else if(score < 60) level = "😎 สายตาไวมาก!";
     else level = "🔥 ระดับเทพสายตาเหยี่ยว!";
 
-    // สร้างใบรับรองแบบง่ายๆ
     certificate.innerHTML = `
         <h2>📜 ใบรับรองความไวสายตา</h2>
         <p>คะแนนของคุณ: ${score}</p>
