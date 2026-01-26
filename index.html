@@ -3,80 +3,191 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>POP CAT ∞</title>
-
+<title>Block Blast Deluxe</title>
 <style>
-    body {
-        margin: 0;
-        height: 100vh;
-        background: radial-gradient(circle, #ffc0cb, #ff8fb1);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-family: Arial, sans-serif;
-        user-select: none;
-        overflow: hidden;
-    }
-
-    .cat {
-        font-size: 220px;
-        transition: transform 0.05s;
-    }
-
-    .cat.pop {
-        transform: scale(0.95);
-    }
-
-    .info {
-        position: fixed;
-        bottom: 25px;
-        text-align: center;
-        color: white;
-        text-shadow: 0 0 5px black;
-    }
-
-    .count {
-        font-size: 32px;
-        font-weight: bold;
-    }
-
-    .status {
-        font-size: 16px;
-        opacity: 0.9;
-    }
+body {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    background: radial-gradient(circle at top, #1b1b3a, #05010f);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+.game {
+    background: linear-gradient(145deg, #1f1f3a, #0d0d1f);
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 0 40px rgba(0,255,255,0.3);
+    width: 360px;
+}
+h1 {
+    text-align: center;
+    color: #00f7ff;
+    margin-bottom: 10px;
+}
+.score {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+.board {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 5px;
+    background: #0a0a1a;
+    padding: 10px;
+    border-radius: 12px;
+}
+.cell {
+    width: 35px;
+    height: 35px;
+    background: #111;
+    border-radius: 6px;
+    box-shadow: inset 0 0 5px #000;
+}
+.cell.filled {
+    background: linear-gradient(145deg,#00f7ff,#00bcd4);
+    box-shadow: 0 0 10px #00f7ff;
+}
+.blocks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+.block {
+    display: grid;
+    gap: 4px;
+    cursor: grab;
+}
+.block div {
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(145deg,#ff4dff,#7f00ff);
+    border-radius: 6px;
+}
+.footer {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #aaa;
+}
 </style>
 </head>
 <body>
 
-<div id="cat" class="cat">😺</div>
+<div class="game">
+    <h1>🧩 BLOCK BLAST</h1>
+    <div class="score">คะแนน: <span id="score">0</span></div>
 
-<div class="info">
-    <div class="count">POP: <span id="count">0</span></div>
-    <div class="status">กดได้ไม่จำกัด ∞</div>
+    <div class="board" id="board"></div>
+
+    <div class="blocks" id="blocks"></div>
+
+    <div class="footer">ลากบล็อกมาวางให้เต็มแถว ✨</div>
 </div>
 
 <script>
-let count = 0;
+const boardSize = 8;
+const board = document.getElementById("board");
+const blocksDiv = document.getElementById("blocks");
+const scoreEl = document.getElementById("score");
+let score = 0;
+let grid = Array(64).fill(0);
 
-const cat = document.getElementById("cat");
-const counter = document.getElementById("count");
-
-document.addEventListener("mousedown", pop);
-document.addEventListener("touchstart", pop);
-
-function pop() {
-    count++;
-    counter.textContent = count;
-
-    cat.textContent = "😸";
-    cat.classList.add("pop");
-
-    setTimeout(() => {
-        cat.textContent = "😺";
-        cat.classList.remove("pop");
-    }, 60);
+function createBoard() {
+    board.innerHTML = "";
+    grid.forEach(v => {
+        const cell = document.createElement("div");
+        cell.className = "cell" + (v ? " filled" : "");
+        board.appendChild(cell);
+    });
 }
-</script>
+createBoard();
 
+const shapes = [
+    [[1,1,1]],
+    [[1],[1],[1]],
+    [[1,1],[1,1]],
+    [[1,1,1],[0,1,0]]
+];
+
+function newBlocks() {
+    blocksDiv.innerHTML = "";
+    for(let i=0;i<3;i++){
+        const shape = shapes[Math.floor(Math.random()*shapes.length)];
+        const b = document.createElement("div");
+        b.className = "block";
+        b.draggable = true;
+        b.dataset.shape = JSON.stringify(shape);
+
+        shape.forEach(row=>{
+            row.forEach(v=>{
+                if(v){
+                    const d = document.createElement("div");
+                    b.appendChild(d);
+                }
+            });
+        });
+
+        b.ondragstart = e=>{
+            e.dataTransfer.setData("shape", b.dataset.shape);
+        };
+
+        blocksDiv.appendChild(b);
+    }
+}
+
+board.ondragover = e => e.preventDefault();
+board.ondrop = e => {
+    const shape = JSON.parse(e.dataTransfer.getData("shape"));
+    const index = [...board.children].indexOf(e.target);
+    const row = Math.floor(index / boardSize);
+    const col = index % boardSize;
+
+    if(place(shape,row,col)){
+        clearLines();
+        newBlocks();
+    }
+};
+
+function place(shape,r,c){
+    for(let y=0;y<shape.length;y++){
+        for(let x=0;x<shape[y].length;x++){
+            if(shape[y][x]){
+                let i = (r+y)*boardSize + (c+x);
+                if(i>=64 || grid[i]) return false;
+            }
+        }
+    }
+    for(let y=0;y<shape.length;y++){
+        for(let x=0;x<shape[y].length;x++){
+            if(shape[y][x]){
+                grid[(r+y)*boardSize + (c+x)] = 1;
+            }
+        }
+    }
+    score += 10;
+    scoreEl.textContent = score;
+    createBoard();
+    return true;
+}
+
+function clearLines(){
+    for(let r=0;r<8;r++){
+        let full = true;
+        for(let c=0;c<8;c++){
+            if(!grid[r*8+c]) full=false;
+        }
+        if(full){
+            for(let c=0;c<8;c++) grid[r*8+c]=0;
+            score += 50;
+        }
+    }
+}
+
+newBlocks();
+</script>
 </body>
 </html>
