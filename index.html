@@ -3,130 +3,75 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>แบบทดสอบเจ้าชู้</title>
-<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;700&display=swap" rel="stylesheet">
+<title>POP CAT</title>
+
 <style>
-body {
-  font-family: 'Kanit', sans-serif;
-  background: linear-gradient(to right, #fbc2eb, #a6c1ee);
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-.container {
-  background: #fff;
-  border-radius: 20px;
-  padding: 20px 25px;
-  max-width: 600px;
-  width: 90%;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  text-align: center;
-}
-h1 {
-  color: #ff4d6d;
-  margin-bottom: 20px;
-}
-.question {
-  margin-bottom: 25px;
-  font-size: 18px;
-}
-.button-group {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 10px;
-}
-button.answer {
-  padding: 10px 25px;
-  font-size: 16px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  background-color: #ff4d6d;
-  color: white;
-  transition: 0.3s;
-}
-button.answer:hover {
-  background-color: #ff1f4b;
-}
-button.hidden {
-  display: none;
-}
-#result {
-  margin-top: 20px;
-  font-size: 20px;
-  font-weight: bold;
-  color: #ff4d6d;
-}
-@media (max-width: 500px){
-  .button-group { flex-direction: column; gap: 10px; }
-}
+    body {
+        margin: 0;
+        height: 100vh;
+        background: linear-gradient(135deg, #ffb6c1, #ffd6e8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-family: Arial, sans-serif;
+        user-select: none;
+    }
+
+    .container {
+        text-align: center;
+    }
+
+    .cat {
+        font-size: 180px;
+        cursor: pointer;
+        transition: transform 0.05s;
+    }
+
+    .cat:active {
+        transform: scale(0.95);
+    }
+
+    .count {
+        margin-top: 20px;
+        font-size: 28px;
+        color: #ff3366;
+        font-weight: bold;
+    }
+
+    .hint {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #555;
+    }
 </style>
 </head>
 <body>
 
 <div class="container">
-<h1>แบบทดสอบ: คุณเจ้าชู้ไหม?</h1>
-<div id="quizContainer"></div>
-<div id="result"></div>
+    <div id="cat" class="cat">😺</div>
+    <div class="count">POP: <span id="count">0</span></div>
+    <div class="hint">แตะที่แมวรัว ๆ 🐾</div>
 </div>
 
 <script>
-// คำถาม
-const questions = [
-  "1. คุณมักแอบคุยกับคนที่สนใจอยู่บ่อยไหม?",
-  "2. คุณมักแอบดูคนอื่นแม้มีแฟนอยู่แล้ว?",
-  "3. คุณคิดว่าการเจ้าชู้คือเรื่องปกติไหม?",
-  "4. คุณชอบกุ๊กกิ๊กกับเพื่อนแม้ไม่มีความสัมพันธ์จริงจัง?",
-  "5. คุณเคยให้ความหวังคนหลายคนพร้อมกันไหม?",
-  "6. คุณมักทำตัวเจ้าชู้เมื่ออยู่กับเพื่อน?",
-  "7. คุณมักกดไลก์หรือคอมเมนต์คนอื่นบ่อยแม้ไม่สนิท?",
-  "8. คุณมักคิดเรื่องเจ้าชู้บ่อยไหม?",
-  "9. คุณเคยทำให้คนอื่นเข้าใจผิดว่าคุณชอบเขาไหม?",
-  "10. คุณคิดว่าตัวเองเจ้าชู้มากแค่ไหน?"
-];
+    let count = 0;
+    const cat = document.getElementById("cat");
+    const counter = document.getElementById("count");
 
-// ข้อที่จะซ่อนปุ่ม
-const hideButtonQuestions = [8]; // ตัวอย่างข้อ 8
+    cat.addEventListener("mousedown", pop);
+    cat.addEventListener("touchstart", pop);
 
-let currentQuestion = 0;
-let score = 0;
+    function pop() {
+        count++;
+        counter.innerText = count;
 
-const quizContainer = document.getElementById("quizContainer");
-const resultDiv = document.getElementById("result");
+        // เปลี่ยนหน้าแมว
+        cat.textContent = "😸";
 
-function showQuestion() {
-  if(currentQuestion >= questions.length){
-    // จบ quiz
-    let level = '';
-    if(score <= 3) level = 'ไม่เจ้าชู้';
-    else if(score <= 6) level = 'เจ้าชู้ปานกลาง';
-    else level = 'เจ้าชู้มาก';
-    resultDiv.innerText = `คะแนนรวม: ${score}\nระดับ: ${level}`;
-    return;
-  }
-
-  // สร้างคำถามและปุ่ม
-  quizContainer.innerHTML = `
-    <div class="question">${questions[currentQuestion]}</div>
-    <div class="button-group">
-      <button class="answer" onclick="answerQuestion(true)" ${hideButtonQuestions.includes(currentQuestion+1)? 'class="answer hidden"':''}>ใช่</button>
-      <button class="answer" onclick="answerQuestion(false)" ${hideButtonQuestions.includes(currentQuestion+1)? 'class="answer hidden"':''}>ไม่ใช่</button>
-    </div>
-  `;
-}
-
-function answerQuestion(isYes){
-  // บางข้อเรากำหนดว่า "ถูก" คือไม่เจ้าชู้ เช่น hideButtonQuestions
-  if(isYes) score += 1;
-  currentQuestion++;
-  showQuestion();
-}
-
-showQuestion();
+        setTimeout(() => {
+            cat.textContent = "😺";
+        }, 80);
+    }
 </script>
 
 </body>
