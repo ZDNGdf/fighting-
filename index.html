@@ -3,209 +3,170 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Block Blast Mobile</title>
+<title>ทดสอบความไวสายตา</title>
+
 <style>
-*{box-sizing:border-box;}
-body{
-    margin:0;
-    background:#0b0f1a;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    font-family:sans-serif;
-}
-.game{
-    width:360px;
-    background:#111;
-    border-radius:16px;
-    padding:15px;
-    color:white;
-}
-h2{text-align:center;color:#00f7ff;}
-.board{
-    display:grid;
-    grid-template-columns:repeat(8,1fr);
-    gap:6px;
-    margin:10px 0;
-}
-.cell{
-    width:38px;
-    height:38px;
-    background:#222;
-    border-radius:6px;
-}
-.cell.filled{
-    background:linear-gradient(145deg,#00f7ff,#5bffff);
-    box-shadow:0 0 8px #00f7ff;
-}
-.blocks{
-    display:flex;
-    justify-content:space-between;
-    margin-top:10px;
-}
-.block{
-    display:grid;
-    gap:4px;
-    touch-action:none;
-}
-.block div{
-    width:30px;
-    height:30px;
-    background:#ff4df0;
-    border-radius:6px;
-}
-.dragging{
-    opacity:.7;
-    position:absolute;
-    z-index:1000;
-}
+    * {
+        box-sizing: border-box;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+        margin: 0;
+        background: radial-gradient(circle at top, #0f172a, #020617);
+        color: white;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+    }
+
+    .container {
+        text-align: center;
+        width: 100%;
+        max-width: 600px;
+        padding: 20px;
+    }
+
+    h1 {
+        margin-bottom: 10px;
+        color: #38bdf8;
+    }
+
+    #info {
+        margin-bottom: 15px;
+        opacity: 0.8;
+    }
+
+    #gameArea {
+        position: relative;
+        width: 100%;
+        height: 60vh;
+        background: rgba(255,255,255,0.05);
+        border-radius: 20px;
+        overflow: hidden;
+        border: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .circle {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: radial-gradient(circle at top, #ff6b6b, #b91c1c);
+        position: absolute;
+        cursor: pointer;
+        animation: pop 0.2s ease-out;
+    }
+
+    @keyframes pop {
+        from { transform: scale(0.6); }
+        to { transform: scale(1); }
+    }
+
+    button {
+        padding: 12px 25px;
+        border-radius: 30px;
+        border: none;
+        background: linear-gradient(135deg,#38bdf8,#6366f1);
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 15px;
+    }
+
+    button:hover {
+        opacity: 0.9;
+    }
+
+    #result {
+        font-size: 20px;
+        margin-top: 15px;
+        color: #facc15;
+    }
 </style>
 </head>
 <body>
 
-<div class="game">
-    <h2>BLOCK BLAST</h2>
-    <div>คะแนน: <span id="score">0</span></div>
-
-    <div class="board" id="board"></div>
-    <div class="blocks" id="blocks"></div>
+<div class="container">
+    <h1>👁️ ทดสอบความไวสายตา</h1>
+    <div id="info">กดวงกลมให้ทันก่อนหาย!</div>
+    <div id="gameArea"></div>
+    <button onclick="startGame()">เริ่มทดสอบ</button>
+    <div id="result"></div>
 </div>
 
 <script>
-const board = document.getElementById("board");
-const blocksDiv = document.getElementById("blocks");
-const scoreEl = document.getElementById("score");
-
-let grid = Array(64).fill(0);
+let times = [5000, 4000, 3000, 2000, 1000, 500];
+let index = 0;
 let score = 0;
-let draggingBlock = null;
-let currentShape = null;
+let timeout;
+let active = false;
 
-const shapes = [
-  [[1,1,1]],
-  [[1],[1],[1]],
-  [[1,1],[1,1]],
-  [[1,1,1],[0,1,0]],
-  [[1,1,1,1]]
-];
+const gameArea = document.getElementById("gameArea");
+const result = document.getElementById("result");
 
-function drawBoard(){
-    board.innerHTML="";
-    grid.forEach(v=>{
-        const c=document.createElement("div");
-        c.className="cell"+(v?" filled":"");
-        board.appendChild(c);
-    });
+function startGame() {
+    index = 0;
+    score = 0;
+    result.innerHTML = "";
+    nextRound();
 }
 
-function randomBlocks(){
-    blocksDiv.innerHTML="";
-    let pool=[...shapes];
-    for(let i=0;i<3;i++){
-        let idx=Math.floor(Math.random()*pool.length);
-        let shape=pool.splice(idx,1)[0];
-
-        const b=document.createElement("div");
-        b.className="block";
-        b.dataset.shape=JSON.stringify(shape);
-
-        shape.forEach(r=>{
-            r.forEach(v=>{
-                if(v){
-                    const d=document.createElement("div");
-                    b.appendChild(d);
-                }
-            });
-        });
-
-        enableDrag(b);
-        blocksDiv.appendChild(b);
-    }
-}
-
-function enableDrag(el){
-    let offsetX,offsetY;
-
-    el.addEventListener("pointerdown",e=>{
-        draggingBlock=el;
-        currentShape=JSON.parse(el.dataset.shape);
-        el.classList.add("dragging");
-        offsetX=e.offsetX;
-        offsetY=e.offsetY;
-    });
-
-    document.addEventListener("pointermove",e=>{
-        if(!draggingBlock) return;
-        draggingBlock.style.left=e.pageX-offsetX+"px";
-        draggingBlock.style.top=e.pageY-offsetY+"px";
-    });
-
-    document.addEventListener("pointerup",e=>{
-        if(!draggingBlock) return;
-
-        const rect=board.getBoundingClientRect();
-        if(e.clientX>rect.left && e.clientX<rect.right &&
-           e.clientY>rect.top && e.clientY<rect.bottom){
-
-            const x=Math.floor((e.clientX-rect.left)/(rect.width/8));
-            const y=Math.floor((e.clientY-rect.top)/(rect.height/8));
-
-            if(place(y,x)){
-                draggingBlock.remove();
-                checkGameOver();
-            }
-        }
-
-        draggingBlock.classList.remove("dragging");
-        draggingBlock.style.left="";
-        draggingBlock.style.top="";
-        draggingBlock=null;
-    });
-}
-
-function place(r,c){
-    for(let y=0;y<currentShape.length;y++){
-        for(let x=0;x<currentShape[y].length;x++){
-            if(currentShape[y][x]){
-                let i=(r+y)*8+(c+x);
-                if(i>=64 || grid[i]) return false;
-            }
-        }
+function nextRound() {
+    gameArea.innerHTML = "";
+    if (index >= times.length) {
+        showResult();
+        return;
     }
 
-    for(let y=0;y<currentShape.length;y++){
-        for(let x=0;x<currentShape[y].length;x++){
-            if(currentShape[y][x]){
-                grid[(r+y)*8+(c+x)] = 1;
-            }
-        }
-    }
+    active = true;
 
-    score+=10;
-    scoreEl.textContent=score;
-    clearLine();
-    drawBoard();
-    return true;
+    const circle = document.createElement("div");
+    circle.className = "circle";
+
+    const size = 50 + Math.random() * 30;
+    circle.style.width = size + "px";
+    circle.style.height = size + "px";
+
+    const maxX = gameArea.clientWidth - size;
+    const maxY = gameArea.clientHeight - size;
+
+    circle.style.left = Math.random() * maxX + "px";
+    circle.style.top = Math.random() * maxY + "px";
+
+    circle.onclick = () => {
+        if (!active) return;
+        active = false;
+        score++;
+        clearTimeout(timeout);
+        index++;
+        setTimeout(nextRound, 300);
+    };
+
+    gameArea.appendChild(circle);
+
+    timeout = setTimeout(() => {
+        active = false;
+        showResult();
+    }, times[index]);
 }
 
-function clearLine(){
-    for(let r=0;r<8;r++){
-        if(grid.slice(r*8,r*8+8).every(v=>v)){
-            for(let i=r*8;i<r*8+8;i++) grid[i]=0;
-            score+=50;
-        }
-    }
-}
+function showResult() {
+    gameArea.innerHTML = "";
+    let level = "";
 
-function checkGameOver(){
-    if(blocksDiv.children.length===0){
-        randomBlocks();
-    }
-}
+    if (score <= 1) level = "😴 สายตาช้า ต้องฝึกอีก!";
+    else if (score <= 3) level = "🙂 ปกติ";
+    else if (score <= 5) level = "😎 สายตาไวมาก!";
+    else level = "🔥 ระดับเทพสายตาเหยี่ยว!";
 
-drawBoard();
-randomBlocks();
+    result.innerHTML = `
+        <p>คุณกดได้ ${score} ครั้ง</p>
+        <p>${level}</p>
+    `;
+}
 </script>
+
 </body>
 </html>
