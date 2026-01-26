@@ -3,98 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เกมวัดสายตา OSU แบบง่าย</title>
+<title>เกมวัดสายตาแบบลาก</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 body{background:#111;display:flex;justify-content:center;align-items:center;height:100vh;transition:all 1s ease;}
-#gameContainer{position:relative;width:100%;max-width:600px;height:80vh;background:rgba(0,0,0,0.2);border-radius:20px;overflow:hidden;}
-.circle{position:absolute;width:60px;height:60px;border-radius:50%;background:#38bdf8;display:flex;justify-content:center;align-items:center;color:white;font-weight:bold;cursor:pointer;transition:all 0.3s ease;}
+.container{width:100%;max-width:600px;padding:20px;text-align:center;background: rgba(0,0,0,0.4);border-radius:15px;}
+h1{color:#38bdf8;margin-bottom:5px;}
+#gameArea{position:relative;width:100%;height:60vh;background: rgba(255,255,255,0.05);border-radius:20px;overflow:hidden;border:2px solid rgba(255,255,255,0.1);margin-bottom:15px;}
+.circle{position:absolute;border-radius:50%;width:60px;height:60px;background:#38bdf8;display:flex;justify-content:center;align-items:center;color:white;font-weight:bold;transition:all 0.3s ease;cursor:pointer;}
 #scoreBoard{color:white;margin-top:10px;font-size:18px;text-align:center;}
 </style>
 </head>
 <body>
-<div>
-    <div id="gameContainer"></div>
-    <div id="scoreBoard">คะแนน: 0</div>
+<div class="container">
+<h1>เกมลากวงกลม</h1>
+<p>ลากจากวงกลมเริ่มไปยังวงกลมปลายให้ทัน!</p>
+<div id="gameArea"></div>
+<div id="scoreBoard">คะแนน: 0</div>
 </div>
 
 <script>
-const gameContainer = document.getElementById("gameContainer");
+const gameArea = document.getElementById("gameArea");
 const scoreBoard = document.getElementById("scoreBoard");
 
 let score = 0;
 let active = false;
 let timeout;
-const fixedTime = 1000; // เวลาให้กด 1 วิ
+const fixedTime = 1000; // 1 วิ
 const circleColors = ["#ff6b6b","#facc15","#38bdf8","#10b981","#f472b6","#a855f7"];
 const bgImages = [
     "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
     "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
     "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
 ];
-
-// preload รูป
-bgImages.forEach(url=>{let img=new Image();img.src=url;});
+bgImages.forEach(url=>{const img=new Image();img.src=url;});
 
 function startGame(){
-    score = 0;
-    scoreBoard.innerText = `คะแนน: ${score}`;
+    score=0;
+    scoreBoard.innerText=`คะแนน: ${score}`;
     document.body.style.backgroundImage=`url(${bgImages[0]})`;
-    nextCircle();
+    nextRound();
 }
 
-function nextCircle(){
-    gameContainer.innerHTML = "";
-    active = true;
+function nextRound(){
+    gameArea.innerHTML="";
+    active=true;
 
-    const circle = document.createElement("div");
-    circle.className = "circle";
-    circle.style.background = circleColors[Math.floor(score/50)%circleColors.length];
+    // วงกลมสองจุด: start และ end
+    const startCircle=document.createElement("div");
+    startCircle.className="circle";
+    const endCircle=document.createElement("div");
+    endCircle.className="circle";
+
+    let colorIndex=Math.floor(score/50)%circleColors.length;
+    startCircle.style.background=circleColors[colorIndex];
+    endCircle.style.background=circleColors[colorIndex];
 
     // วางวงกลมสุ่ม
-    const size = 60;
-    const maxX = gameContainer.clientWidth - size;
-    const maxY = gameContainer.clientHeight - size;
-    circle.style.left = Math.random()*maxX + "px";
-    circle.style.top = Math.random()*maxY + "px";
+    const size=60;
+    const maxX=gameArea.clientWidth-size;
+    const maxY=gameArea.clientHeight-size;
 
-    // ลาก / แตะวงกลม
-    let dragged = false;
+    const startX=Math.random()*maxX;
+    const startY=Math.random()*maxY;
+    const endX=Math.random()*maxX;
+    const endY=Math.random()*maxY;
 
-    circle.addEventListener("touchstart", e=>{ dragged=true; score++; nextRound(); });
-    circle.addEventListener("mousedown", e=>{ dragged=true; score++; nextRound(); });
+    startCircle.style.left=startX+"px";
+    startCircle.style.top=startY+"px";
+    endCircle.style.left=endX+"px";
+    endCircle.style.top=endY+"px";
 
-    function nextRound(){
-        if(!dragged) return;
-        active=false;
-        scoreBoard.innerText = `คะแนน: ${score}`;
-        // เปลี่ยนพื้นหลังทุก 100 คะแนน
-        if(score%100===0){
-            let bgIndex = Math.floor(score/100)%bgImages.length;
-            document.body.style.backgroundImage=`url(${bgImages[bgIndex]})`;
-        }
-        clearTimeout(timeout);
-        nextCircle();
+    gameArea.appendChild(startCircle);
+    gameArea.appendChild(endCircle);
+
+    // ฟังก์ชันลาก
+    let dragging=false;
+    let startTime=0;
+
+    function startDrag(e){
+        e.preventDefault();
+        dragging=true;
+        startTime=Date.now();
     }
 
-    gameContainer.appendChild(circle);
+    function moveDrag(e){
+        if(!dragging) return;
+        let x=e.touches?e.touches[0].clientX: e.clientX;
+        let y=e.touches?e.touches[0].clientY: e.clientY;
+        const rect=gameArea.getBoundingClientRect();
+        x-=rect.left; y-=rect.top;
 
-    timeout=setTimeout(()=>{ if(!dragged){ endGame(); }}, fixedTime);
+        // เช็คใกล้ endCircle
+        const endRect=endCircle.getBoundingClientRect();
+        const endXPos=endRect.left-rect.left + endRect.width/2;
+        const endYPos=endRect.top-rect.top + endRect.height/2;
+        const distance=Math.hypot(x-endXPos, y-endYPos);
+
+        if(distance<endRect.width/2){
+            // กดสำเร็จ
+            dragging=false;
+            score++;
+            scoreBoard.innerText=`คะแนน: ${score}`;
+            // เปลี่ยนพื้นหลังทุก 100 คะแนน
+            if(score%100===0){
+                let bgIndex=Math.floor(score/100)%bgImages.length;
+                document.body.style.backgroundImage=`url(${bgImages[bgIndex]})`;
+            }
+            clearTimeout(timeout);
+            nextRound();
+        }
+    }
+
+    function endDrag(){
+        if(dragging){
+            dragging=false;
+            endGame();
+        }
+    }
+
+    startCircle.addEventListener("touchstart", startDrag);
+    startCircle.addEventListener("mousedown", startDrag);
+    gameArea.addEventListener("touchmove", moveDrag);
+    gameArea.addEventListener("mousemove", moveDrag);
+    document.addEventListener("mouseup", endDrag);
+    document.addEventListener("touchend", endDrag);
+
+    timeout=setTimeout(()=>{
+        if(dragging){dragging=false; endGame();}
+    }, fixedTime);
 }
 
-// กดผิดที่อื่น = จบเกม
-gameContainer.addEventListener("click", e=>{
-    if(!active) return;
-    if(!e.target.classList.contains("circle")){
-        active=false;
-        clearTimeout(timeout);
-        endGame();
-    }
-});
-
 function endGame(){
-    gameContainer.innerHTML="";
-    alert(`เกมจบ! คุณได้คะแนน: ${score}`);
+    active=false;
+    gameArea.innerHTML="";
+    alert(`เกมจบ! คะแนน: ${score}`);
 }
 
 startGame();
