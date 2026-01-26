@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iBitPaint Online</title>
+<title>iBitPaint Online Full Version</title>
 
 <!-- Fabric.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
@@ -13,98 +13,83 @@
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
-body{
-  margin:0; font-family:'Inter',sans-serif; background: #f0f0f0; overflow:hidden;
-}
-/* Toolbar UI */
-#toolbar{
-  position:absolute; top:10px; left:50%; transform:translateX(-50%);
-  background:rgba(255,255,255,0.9); padding:10px; border-radius:20px;
-  display:flex; flex-wrap:wrap; gap:10px; box-shadow:0 8px 20px rgba(0,0,0,0.2); z-index:10;
-}
-#toolbar > *{
-  padding:6px 10px; border-radius:10px; border:none; cursor:pointer;
-  font-size:14px; background:#fff; transition:0.2s;
-}
-#toolbar > *:hover{
-  transform:translateY(-2px); box-shadow:0 4px 10px rgba(0,0,0,0.15);
-}
-
-/* Canvas */
-#canvasContainer{position:absolute; top:0; left:0; width:100%; height:100%;}
-canvas{background:#fff; border-radius:12px; margin:auto;}
-
-/* Room UI */
-#roomCode{
-  position:fixed; top:15px; right:15px;
-  background:linear-gradient(135deg,#8d5eff,#ff9ce5);
-  color:#fff; padding:8px 12px; border-radius:12px;
-  font-weight:bold; box-shadow:0 5px 15px rgba(0,0,0,0.25); z-index:10;
-}
-#joinRoom{
-  position:fixed; bottom:15px; right:15px;
-  padding:8px; background:linear-gradient(135deg,#34d1ff,#8d5eff);
-  color:#fff; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.25);
-  display:flex; gap:6px; z-index:10;
-}
-#joinRoom input{padding:4px 6px; border-radius:8px; border:1px solid #ccc; width:80px;}
-
-/* Layer Panel */
-#layerPanel{
-  position:fixed; top:60px; right:15px;
-  background:rgba(255,255,255,0.95); padding:10px; border-radius:12px;
-  max-height:300px; overflow-y:auto; box-shadow:0 5px 15px rgba(0,0,0,0.2); z-index:10;
-}
-.layerItem{
-  display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;
-}
-.layerItem button{padding:2px 4px; font-size:12px;}
+body{margin:0;font-family:'Inter',sans-serif;background:#f0f0f0;overflow:hidden;}
+#toolbar{position:absolute;top:10px;left:50%;transform:translateX(-50%);
+background:rgba(255,255,255,0.95);padding:10px;border-radius:20px;display:flex;flex-wrap:wrap;gap:8px;
+box-shadow:0 8px 20px rgba(0,0,0,0.2);z-index:10;}
+#toolbar > *{padding:6px 10px;border-radius:10px;border:none;cursor:pointer;font-size:14px;background:#fff;transition:0.2s;}
+#toolbar > *:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,0.15);}
+#canvasContainer{position:absolute;top:0;left:0;width:100%;height:100%;}
+canvas{background:#fff;border-radius:12px;margin:auto;}
+#roomCode{position:fixed;top:15px;right:15px;background:linear-gradient(135deg,#8d5eff,#ff9ce5);
+color:#fff;padding:8px 12px;border-radius:12px;font-weight:bold;box-shadow:0 5px 15px rgba(0,0,0,0.25);z-index:10;}
+#joinRoom{position:fixed;bottom:15px;right:15px;padding:8px;background:linear-gradient(135deg,#34d1ff,#8d5eff);
+color:#fff;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,0.25);display:flex;gap:6px;z-index:10;}
+#joinRoom input{padding:4px 6px;border-radius:8px;border:1px solid #ccc;width:80px;}
+#layerPanel{position:fixed;top:60px;right:15px;background:rgba(255,255,255,0.95);padding:10px;border-radius:12px;
+max-height:300px;overflow-y:auto;box-shadow:0 5px 15px rgba(0,0,0,0.2);z-index:10;}
+.layerItem{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.layerItem button{padding:2px 4px;font-size:12px;}
+#chatPanel{position:fixed;top:60px;left:15px;width:220px;height:400px;background:rgba(255,255,255,0.95);
+padding:10px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,0.2);z-index:10;display:flex;flex-direction:column;}
+#chatMessages{flex:1;overflow-y:auto;margin-bottom:6px;}
+#chatInput{display:flex;gap:4px;}
+#chatInput input{flex:1;padding:4px 6px;border-radius:6px;border:1px solid #ccc;}
 </style>
 </head>
 <body>
 
 <div id="toolbar">
-  Brush: <select id="brushSelect"></select>
-  Size: <input type="range" id="sizePicker" min="1" max="50" value="5">
-  Opacity: <input type="range" id="opacityPicker" min="0.1" max="1" step="0.1" value="1">
-  Color: <input type="color" id="colorPicker" value="#ff0000">
-  <button id="undoBtn">↩️ Undo</button>
-  <button id="redoBtn">↪️ Redo</button>
-  <button id="clearBtn">🗑️ Clear</button>
-  <button id="rotateBtn">🔄 Rotate 0°</button>
-  <button id="addLayerBtn">➕ Layer</button>
-  <button id="saveBtn">💾 Save PNG</button>
+Brush: <select id="brushSelect"></select>
+Size: <input type="range" id="sizePicker" min="1" max="50" value="5">
+Opacity: <input type="range" id="opacityPicker" min="0.1" max="1" step="0.1" value="1">
+Color: <input type="color" id="colorPicker" value="#ff0000">
+<button id="eraserBtn">🩹 Eraser</button>
+<button id="undoBtn">↩️ Undo</button>
+<button id="redoBtn">↪️ Redo</button>
+<button id="clearBtn">🗑️ Clear</button>
+<button id="rotateBtn">🔄 Rotate 0°</button>
+<button id="addLayerBtn">➕ Layer</button>
+<button id="saveBtn">💾 Save PNG</button>
 </div>
 
 <div id="roomCode">Room: ---</div>
 <div id="joinRoom">
-  Join Room: <input id="joinInput" placeholder="room code"><button id="joinBtn">Join</button>
+Join Room: <input id="joinInput" placeholder="room code"><button id="joinBtn">Join</button>
 </div>
 
 <div id="layerPanel"></div>
 
+<div id="chatPanel">
+<div id="chatMessages"></div>
+<div id="chatInput">
+<input id="chatText" placeholder="Type message">
+<button id="sendChat">Send</button>
+</div>
+</div>
+
 <div id="canvasContainer">
-  <canvas id="canvas" width="2000" height="2000"></canvas>
+<canvas id="canvas" width="2000" height="2000"></canvas>
 </div>
 
 <script>
 /* =======================
-   1) Firebase Init
+Firebase Init
 ========================== */
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+apiKey: "YOUR_API_KEY",
+authDomain: "YOUR_AUTH_DOMAIN",
+databaseURL: "YOUR_DATABASE_URL",
+projectId: "YOUR_PROJECT_ID",
+storageBucket: "YOUR_STORAGE_BUCKET",
+messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+appId: "YOUR_APP_ID"
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /* =======================
-   2) Canvas Setup
+Canvas Setup
 ========================== */
 const canvas = new fabric.Canvas('canvas',{isDrawingMode:true});
 canvas.selection=false;
@@ -112,33 +97,33 @@ canvas.selection=false;
 // Brush Init
 const brushSelect = document.getElementById('brushSelect');
 for(let i=1;i<=20;i++){
-  const opt=document.createElement('option');
-  opt.value='brush'+i;
-  opt.text='Brush '+i;
-  brushSelect.appendChild(opt);
+const opt=document.createElement('option');
+opt.value='brush'+i;
+opt.text='Brush '+i;
+brushSelect.appendChild(opt);
 }
 const brushMap = {};
 for(let i=1;i<=20;i++){
-  brushMap['brush'+i] = new fabric.PencilBrush(canvas);
+brushMap['brush'+i] = new fabric.PencilBrush(canvas);
 }
-
-// Default Brush
-setBrush('brush1');
-
-// Change Brush
+let isEraser=false;
+function setBrush(name){
+isEraser=false;
+canvas.freeDrawingBrush = brushMap[name];
+canvas.freeDrawingBrush.width=document.getElementById('sizePicker').value;
+canvas.freeDrawingBrush.color=document.getElementById('colorPicker').value;
+canvas.freeDrawingBrush.opacity=document.getElementById('opacityPicker').value;
+}
 brushSelect.onchange =()=>setBrush(brushSelect.value);
 
-function setBrush(name){
-  canvas.freeDrawingBrush = brushMap[name];
-  canvas.freeDrawingBrush.width=document.getElementById('sizePicker').value;
-  canvas.freeDrawingBrush.color=document.getElementById('colorPicker').value;
-  canvas.freeDrawingBrush.opacity=document.getElementById('opacityPicker').value;
+// Eraser
+document.getElementById('eraserBtn').onclick=()=>{
+isEraser=true;
+canvas.freeDrawingBrush = new fabric.EraserBrush(canvas);
+canvas.freeDrawingBrush.width=document.getElementById('sizePicker').value;
 }
 
-/* =======================
-   3) UI Events
-========================== */
-// Size/Color/Opacity
+/* Toolbar events */
 document.getElementById('sizePicker').oninput=e=>canvas.freeDrawingBrush.width=e.target.value;
 document.getElementById('colorPicker').onchange=e=>canvas.freeDrawingBrush.color=e.target.value;
 document.getElementById('opacityPicker').oninput=e=>canvas.freeDrawingBrush.opacity=e.target.value;
@@ -146,29 +131,29 @@ document.getElementById('opacityPicker').oninput=e=>canvas.freeDrawingBrush.opac
 // Rotate
 let rotation=0;
 document.getElementById('rotateBtn').onclick=()=>{
-  rotation=(rotation+15)%360;
-  canvas.setViewportTransform([Math.cos(rotation*Math.PI/180), Math.sin(rotation*Math.PI/180), -Math.sin(rotation*Math.PI/180), Math.cos(rotation*Math.PI/180),0,0]);
+rotation=(rotation+15)%360;
+canvas.setViewportTransform([Math.cos(rotation*Math.PI/180), Math.sin(rotation*Math.PI/180), -Math.sin(rotation*Math.PI/180), Math.cos(rotation*Math.PI/180),0,0]);
 };
 
 // Clear
 document.getElementById('clearBtn').onclick=()=>{
-  canvas.clear(); broadcastClear();
+canvas.clear(); broadcastClear();
 };
 
 // Save PNG
 document.getElementById('saveBtn').onclick=()=>{
-  const link=document.createElement('a');
-  link.download='my_paint.png';
-  link.href=canvas.toDataURL({format:'png'});
-  link.click();
+const link=document.createElement('a');
+link.download='my_paint.png';
+link.href=canvas.toDataURL({format:'png'});
+link.click();
 };
 
 // Undo/Redo
 let history=[], historyStep=-1;
 function saveHistory(){
-  history=history.slice(0,historyStep+1);
-  history.push(JSON.stringify(canvas));
-  historyStep++;
+history=history.slice(0,historyStep+1);
+history.push(JSON.stringify(canvas));
+historyStep++;
 }
 function undo(){ if(historyStep>0){historyStep--; canvas.loadFromJSON(history[historyStep],()=>canvas.renderAll());}}
 function redo(){ if(historyStep<history.length-1){historyStep++; canvas.loadFromJSON(history[historyStep],()=>canvas.renderAll());}}
@@ -176,79 +161,123 @@ document.getElementById('undoBtn').onclick=undo;
 document.getElementById('redoBtn').onclick=redo;
 canvas.on('path:created', saveHistory);
 
-/* =======================
-   4) Layer System
-========================== */
+/* Layer System */
 let layers=[];
 function addLayer(name){
-  const group=new fabric.Group([],{name});
-  layers.push(group);
-  canvas.add(group);
-  updateLayerPanel();
-  canvas.setActiveObject(group);
+const group=new fabric.Group([],{name, player:playerName});
+layers.push(group);
+canvas.add(group);
+updateLayerPanel();
+canvas.setActiveObject(group);
 }
 function updateLayerPanel(){
-  const panel=document.getElementById('layerPanel');
-  panel.innerHTML='';
-  layers.slice().reverse().forEach((l,i)=>{
-    const div=document.createElement('div');
-    div.className='layerItem';
-    div.innerHTML=`<span>${l.name}</span>`;
-    const upBtn=document.createElement('button'); upBtn.textContent='↑';
-    const downBtn=document.createElement('button'); downBtn.textContent='↓';
-    const visBtn=document.createElement('button'); visBtn.textContent=l.visible?'👁️':'🚫';
-    upBtn.onclick=()=>canvas.bringForward(l);
-    downBtn.onclick=()=>canvas.sendBackwards(l);
-    visBtn.onclick=()=>{
-      l.visible=!l.visible;
-      visBtn.textContent=l.visible?'👁️':'🚫';
-      canvas.renderAll();
-    };
-    div.appendChild(upBtn); div.appendChild(downBtn); div.appendChild(visBtn);
-    panel.appendChild(div);
-  });
+const panel=document.getElementById('layerPanel');
+panel.innerHTML='';
+layers.slice().reverse().forEach((l,i)=>{
+const div=document.createElement('div');
+div.className='layerItem';
+div.innerHTML=`<span>${l.name}</span>`;
+const upBtn=document.createElement('button'); upBtn.textContent='↑';
+const downBtn=document.createElement('button'); downBtn.textContent='↓';
+const visBtn=document.createElement('button'); visBtn.textContent=l.visible?'👁️':'🚫';
+upBtn.onclick=()=>canvas.bringForward(l);
+downBtn.onclick=()=>canvas.sendBackwards(l);
+visBtn.onclick=()=>{
+l.visible=!l.visible;
+visBtn.textContent=l.visible?'👁️':'🚫';
+canvas.renderAll();
+};
+div.appendChild(upBtn); div.appendChild(downBtn); div.appendChild(visBtn);
+panel.appendChild(div);
+});
 }
 // Add default layer
-addLayer('Layer 1');
+let playerName = 'User'+Math.floor(Math.random()*1000);
+addLayer('Layer '+playerName);
 
 /* =======================
-   5) Firebase Realtime
+Firebase Realtime Join
 ========================== */
 let roomCode=document.getElementById('roomCode').innerText.split(' ')[1];
-if(roomCode==='---'){
-  roomCode = Math.floor(Math.random()*9000+1000).toString();
-  document.getElementById('roomCode').innerText='Room: '+roomCode;
-}
+if(roomCode==='---'){ roomCode=Math.floor(Math.random()*9000+1000).toString();
+document.getElementById('roomCode').innerText='Room: '+roomCode;}
 
 document.getElementById('joinBtn').onclick=()=>{
-  const code=document.getElementById('joinInput').value.trim();
-  if(!code) return;
-  roomCode=code;
-  document.getElementById('roomCode').innerText='Room: '+roomCode;
+const code=document.getElementById('joinInput').value.trim();
+if(!code) return;
+roomCode=code;
+document.getElementById('roomCode').innerText='Room: '+roomCode;
 };
 
-// Listen Realtime
+// Realtime drawing
 db.ref('rooms/'+roomCode+'/paths').on('child_added', snap=>{
-  const data=snap.val();
-  fabric.util.enlivenObjects([data.object],objects=>{
-    objects.forEach(o=>canvas.add(o));
-    canvas.renderAll();
-  });
+const data=snap.val();
+fabric.util.enlivenObjects([data.object],objects=>{
+objects.forEach(o=>canvas.add(o));
+canvas.renderAll();
+});
 });
 db.ref('rooms/'+roomCode+'/clear').on('value',snap=>{
-  if(snap.val()) canvas.clear();
+if(snap.val()) canvas.clear();
 });
 
-/* Broadcast draw */
+// Broadcast draw
 canvas.on('path:created', e=>{
-  const obj=e.path.toObject(['stroke','strokeWidth','fill']);
-  const newRef=db.ref('rooms/'+roomCode+'/paths').push();
-  newRef.set({object:obj});
+const obj=e.path.toObject(['stroke','strokeWidth','fill']);
+const newRef=db.ref('rooms/'+roomCode+'/paths').push();
+newRef.set({object:obj,player:playerName});
 });
-function broadcastClear(){
-  db.ref('rooms/'+roomCode+'/clear').set(true);
-}
-</script>
+function broadcastClear(){ db.ref('rooms/'+roomCode+'/clear').set(true); }
 
+/* =======================
+Chat Realtime
+========================== */
+const chatMessages=document.getElementById('chatMessages');
+document.getElementById('sendChat').onclick=()=>{
+const text=document.getElementById('chatText').value.trim();
+if(!text) return;
+db.ref('rooms/'+roomCode+'/chat').push({player:playerName,text});
+document.getElementById('chatText').value='';
+};
+db.ref('rooms/'+roomCode+'/chat').on('child_added', snap=>{
+const msg=snap.val();
+const div=document.createElement('div');
+div.textContent=`${msg.player}: ${msg.text}`;
+chatMessages.appendChild(div);
+chatMessages.scrollTop=chatMessages.scrollHeight;
+});
+
+/* =======================
+Zoom/Pan two fingers
+========================== */
+let scale=1, offsetX=0, offsetY=0, panning=false, startX=0, startY=0;
+const container=document.getElementById('canvasContainer');
+container.addEventListener('wheel', e=>{
+e.preventDefault();
+scale *= e.deltaY<0?1.1:0.9;
+canvas.setZoom(scale);
+});
+container.addEventListener('mousedown', e=>{
+if(e.button===1){panning=true; startX=e.clientX-offsetX; startY=e.clientY-offsetY;}
+});
+container.addEventListener('mouseup', e=>panning=false);
+container.addEventListener('mousemove', e=>{
+if(panning){offsetX=e.clientX-startX; offsetY=e.clientY-startY; canvas.relativePan({x:offsetX,y:offsetY});}
+});
+// Touch pinch zoom
+let lastDist=0;
+container.addEventListener('touchstart', e=>{
+if(e.touches.length===2){lastDist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);}
+});
+container.addEventListener('touchmove', e=>{
+if(e.touches.length===2){canvas.isDrawingMode=false;
+let dist=Math.hypot(e.touches[0].clientX-e.touches[1].clientX, e.touches[0].clientY-e.touches[1].clientY);
+let zoom=dist/lastDist;
+scale*=zoom; lastDist=dist;
+canvas.setZoom(scale);
+}
+});
+container.addEventListener('touchend', e=>{canvas.isDrawingMode=true;});
+</script>
 </body>
 </html>
