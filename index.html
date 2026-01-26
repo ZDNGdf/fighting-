@@ -3,226 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Candy Crush Full-Feature Prototype</title>
+<title>เว็บวาดรูป</title>
 <style>
-body {
-    margin:0; padding:0; font-family:sans-serif; display:flex; flex-direction:column; align-items:center;
-    background: linear-gradient(to bottom, #ffe6f0, #fff0f5); user-select:none;
-}
-#score,#level,#moves,#quest{
-    font-size:18px; margin:3px; font-weight:bold; color:#ff3366;
-}
-#gameBoard{
-    display:grid; grid-template-columns:repeat(8,60px); grid-template-rows:repeat(8,60px); gap:2px; touch-action:none;
-    margin-top:10px;
-}
-.candy{
-    width:60px; height:60px; border-radius:12px; display:flex; justify-content:center; align-items:center;
-    font-size:36px; background:#fff; box-shadow:0 2px 5px rgba(0,0,0,0.3); cursor:pointer;
-    transition: transform 0.2s ease, background 0.2s ease;
-}
-.special{
-    box-shadow:0 0 15px 3px #ff0;
-    transform: scale(1.2);
-}
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: #f0f0f0;
+    align-items: center;
+    justify-content: center;
+  }
+  #toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px;
+    background: #ffffff;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  }
+  #toolbar button, #toolbar input {
+    padding: 5px 10px;
+    font-size: 16px;
+  }
+  #canvasContainer {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  canvas {
+    background: #fff;
+    border: 2px solid #ccc;
+    touch-action: none;
+  }
 </style>
 </head>
 <body>
 
-<div id="score">คะแนน: 0</div>
-<div id="level">ด่าน: 1</div>
-<div id="moves">เลื่อน: 20</div>
-<div id="quest">เควส: เก็บ 🍎 0/5</div>
-<div id="gameBoard"></div>
+<div id="toolbar">
+  <button id="penBtn">🖊️ แปรง</button>
+  <button id="eraserBtn">🩹 ยางลบ</button>
+  <button id="clearBtn">🗑️ ล้าง</button>
+  สี: <input type="color" id="colorPicker" value="#ff0000">
+  ขนาด: <input type="range" id="sizePicker" min="1" max="50" value="5">
+</div>
+
+<div id="canvasContainer">
+  <canvas id="drawingCanvas" width="800" height="500"></canvas>
+</div>
 
 <script>
-// === Settings ===
-const fruits = ['🍎','🍌','🍇','🍓','🍍'];
-const boardSize = 8;
-let board=[], score=0, level=1, movesLeft=20;
-let questTarget='🍎', questCount=0, questGoal=5;
-let selected=null, moveAllowed=true;
-const boardEl=document.getElementById('gameBoard');
+  const canvas = document.getElementById('drawingCanvas');
+  const ctx = canvas.getContext('2d');
+  let drawing = false;
+  let erasing = false;
+  let brushColor = document.getElementById('colorPicker').value;
+  let brushSize = document.getElementById('sizePicker').value;
 
-// === Init Board ===
-function initBoard(){
-    board=[]; boardEl.innerHTML='';
-    for(let r=0;r<boardSize;r++){
-        let row=[];
-        for(let c=0;c<boardSize;c++){
-            let f=randomFruit();
-            let candy=document.createElement('div');
-            candy.classList.add('candy'); candy.innerText=f;
-            candy.dataset.row=r; candy.dataset.col=c;
-            boardEl.appendChild(candy);
-            row.push(f);
-        }
-        board.push(row);
-    }
-}
+  // ปรับให้วาดสมูท
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
 
-// Random Fruit + Booster Chance
-function randomFruit(){
-    if(Math.random()<0.15) return '💣'; // 15% chance bomb / special
-    return fruits[Math.floor(Math.random()*fruits.length)];
-}
+  function startPosition(e) {
+    drawing = true;
+    draw(e);
+  }
 
-// === Render Board ===
-function renderBoard(){
-    for(let r=0;r<boardSize;r++){
-        for(let c=0;c<boardSize;c++){
-            boardEl.children[r*boardSize+c].innerText = board[r][c];
-        }
-    }
-}
+  function endPosition() {
+    drawing = false;
+    ctx.beginPath();
+  }
 
-// === Highlight ===
-function highlight(pos,on=true){
-    const candy = boardEl.children[pos.r*boardSize + pos.c];
-    if(on) candy.classList.add('special'); else candy.classList.remove('special');
-}
+  function draw(e) {
+    if (!drawing) return;
 
-// === Adjacent Check ===
-function isAdjacent(a,b){
-    return (Math.abs(a.r-b.r)+Math.abs(a.c-b.c))===1;
-}
+    let rect = canvas.getBoundingClientRect();
+    let x = e.clientX ? e.clientX - rect.left : e.touches[0].clientX - rect.left;
+    let y = e.clientY ? e.clientY - rect.top : e.touches[0].clientY - rect.top;
 
-// === Select Candy ===
-function selectCandy(r,c){
-    if(!moveAllowed) return;
-    if(!selected){ selected={r,c}; highlight(selected,true); }
-    else {
-        highlight(selected,false);
-        if(isAdjacent(selected,{r,c})){
-            moveAllowed=false;
-            swap(selected,{r,c});
-            selected=null;
-            movesLeft--; updateMoves();
-            setTimeout(()=>moveAllowed=true,300);
-        } else { selected={r,c}; highlight(selected,true); }
-    }
-}
+    ctx.lineWidth = brushSize;
+    ctx.strokeStyle = erasing ? '#fff' : brushColor;
 
-// === Swap ===
-function swap(a,b,check=true){
-    [board[a.r][a.c], board[b.r][b.c]] = [board[b.r][b.c], board[a.r][a.c]];
-    renderBoard();
-    if(check){
-        setTimeout(()=>{
-            if(!checkMatches()){
-                [board[a.r][a.c], board[b.r][b.c]] = [board[b.r][b.c], board[a.r][a.c]];
-                renderBoard();
-            } else { checkWin(); }
-        },200);
-    }
-}
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
 
-// === Match Check ===
-function checkMatches(){
-    let matchFound=false, remove=[];
-    // Row
-    for(let r=0;r<boardSize;r++){
-        for(let c=0;c<boardSize-2;c++){
-            if(board[r][c]!=='' && board[r][c]===board[r][c+1] && board[r][c]===board[r][c+2]){
-                matchFound=true;
-                remove.push([r,c],[r,c+1],[r,c+2]);
-            }
-        }
-    }
-    // Column
-    for(let c=0;c<boardSize;c++){
-        for(let r=0;r<boardSize-2;r++){
-            if(board[r][c]!=='' && board[r][c]===board[r+1][c] && board[r][c]===board[r+2][c]){
-                matchFound=true;
-                remove.push([r,c],[r+1,c],[r+2,c]);
-            }
-        }
-    }
-    // Remove and score
-    if(matchFound){
-        remove.forEach(([r,c])=>{
-            if(board[r][c]===questTarget) questCount++;
-            board[r][c]=''; score+=10;
-        });
-        document.getElementById('score').innerText='คะแนน: '+score;
-        document.getElementById('quest').innerText=`เควส: เก็บ ${questTarget} ${questCount}/${questGoal}`;
-        collapseBoard();
-    }
-    return matchFound;
-}
+  // Events
+  canvas.addEventListener('mousedown', startPosition);
+  canvas.addEventListener('mouseup', endPosition);
+  canvas.addEventListener('mousemove', draw);
 
-// === Collapse Board Smooth ===
-function collapseBoard(){
-    for(let c=0;c<boardSize;c++){
-        let empty=0;
-        for(let r=boardSize-1;r>=0;r--){
-            if(board[r][c]==='') empty++;
-            else if(empty>0){ board[r+empty][c]=board[r][c]; board[r][c]=''; }
-        }
-        for(let r=0;r<empty;r++){ board[r][c]=randomFruit(); }
-    }
-    renderBoard();
-    requestAnimationFrame(()=>checkMatches());
-}
+  canvas.addEventListener('touchstart', startPosition);
+  canvas.addEventListener('touchend', endPosition);
+  canvas.addEventListener('touchmove', draw);
 
-// === Check Win/Lose ===
-function checkWin(){
-    if(questCount>=questGoal){ level++; startNextLevel(); }
-    if(movesLeft<=0){ alert('แพ้แล้ว! คะแนน:'+score); resetGame(); }
-}
-
-// === Start Next Level ===
-function startNextLevel(){
-    movesLeft = 20 + level*2;
-    questTarget=fruits[Math.floor(Math.random()*fruits.length)];
-    questCount=0; questGoal=5+level;
-    document.getElementById('level').innerText='ด่าน: '+level;
-    updateMoves(); initBoard(); renderBoard();
-}
-
-// === Update Moves ===
-function updateMoves(){ document.getElementById('moves').innerText='เลื่อน: '+movesLeft; }
-
-// === Swipe Touch ===
-let touchStart=null;
-boardEl.addEventListener('touchstart', e=>{
-    const rect=boardEl.getBoundingClientRect();
-    const touch=e.touches[0];
-    const x=touch.clientX-rect.left, y=touch.clientY-rect.top;
-    const c=Math.floor(x/62), r=Math.floor(y/62);
-    selectCandy(r,c);
-});
-boardEl.addEventListener('touchmove', e=>{
-    if(!selected) return;
-    const rect=boardEl.getBoundingClientRect();
-    const touch=e.touches[0];
-    const x=touch.clientX-rect.left, y=touch.clientY-rect.top;
-    const c=Math.floor(x/62), r=Math.floor(y/62);
-    if(isAdjacent(selected,{r,c})){ swap(selected,{r,c}); selected=null; movesLeft--; updateMoves(); }
-});
-
-// === Click PC ===
-boardEl.addEventListener('click', e=>{
-    const target=e.target;
-    if(!target.classList.contains('candy')) return;
-    const r=parseInt(target.dataset.row), c=parseInt(target.dataset.col);
-    selectCandy(r,c);
-});
-
-// === Chocolate Lightning Special Item ===
-window.addEventListener('keydown', e=>{
-    if(e.key.toLowerCase()==='c'){ 
-        for(let r=0;r<boardSize;r++){ for(let c=0;c<boardSize;c++){
-            if(board[r][c]===questTarget) board[r][c]='';
-        }}
-        collapseBoard();
-    }
-});
-
-// === Reset Game ===
-function resetGame(){ score=0; level=1; movesLeft=20; questCount=0; questGoal=5; initBoard(); renderBoard(); updateMoves(); }
-
-initBoard(); renderBoard(); updateMoves();
+  // Toolbar
+  document.getElementById('penBtn').onclick = () => erasing = false;
+  document.getElementById('eraserBtn').onclick = () => erasing = true;
+  document.getElementById('clearBtn').onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+  document.getElementById('colorPicker').onchange = (e) => brushColor = e.target.value;
+  document.getElementById('sizePicker').oninput = (e) => brushSize = e.target.value;
 </script>
 
 </body>
