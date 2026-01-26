@@ -3,153 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>วัดความไวสายตา</title>
+<title>วัดความไวสายตาแบบเส้นรูปทรง</title>
 <style>
-* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: all 0.5s ease; }
-body { margin:0; background-size: cover; background-position: center; color:white; display:flex; justify-content:center; align-items:center; height:100vh; transition: all 1s ease;}
-.container { width:100%; max-width:600px; padding:20px; text-align:center; transition: all 1s ease; background: rgba(0,0,0,0.4); border-radius: 15px;}
-h1 { color:#38bdf8; margin-bottom:5px; transition: all 1s ease;}
-p { opacity:0.8; }
-#gameArea { position:relative; width:100%; height:60vh; background: rgba(255,255,255,0.05); border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.1); margin-bottom:15px; transition: all 1s ease;}
-.circle { position:absolute; border-radius:50%; cursor:pointer; animation:pop 0.2s ease-out; transition: all 0.3s ease; }
-@keyframes pop { from { transform: scale(0.6);} to { transform: scale(1);} }
-button { width:100%; max-width:300px; padding:18px; font-size:20px; border-radius:40px; border:none; background: linear-gradient(135deg,#38bdf8,#6366f1); color:white; cursor:pointer; margin-top:10px; transition: all 1s ease;}
-button:active { transform: scale(0.96); }
-#result { font-size:20px; margin-top:15px; color:#facc15; transition: all 1s ease;}
-#certificate { margin-top:20px; padding:15px; border:2px dashed #38bdf8; border-radius:15px; background: rgba(0,0,0,0.3); transition: all 1s ease;}
+* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+body { margin:0; background:#111; color:white; display:flex; justify-content:center; align-items:center; height:100vh; transition: all 1s ease;}
+.container { width:100%; max-width:600px; padding:20px; text-align:center; background: rgba(0,0,0,0.4); border-radius: 15px;}
+h1 { color:#38bdf8; margin-bottom:5px;}
+#gameArea { position:relative; width:100%; height:60vh; background: rgba(255,255,255,0.05); border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.1); margin-bottom:15px;}
+.circle { position:absolute; border-radius:50%; width:50px; height:50px; background:#38bdf8; cursor:pointer; display:flex; justify-content:center; align-items:center; font-weight:bold; transition: all 0.3s ease;}
+#result { font-size:20px; margin-top:10px; color:#facc15;}
+#certificate { margin-top:10px; padding:10px; border:2px dashed #38bdf8; border-radius:15px; background: rgba(0,0,0,0.3);}
+button { padding:15px 25px; font-size:18px; border:none; border-radius:30px; background:#38bdf8; color:white; cursor:pointer; }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>👁️ วัดความไวสายตา</h1>
-    <p>แตะวงกลมเท่านั้น! กดผิด = จบเกมทันที</p>
+    <h1>วัดความไวสายตาแบบเส้นรูปทรง</h1>
+    <p>กดวงกลมตามเส้นตัวอักษรให้ทัน!</p>
     <div id="gameArea"></div>
-    <button onclick="startGame()">▶ เริ่มทดสอบ</button>
+    <button onclick="startGame()">▶ เริ่มเกม</button>
     <div id="result"></div>
     <div id="certificate"></div>
 </div>
 
 <script>
-const fixedTime = 1000; // 1 วิ ต่อรอบ
-let score = 0;
-let active = false;
-let timeout;
-
-// วงกลมเปลี่ยนสีทุก 50 คะแนน
-const circleColors = ["#ff6b6b","#facc15","#38bdf8","#10b981","#f472b6","#a855f7"];
-
-// 15 รูปพื้นหลัง
-const bgImages = [
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
-    "https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg?ex=69782f13&is=6976dd93&hm=4508b935ddf61f4a84ceb01550ff8e7dd3efd2f58a9d278d1b9269f2dfcc92b7&",
-    "https://cdn.discordapp.com/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg?ex=69782f15&is=6976dd95&hm=c38d669b39ca752cb2495badab5bb5ca12c1219ec47811a63fa694462b605a37&",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
-    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
-    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2"
-];
-
-// preload รูปทั้งหมด
-bgImages.forEach(url => {
-    const img = new Image();
-    img.src = url;
-});
-
 const gameArea = document.getElementById("gameArea");
 const result = document.getElementById("result");
 const certificate = document.getElementById("certificate");
-const body = document.body;
+let score = 0;
+let active = false;
+let timeout;
+const fixedTime = 1000; // 1 วิ
+const circleColors = ["#ff6b6b","#facc15","#38bdf8","#10b981","#f472b6","#a855f7"];
+const bgImages = [
+    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
+];
+
+// preload
+bgImages.forEach(url => { const img = new Image(); img.src = url; });
+
+// รูปร่างตัวอักษร + จำนวนเหลี่ยม
+const shapes = [
+    {letter:'Z', points:4},
+    {letter:'V', points:2},
+    {letter:'J', points:3},
+    {letter:'U', points:3},
+    {letter:'O', points:1},
+    {letter:'L', points:3}
+];
 
 function startGame(){
     score = 0;
     result.innerHTML = "";
     certificate.innerHTML = "";
-    body.style.backgroundImage = `url(${bgImages[0]})`;
-    gameArea.addEventListener("click", clickOutsideCircle);
-    nextRound();
+    gameArea.innerHTML = "";
+    document.body.style.backgroundImage = `url(${bgImages[0]})`;
+    nextShape();
 }
 
-// ตรวจว่ากดผิด
-function clickOutsideCircle(e){
-    if(!active) return;
-    if(!e.target.classList.contains("circle")){
-        active = false;
-        clearTimeout(timeout);
-        endGame();
-    }
-}
-
-function nextRound(){
+// สร้างเส้นตัวอักษร
+function nextShape(){
     gameArea.innerHTML = "";
     active = true;
 
-    const circle = document.createElement("div");
-    circle.className = "circle";
+    // เลือกตัวอักษรแบบสุ่ม
+    const shape = shapes[Math.floor(Math.random()*shapes.length)];
 
-    const size = 70 + Math.random()*30;
-    circle.style.width = size + "px";
-    circle.style.height = size + "px";
-
-    // วงกลมเปลี่ยนสีทุก 50 คะแนน
+    // สีวงกลม
     let colorIndex = Math.floor(score/50) % circleColors.length;
-    circle.style.background = circleColors[colorIndex];
+    
+    // สร้างวงกลมตามเส้นตัวอักษร
+    const points = shape.points;
+    for(let i=0;i<points;i++){
+        const circle = document.createElement("div");
+        circle.className = "circle";
+        circle.style.background = circleColors[colorIndex];
+        circle.innerText = shape.letter;
 
-    const maxX = gameArea.clientWidth - size;
-    const maxY = gameArea.clientHeight - size;
-    circle.style.left = Math.random()*maxX + "px";
-    circle.style.top = Math.random()*maxY + "px";
+        // วางแบบสุ่มในแนวเส้นตัวอักษร (ง่าย)
+        circle.style.left = (10 + i*(80/points)) + "%";
+        circle.style.top = (10 + i*(80/points)) + "%";
 
-    // กดวงกลมสำเร็จ
-    circle.onclick = (e) => {
-        e.stopPropagation();
-        if(!active) return;
-        active = false;
-        score++;
-        result.innerHTML = `คะแนน: ${score}`;
+        circle.onclick = (e)=>{
+            e.stopPropagation();
+            if(!active) return;
+            active = false;
+            score += points; // คะแนน = จำนวนเหลี่ยม
+            result.innerHTML = `คะแนน: ${score}`;
 
-        // เปลี่ยนพื้นหลังทุก 100 คะแนน
-        if(score % 100 === 0){
-            let bgIndex = Math.floor(score/100) % bgImages.length;
-            body.style.backgroundImage = `url(${bgImages[bgIndex]})`;
+            // เปลี่ยนพื้นหลังทุก 100 คะแนน
+            if(score % 100 === 0){
+                let bgIndex = Math.floor(score/100) % bgImages.length;
+                document.body.style.backgroundImage = `url(${bgImages[bgIndex]})`;
+            }
+            clearTimeout(timeout);
+            nextShape();
         }
 
-        clearTimeout(timeout);
-        nextRound();
+        gameArea.appendChild(circle);
     }
 
-    gameArea.appendChild(circle);
-
-    timeout = setTimeout(() => {
-        active = false;
-        endGame();
-    }, fixedTime);
+    timeout = setTimeout(()=>{ active=false; endGame(); }, fixedTime);
 }
+
+// กดผิดที่อื่น
+gameArea.addEventListener("click",(e)=>{
+    if(!active) return;
+    if(!e.target.classList.contains("circle")){
+        active=false; clearTimeout(timeout); endGame();
+    }
+});
 
 function endGame(){
     gameArea.innerHTML = "";
-    result.innerHTML = `คุณกดได้ทั้งหมด ${score} ครั้ง`;
-
-    let level = "";
-    if(score < 50) level = "😴 สายตาช้า";
-    else if(score < 150) level = "🙂 สายตาปกติ";
-    else if(score < 400) level = "😎 สายตาไว";
-    else level = "🔥 สายตาไวสุดยอด!";
-
-    certificate.innerHTML = `
-        <h2>📜 ใบรับรองความไวสายตา</h2>
-        <p>คะแนนของคุณ: ${score}</p>
-        <p>ระดับสายตา: ${level}</p>
-        <p>ทดสอบโดย: ระบบวัดความไวสายตาออนไลน์</p>
-    `;
+    result.innerHTML = `คุณได้คะแนนทั้งหมด: ${score}`;
+    certificate.innerHTML = `<h3>ระดับสายตา:</h3>
+        <p>${score<50?"😴 สายตาช้า":score<150?"🙂 สายตาปกติ":score<400?"😎 สายตาไว":"🔥 สายตาไวสุดยอด!"}</p>`;
 }
 </script>
 
