@@ -6,8 +6,8 @@
 <title>วัดความไวสายตา</title>
 <style>
 * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: all 0.5s ease; }
-body { margin:0; background: radial-gradient(circle at top, #0f172a, #020617); color:white; display:flex; justify-content:center; align-items:center; height:100vh; transition: all 1s ease;}
-.container { width:100%; max-width:600px; padding:20px; text-align:center; transition: all 1s ease; }
+body { margin:0; background-size: cover; background-position: center; color:white; display:flex; justify-content:center; align-items:center; height:100vh; transition: all 1s ease;}
+.container { width:100%; max-width:600px; padding:20px; text-align:center; transition: all 1s ease; background: rgba(0,0,0,0.4); border-radius: 15px;}
 h1 { color:#38bdf8; margin-bottom:5px; transition: all 1s ease;}
 p { opacity:0.8; }
 #gameArea { position:relative; width:100%; height:60vh; background: rgba(255,255,255,0.05); border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.1); margin-bottom:15px; transition: all 1s ease;}
@@ -36,13 +36,26 @@ let score = 0;
 let active = false;
 let timeout;
 
-// ธีมวงกลมและพื้นหลัง
+// วงกลมเปลี่ยนสีทุก 50 คะแนน
 const circleColors = ["#ff6b6b","#facc15","#38bdf8","#10b981","#f472b6","#a855f7"];
-const themes = [
-    {bg:"radial-gradient(circle at top, #0f172a, #020617)", text:"#ffffff", button:["#38bdf8","#6366f1"]},
-    {bg:"radial-gradient(circle at top, #1e3a8a, #1e40af)", text:"#fbbf24", button:["#f472b6","#f43f5e"]},
-    {bg:"radial-gradient(circle at top, #065f46, #10b981)", text:"#fef3c7", button:["#8b5cf6","#6366f1"]},
-    {bg:"radial-gradient(circle at top, #7c2d12, #b45309)", text:"#fef3c7", button:["#ec4899","#f43f5e"]}
+
+// 15 รูปพื้นหลัง
+const bgImages = [
+    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
+    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
+    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
+    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2"
 ];
 
 const gameArea = document.getElementById("gameArea");
@@ -57,9 +70,7 @@ function startGame(){
     score = 0;
     result.innerHTML = "";
     certificate.innerHTML = "";
-    body.style.background = themes[0].bg;
-    title.style.color = themes[0].text;
-    btn.style.background = `linear-gradient(135deg,${themes[0].button[0]},${themes[0].button[1]})`;
+    body.style.backgroundImage = `url(${bgImages[0]})`;
     nextRound();
 }
 
@@ -89,12 +100,10 @@ function nextRound(){
         score++;
         result.innerHTML = `คะแนน: ${score}`;
 
-        // เปลี่ยนธีมทุก 100 คะแนน
+        // เปลี่ยนรูปพื้นหลังทุก 100 คะแนน
         if(score % 100 === 0){
-            let themeIndex = Math.floor(score/100) % themes.length;
-            body.style.background = themes[themeIndex].bg;
-            title.style.color = themes[themeIndex].text;
-            btn.style.background = `linear-gradient(135deg,${themes[themeIndex].button[0]},${themes[themeIndex].button[1]})`;
+            let bgIndex = Math.floor(score/100) % bgImages.length;
+            body.style.backgroundImage = `url(${bgImages[bgIndex]})`;
         }
 
         clearTimeout(timeout);
