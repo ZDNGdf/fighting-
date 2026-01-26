@@ -3,235 +3,101 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>iPhone เสมือนจริง All-in-One</title>
+<title>มือถือเสมือนจริง All-in-One</title>
 <style>
-body {
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #e0e0e0, #f8f8f8);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-.phone {
-    width: 375px;
-    height: 812px;
-    border-radius: 50px;
-    border: 16px solid #222;
-    background: #111;
-    box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-    position: relative;
-    overflow: hidden;
-}
-.screen {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(to bottom, #1c1c1c, #0d0d0d);
-    border-radius: 34px;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    color: #fff;
-}
-.status-bar {
-    height: 40px;
-    background: rgba(255,255,255,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 12px;
-    font-size: 14px;
-}
-.battery-bar {
-    width: 50px;
-    height: 12px;
-    border: 2px solid #fff;
-    border-radius: 4px;
-    position: relative;
-    margin-left: 5px;
-}
-.battery-fill {
-    height: 100%;
-    background: #4cd137;
-    width: 100%;
-    border-radius: 2px;
-    transition: width 0.5s ease;
-}
-.apps {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    grid-template-rows: repeat(5, 1fr);
-    gap: 15px;
-    padding: 20px;
-    box-sizing: border-box;
-}
-.app {
-    background: linear-gradient(145deg, #ff6ec4, #7873f5);
-    border-radius: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 26px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-.app:hover {
-    transform: scale(1.1);
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-.app-window {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    background: #222;
-    color: #fff;
-    display: flex;
-    flex-direction: column;
-    z-index: 10;
-    transform: translateY(100%);
-    transition: transform 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-    padding: 20px;
-    box-sizing: border-box;
-    overflow: auto;
-}
-.app-window.active {
-    transform: translateY(0);
-}
-.close-btn {
-    background: #ff4d4d;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    text-align: center;
-    line-height: 42px;
-    cursor: pointer;
-    align-self: flex-end;
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-    transition: all 0.2s ease;
-}
-.close-btn:hover {
-    background: #ff1a1a;
-}
-.shutter {
-    width: 60px;
-    height: 60px;
-    background: #fff;
-    border-radius: 50%;
-    margin: 20px auto;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-.shutter:active {
-    transform: scale(0.9);
-}
+body,html{margin:0;padding:0;font-family:sans-serif;background:#111;color:#fff;overflow:hidden;}
+#loader{position:fixed;top:0;left:0;width:100%;height:100%;background:#111;display:flex;justify-content:center;align-items:center;flex-direction:column;z-index:1000;}
+#loader span{margin-top:10px;font-size:18px;}
+.phone{width:375px;height:812px;border-radius:50px;border:16px solid #222;background:#111;box-shadow:0 25px 60px rgba(0,0,0,0.5);position:relative;overflow:hidden;margin:auto;}
+.screen{width:100%;height:100%;border-radius:34px;background:linear-gradient(to bottom,#1c1c1c,#0d0d0d);display:flex;flex-direction:column;color:#fff;}
+.status-bar{height:40px;display:flex;justify-content:space-between;align-items:center;padding:0 12px;font-size:14px;}
+.battery-bar{width:50px;height:12px;border:2px solid #fff;border-radius:4px;position:relative;margin-left:5px;}
+.battery-fill{height:100%;background:#4cd137;width:100%;border-radius:2px;transition:width 0.5s ease;}
+.apps{flex:1;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:1fr;gap:10px;padding:10px;overflow:auto;}
+.app{background:linear-gradient(145deg,#ff6ec4,#7873f5);border-radius:20px;display:flex;justify-content:center;align-items:center;font-size:22px;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.3);transition:all 0.2s ease;}
+.app:hover{transform:scale(1.1);box-shadow:0 10px 25px rgba(0,0,0,0.5);}
+.app-window{position:absolute;top:0;left:0;width:100%;height:100%;background:#222;z-index:10;transform:translateY(100%);transition:transform 0.5s cubic-bezier(0.68,-0.55,0.27,1.55);padding:20px;overflow:auto;}
+.app-window.active{transform:translateY(0);}
+.close-btn{background:#ff4d4d;width:40px;height:40px;border-radius:50%;text-align:center;line-height:40px;cursor:pointer;align-self:flex-end;font-weight:bold;box-shadow:0 2px 5px rgba(0,0,0,0.3);transition:all 0.2s ease;}
+.close-btn:hover{background:#ff1a1a;}
 </style>
 </head>
 <body>
-<div class="phone">
+<div id="loader"><h1>กำลังโหลดมือถือ...</h1><span id="loadPercent">0%</span></div>
+
+<div class="phone" style="display:none;">
     <div class="screen">
         <div class="status-bar">
             <span id="time">09:30</span>
-            <span>🔋
-                <div class="battery-bar"><div class="battery-fill" id="battery"></div></div>
-            </span>
+            <span>🔋<div class="battery-bar"><div class="battery-fill" id="battery"></div></div></span>
         </div>
-        <div class="apps">
-            <div class="app" data-app="chat">💬</div>
-            <div class="app" data-app="camera">📷</div>
-            <div class="app" data-app="music">🎵</div>
-            <div class="app" data-app="settings">⚙️</div>
-            <div class="app" data-app="gallery">🖼️</div>
-            <div class="app" data-app="mail">📧</div>
-            <div class="app" data-app="calendar">📅</div>
-            <div class="app" data-app="notes">📝</div>
-            <div class="app" data-app="map">🗺️</div>
-            <div class="app" data-app="weather">☀️</div>
-        </div>
-    </div>
-
-    <!-- แอพตัวอย่าง -->
-    <div class="app-window" id="chat">
-        <div class="close-btn">×</div>
-        <h2>แชท</h2>
-        <textarea style="width:100%;height:300px;">พิมพ์ข้อความได้จริง!</textarea>
-    </div>
-
-    <div class="app-window" id="camera">
-        <div class="close-btn">×</div>
-        <h2>กล้อง</h2>
-        <video id="cameraPreview" width="100%" autoplay playsinline style="border-radius:20px;"></video>
-        <div class="shutter" id="snap"></div>
-    </div>
-
-    <div class="app-window" id="music">
-        <div class="close-btn">×</div>
-        <h2>เพลง</h2>
-        <audio controls style="width:100%;">
-            <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
-        </audio>
-    </div>
-
-    <div class="app-window" id="settings">
-        <div class="close-btn">×</div>
-        <h2>ตั้งค่า</h2>
-        <button onclick="chargeBattery()">ชาร์จแบต</button>
+        <div class="apps" id="appsContainer"></div>
     </div>
 </div>
 
 <script>
-// เวลาอัปเดต
+// เวลา
 function updateTime(){
     const now = new Date();
-    document.getElementById('time').textContent = now.getHours().toString().padStart(2,'0') + ":" + now.getMinutes().toString().padStart(2,'0');
+    document.getElementById('time').textContent = now.getHours().toString().padStart(2,'0')+":"+now.getMinutes().toString().padStart(2,'0');
 }
 setInterval(updateTime,1000);
 
-// เปิด/ปิดแอพ
-document.querySelectorAll('.app').forEach(app => {
-    app.addEventListener('click', () => {
-        const id = app.dataset.app;
-        document.querySelectorAll('.app-window').forEach(a => a.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    });
-});
-document.querySelectorAll('.close-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-        e.target.parentElement.classList.remove('active');
-    });
-});
-
-// แบตเตอรี่
+// แบต
 let batteryLevel = 100;
-let charging = false;
-const batteryFill = document.getElementById('battery');
-function updateBattery() {
-    if (!charging) {
-        batteryLevel -= 0.1;
-        if (batteryLevel < 0) batteryLevel = 0;
-    }
-    batteryFill.style.width = batteryLevel + '%';
-    batteryFill.style.background = batteryLevel>50?"#4cd137":batteryLevel>20?"#fbc531":"#e84118";
+function updateBattery(){
+    const b = document.getElementById('battery');
+    b.style.width = batteryLevel+'%';
+    b.style.background=batteryLevel>50?"#4cd137":batteryLevel>20?"#fbc531":"#e84118";
 }
-setInterval(updateBattery,10000);
-function chargeBattery() {
-    charging = true;
-    let charge = setInterval(()=>{
-        batteryLevel+=1;
-        if(batteryLevel>=100){batteryLevel=100;charging=false;clearInterval(charge);}
-    },1000);
+setInterval(()=>{batteryLevel-=0.05;if(batteryLevel<0)batteryLevel=0;updateBattery();},10000);
+
+// โหลดแอพหลายร้อยตัว Dynamic
+const appCount = 200; // ตัวอย่าง 200 แอพ
+const appsContainer = document.getElementById('appsContainer');
+const windows = [];
+
+let loaded = 0;
+function simulateLoad(){
+    for(let i=1;i<=appCount;i++){
+        // สร้างไอคอนแอพ
+        const app = document.createElement('div');
+        app.className='app';
+        app.textContent='🟢';
+        app.dataset.app='app'+i;
+        appsContainer.appendChild(app);
+
+        // สร้างหน้าต่างแอพ
+        const win = document.createElement('div');
+        win.className='app-window';
+        win.id='app'+i;
+        win.innerHTML=`<div class="close-btn">×</div><h2>แอพ #${i}</h2><p>นี่คือแอพเสมือนจริง ${i}</p>`;
+        document.body.appendChild(win);
+        windows.push(win);
+
+        // เปิด/ปิด
+        app.onclick = ()=>{windows.forEach(w=>w.classList.remove('active'));win.classList.add('active');};
+        win.querySelector('.close-btn').onclick = ()=>win.classList.remove('active');
+
+        // โหลด progress
+        loaded++;
+        document.getElementById('loadPercent').textContent = Math.floor((loaded/appCount)*100)+'%';
+    }
+
+    // โหลดเสร็จ
+    setTimeout(()=>{
+        document.getElementById('loader').style.display='none';
+        document.querySelector('.phone').style.display='block';
+    },500);
 }
 
-// กล้องจริง
-const video = document.getElementById('cameraPreview');
+// เริ่มโหลด
+simulateLoad();
+
+// กล้องจริง (ตัวอย่างแอพแรก)
 navigator.mediaDevices.getUserMedia({video:true})
-.then(stream => video.srcObject = stream)
-.catch(err => alert("ไม่สามารถเข้าถึงกล้องได้"));
+.then(stream=>{ /* เอาไว้ใส่ video ใน app1 */ })
+.catch(err=>console.log("กล้องไม่พร้อม"));
 
 </script>
 </body>
