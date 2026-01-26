@@ -3,107 +3,125 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เว็บเปียโนสนุก</title>
+<title>เกมแต่งตัว</title>
 <style>
   body {
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    height:100vh;
-    margin:0;
-    background: #f0f0f0;
-    font-family: Arial, sans-serif;
-  }
-  h1 { color:#333; }
-  .piano {
+    font-family: 'Comic Sans MS', cursive;
+    background: linear-gradient(to bottom, #fce4ec, #f8bbd0);
+    margin: 0;
     display: flex;
-    user-select: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
   }
-  .key {
-    width: 40px;
-    height: 150px;
-    margin: 1px;
-    background: white;
-    border:1px solid #999;
-    border-radius:5px;
-    display:flex;
-    align-items:flex-end;
-    justify-content:center;
-    font-weight:bold;
-    font-size:14px;
-    cursor: pointer;
-    touch-action: manipulation;
+
+  h1 { color: #ff4d6d; }
+
+  #genderSelect {
+    margin-bottom: 20px;
   }
-  .key.black {
-    width:30px;
-    height:100px;
-    background:black;
-    color:white;
-    margin-left:-15px;
-    margin-right:-15px;
-    z-index:1;
-    position:relative;
+
+  #game {
+    display: flex;
+    gap: 20px;
+  }
+
+  #character {
+    width: 300px;
+    height: 500px;
+    position: relative;
+    background: #ffe6f0;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+  }
+
+  .layer {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; /* ให้ draggable overlay ทำงาน */
+  }
+
+  #items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 500px;
+    overflow-y: auto;
+  }
+
+  .item {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    cursor: grab;
+    background-size: cover;
+    background-position: center;
   }
 </style>
 </head>
 <body>
-<h1>เว็บเปียโนสนุก 🎹</h1>
-<div class="piano" id="piano">
-  <div class="key" data-note="C">C</div>
-  <div class="key black" data-note="C#">C#</div>
-  <div class="key" data-note="D">D</div>
-  <div class="key black" data-note="D#">D#</div>
-  <div class="key" data-note="E">E</div>
-  <div class="key" data-note="F">F</div>
-  <div class="key black" data-note="F#">F#</div>
-  <div class="key" data-note="G">G</div>
-  <div class="key black" data-note="G#">G#</div>
-  <div class="key" data-note="A">A</div>
-  <div class="key black" data-note="A#">A#</div>
-  <div class="key" data-note="B">B</div>
-  <div class="key" data-note="C2">C2</div>
+
+<h1>เกมแต่งตัว</h1>
+
+<div id="genderSelect">
+  <button onclick="selectGender('male')">ชาย</button>
+  <button onclick="selectGender('female')">หญิง</button>
+</div>
+
+<div id="game" style="display:none;">
+  <div id="character">
+    <div id="hair" class="layer"></div>
+    <div id="eyes" class="layer"></div>
+    <div id="mouth" class="layer"></div>
+    <div id="clothes" class="layer"></div>
+    <div id="accessories" class="layer"></div>
+  </div>
+
+  <div id="items">
+    <h3>เลือกไอเทม</h3>
+    <!-- ตัวอย่าง item -->
+    <div class="item" draggable="true" style="background-image:url('https://i.imgur.com/l7G5lGU.png');" data-target="hair"></div>
+    <div class="item" draggable="true" style="background-image:url('https://i.imgur.com/6RpL1dP.png');" data-target="eyes"></div>
+    <div class="item" draggable="true" style="background-image:url('https://i.imgur.com/yMqYxX6.png');" data-target="mouth"></div>
+    <div class="item" draggable="true" style="background-image:url('https://i.imgur.com/v7XcvzT.png');" data-target="clothes"></div>
+    <div class="item" draggable="true" style="background-image:url('https://i.imgur.com/k9vVQmz.png');" data-target="accessories"></div>
+  </div>
 </div>
 
 <script>
-const notes = {
-  C: 'https://piano-sounds.s3.us-east-2.amazonaws.com/C.mp3',
-  'C#': 'https://piano-sounds.s3.us-east-2.amazonaws.com/Cs.mp3',
-  D: 'https://piano-sounds.s3.us-east-2.amazonaws.com/D.mp3',
-  'D#': 'https://piano-sounds.s3.us-east-2.amazonaws.com/Ds.mp3',
-  E: 'https://piano-sounds.s3.us-east-2.amazonaws.com/E.mp3',
-  F: 'https://piano-sounds.s3.us-east-2.amazonaws.com/F.mp3',
-  'F#': 'https://piano-sounds.s3.us-east-2.amazonaws.com/Fs.mp3',
-  G: 'https://piano-sounds.s3.us-east-2.amazonaws.com/G.mp3',
-  'G#': 'https://piano-sounds.s3.us-east-2.amazonaws.com/Gs.mp3',
-  A: 'https://piano-sounds.s3.us-east-2.amazonaws.com/A.mp3',
-  'A#': 'https://piano-sounds.s3.us-east-2.amazonaws.com/As.mp3',
-  B: 'https://piano-sounds.s3.us-east-2.amazonaws.com/B.mp3',
-  C2: 'https://piano-sounds.s3.us-east-2.amazonaws.com/C2.mp3'
-};
-
-// สร้างเพลงอัตโนมัติ
-const songNotes = ['C','E','G','C2','G','E','C','C']; // ตัวอย่างเมโลดี้
-let songIndex = 0;
-
-function playNote(note){
-  // เล่นโน้ตจริง
-  const audio = new Audio(notes[note]);
-  audio.currentTime = 0;
-  audio.play();
-
-  // เล่นเมโลดี้อัตโนมัติ
-  const autoNote = songNotes[songIndex % songNotes.length];
-  const autoAudio = new Audio(notes[autoNote]);
-  autoAudio.currentTime = 0;
-  autoAudio.play();
-  songIndex++;
+function selectGender(gender){
+  document.getElementById('game').style.display = 'flex';
+  // เปลี่ยนตัวละครพื้นฐานตามเพศ
+  let character = document.getElementById('character');
+  character.style.backgroundImage = gender === 'male' ? "url('https://i.imgur.com/XoA9B7K.png')" : "url('https://i.imgur.com/Y3WjHYn.png')";
 }
 
-document.querySelectorAll('.key').forEach(key => {
-  key.addEventListener('click', () => playNote(key.dataset.note));
-  key.addEventListener('touchstart', () => playNote(key.dataset.note));
+// Drag & Drop
+const items = document.querySelectorAll('.item');
+items.forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('target', item.dataset.target);
+    e.dataTransfer.setData('bg', item.style.backgroundImage);
+  });
+});
+
+const layers = document.querySelectorAll('.layer');
+layers.forEach(layer => {
+  layer.addEventListener('dragover', e => e.preventDefault());
+  layer.addEventListener('drop', e => {
+    e.preventDefault();
+    const target = e.dataTransfer.getData('target');
+    const bg = e.dataTransfer.getData('bg');
+    if(layer.id === target){
+      layer.style.backgroundImage = bg;
+    }
+  });
 });
 </script>
+
 </body>
 </html>
