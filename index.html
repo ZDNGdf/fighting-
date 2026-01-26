@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เกมวัดสายตาแบบลาก</title>
+<title>เกมวัดสายตา + ลาก</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
 body{background:#111;display:flex;justify-content:center;align-items:center;height:100vh;transition:all 1s ease;}
@@ -16,8 +16,8 @@ h1{color:#38bdf8;margin-bottom:5px;}
 </head>
 <body>
 <div class="container">
-<h1>เกมลากวงกลม</h1>
-<p>ลากจากวงกลมเริ่มไปยังวงกลมปลายให้ทัน!</p>
+<h1>เกมวัดสายตา + ลาก</h1>
+<p>กดวงกลม หรือบางรอบลากจากจุด A→B</p>
 <div id="gameArea"></div>
 <div id="scoreBoard">คะแนน: 0</div>
 </div>
@@ -29,7 +29,7 @@ const scoreBoard = document.getElementById("scoreBoard");
 let score = 0;
 let active = false;
 let timeout;
-const fixedTime = 1000; // 1 วิ
+const fixedTime = 1000; // 1 วิ ต่อรอบ
 const circleColors = ["#ff6b6b","#facc15","#38bdf8","#10b981","#f472b6","#a855f7"];
 const bgImages = [
     "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
@@ -38,6 +38,7 @@ const bgImages = [
 ];
 bgImages.forEach(url=>{const img=new Image();img.src=url;});
 
+// ฟังก์ชันเริ่มเกม
 function startGame(){
     score=0;
     scoreBoard.innerText=`คะแนน: ${score}`;
@@ -45,67 +46,112 @@ function startGame(){
     nextRound();
 }
 
+// ฟังก์ชันสร้างรอบใหม่
 function nextRound(){
     gameArea.innerHTML="";
     active=true;
 
-    // วงกลมสองจุด: start และ end
-    const startCircle=document.createElement("div");
-    startCircle.className="circle";
-    const endCircle=document.createElement("div");
-    endCircle.className="circle";
+    const isDragRound = Math.random()<0.3; // 30% โอกาสเกิดลาก A->B
 
-    let colorIndex=Math.floor(score/50)%circleColors.length;
-    startCircle.style.background=circleColors[colorIndex];
-    endCircle.style.background=circleColors[colorIndex];
+    if(isDragRound){
+        // สร้างวงกลม 2 จุดให้ลาก
+        const circleA=document.createElement("div");
+        circleA.className="circle";
+        const circleB=document.createElement("div");
+        circleB.className="circle";
 
-    // วางวงกลมสุ่ม
-    const size=60;
-    const maxX=gameArea.clientWidth-size;
-    const maxY=gameArea.clientHeight-size;
+        let colorIndex=Math.floor(score/50)%circleColors.length;
+        circleA.style.background=circleColors[colorIndex];
+        circleB.style.background=circleColors[colorIndex];
 
-    const startX=Math.random()*maxX;
-    const startY=Math.random()*maxY;
-    const endX=Math.random()*maxX;
-    const endY=Math.random()*maxY;
+        const size=60;
+        const maxX=gameArea.clientWidth-size;
+        const maxY=gameArea.clientHeight-size;
 
-    startCircle.style.left=startX+"px";
-    startCircle.style.top=startY+"px";
-    endCircle.style.left=endX+"px";
-    endCircle.style.top=endY+"px";
+        const ax=Math.random()*maxX;
+        const ay=Math.random()*maxY;
+        const bx=Math.random()*maxX;
+        const by=Math.random()*maxY;
 
-    gameArea.appendChild(startCircle);
-    gameArea.appendChild(endCircle);
+        circleA.style.left=ax+"px";
+        circleA.style.top=ay+"px";
+        circleB.style.left=bx+"px";
+        circleB.style.top=by+"px";
 
-    // ฟังก์ชันลาก
-    let dragging=false;
-    let startTime=0;
+        gameArea.appendChild(circleA);
+        gameArea.appendChild(circleB);
 
-    function startDrag(e){
-        e.preventDefault();
-        dragging=true;
-        startTime=Date.now();
-    }
+        let dragging=false;
 
-    function moveDrag(e){
-        if(!dragging) return;
-        let x=e.touches?e.touches[0].clientX: e.clientX;
-        let y=e.touches?e.touches[0].clientY: e.clientY;
-        const rect=gameArea.getBoundingClientRect();
-        x-=rect.left; y-=rect.top;
+        function startDrag(e){
+            e.preventDefault();
+            dragging=true;
+        }
 
-        // เช็คใกล้ endCircle
-        const endRect=endCircle.getBoundingClientRect();
-        const endXPos=endRect.left-rect.left + endRect.width/2;
-        const endYPos=endRect.top-rect.top + endRect.height/2;
-        const distance=Math.hypot(x-endXPos, y-endYPos);
+        function moveDrag(e){
+            if(!dragging) return;
+            let x=e.touches?e.touches[0].clientX:e.clientX;
+            let y=e.touches?e.touches[0].clientY:e.clientY;
+            const rect=gameArea.getBoundingClientRect();
+            x-=rect.left; y-=rect.top;
 
-        if(distance<endRect.width/2){
-            // กดสำเร็จ
-            dragging=false;
+            const rectA=circleA.getBoundingClientRect();
+            const rectB=circleB.getBoundingClientRect();
+            const axc=rectA.left-rect.left+rectA.width/2;
+            const ayc=rectA.top-rect.top+rectA.height/2;
+            const bxc=rectB.left-rect.left+rectB.width/2;
+            const byc=rectB.top-rect.top+rectB.height/2;
+
+            const distAB=Math.hypot(x-bxc,y-byc);
+            const distBA=Math.hypot(x-axc,y-ayc);
+
+            // ลากจาก A->B หรือ B->A ก็ถูก
+            if(distAB<rectB.width/2 || distBA<rectA.width/2){
+                dragging=false;
+                score++;
+                scoreBoard.innerText=`คะแนน: ${score}`;
+                if(score%100===0){
+                    let bgIndex=Math.floor(score/100)%bgImages.length;
+                    document.body.style.backgroundImage=`url(${bgImages[bgIndex]})`;
+                }
+                clearTimeout(timeout);
+                nextRound();
+            }
+        }
+
+        function endDrag(){
+            if(dragging){dragging=false; endGame();}
+        }
+
+        circleA.addEventListener("touchstart",startDrag);
+        circleB.addEventListener("touchstart",startDrag);
+        circleA.addEventListener("mousedown",startDrag);
+        circleB.addEventListener("mousedown",startDrag);
+        gameArea.addEventListener("touchmove",moveDrag);
+        gameArea.addEventListener("mousemove",moveDrag);
+        document.addEventListener("mouseup",endDrag);
+        document.addEventListener("touchend",endDrag);
+
+        timeout=setTimeout(()=>{ if(dragging){dragging=false; endGame();} }, fixedTime);
+    } else {
+        // รอบแตะวงกลมเดี่ยว
+        const circle=document.createElement("div");
+        circle.className="circle";
+        let colorIndex=Math.floor(score/50)%circleColors.length;
+        circle.style.background=circleColors[colorIndex];
+
+        const size=60;
+        const maxX=gameArea.clientWidth-size;
+        const maxY=gameArea.clientHeight-size;
+        circle.style.left=Math.random()*maxX+"px";
+        circle.style.top=Math.random()*maxY+"px";
+
+        circle.onclick=(e)=>{
+            e.stopPropagation();
+            if(!active) return;
+            active=false;
             score++;
             scoreBoard.innerText=`คะแนน: ${score}`;
-            // เปลี่ยนพื้นหลังทุก 100 คะแนน
             if(score%100===0){
                 let bgIndex=Math.floor(score/100)%bgImages.length;
                 document.body.style.backgroundImage=`url(${bgImages[bgIndex]})`;
@@ -113,31 +159,32 @@ function nextRound(){
             clearTimeout(timeout);
             nextRound();
         }
+
+        gameArea.appendChild(circle);
+
+        timeout=setTimeout(()=>{ if(active){endGame();} }, fixedTime);
     }
-
-    function endDrag(){
-        if(dragging){
-            dragging=false;
-            endGame();
-        }
-    }
-
-    startCircle.addEventListener("touchstart", startDrag);
-    startCircle.addEventListener("mousedown", startDrag);
-    gameArea.addEventListener("touchmove", moveDrag);
-    gameArea.addEventListener("mousemove", moveDrag);
-    document.addEventListener("mouseup", endDrag);
-    document.addEventListener("touchend", endDrag);
-
-    timeout=setTimeout(()=>{
-        if(dragging){dragging=false; endGame();}
-    }, fixedTime);
 }
 
+// กดผิดที่อื่น = จบเกม
+gameArea.addEventListener("click",e=>{
+    if(!active) return;
+    if(!e.target.classList.contains("circle")){
+        active=false;
+        clearTimeout(timeout);
+        endGame();
+    }
+});
+
 function endGame(){
-    active=false;
     gameArea.innerHTML="";
-    alert(`เกมจบ! คะแนน: ${score}`);
+    let level="";
+    if(score<50) level="😴 สายตาช้า";
+    else if(score<150) level="🙂 สายตาปกติ";
+    else if(score<400) level="😎 สายตาไว";
+    else level="🔥 สายตาไวสุดยอด!";
+
+    alert(`เกมจบ! คะแนน: ${score}\nระดับสายตา: ${level}`);
 }
 
 startGame();
