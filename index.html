@@ -15,16 +15,17 @@ body {
     justify-content: center;
     align-items: center;
     font-family: sans-serif;
+    cursor: pointer; /* ทำให้เห็นว่ากดได้ทั้งหน้า */
 }
 
 img {
     width: 280px;
-    cursor: pointer;
+    max-width: 80vw;
+    margin-bottom: 15px;
 }
 
 .counter {
     font-size: 22px;
-    margin-top: 10px;
     font-weight: bold;
 }
 
@@ -41,12 +42,13 @@ select {
     padding: 15px;
     border-radius: 15px;
     width: 260px;
+    text-align: center;
 }
 </style>
 </head>
 <body>
 
-<img id="img" src="https://media.discordapp.net/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg">
+<img id="img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Cat_Pop_icon.png/240px-Cat_Pop_icon.png" alt="Pop Cat">
 
 <div class="counter">กดไปแล้ว: <span id="count">0</span> ครั้ง</div>
 
@@ -65,20 +67,18 @@ const countEl = document.getElementById("count");
 const board = document.getElementById("board");
 const countrySelect = document.getElementById("country");
 
+// ใช้ localStorage เก็บข้อมูล
 let data = JSON.parse(localStorage.getItem("popData")) || {
     total: 0,
-    country: {
-        TH: 0,
-        JP: 0,
-        US: 0,
-        KR: 0
-    }
+    country: { TH: 0, JP: 0, US: 0, KR: 0 }
 };
 
+// บันทึก
 function save() {
     localStorage.setItem("popData", JSON.stringify(data));
 }
 
+// อัปเดต UI
 function updateUI() {
     countEl.textContent = data.total;
     board.innerHTML = `
@@ -90,22 +90,28 @@ function updateUI() {
     `;
 }
 
+// ฟังก์ชันกด
 function pop() {
-    img.src = "https://media.discordapp.net/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg";
-
+    // เปลี่ยนรูป 1
+    img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Cat_Pop_icon_open.png/240px-Cat_Pop_icon_open.png";
+    
+    // กลับรูปเดิมหลัง 80ms
     setTimeout(() => {
-        img.src = "https://media.discordapp.net/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg";
+        img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Cat_Pop_icon.png/240px-Cat_Pop_icon.png";
     }, 80);
 
+    // นับคลิก
     data.total++;
     data.country[countrySelect.value]++;
     save();
     updateUI();
 }
 
-img.addEventListener("mousedown", pop);
-img.addEventListener("touchstart", pop);
+// กดได้ทั้งหน้า
+document.body.addEventListener("mousedown", pop);
+document.body.addEventListener("touchstart", pop);
 
+// โหลดตอนเริ่ม
 updateUI();
 </script>
 
