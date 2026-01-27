@@ -3,40 +3,34 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pop Meow Online</title>
+<title>Pop Meow Counter</title>
 <style>
 body{
     margin:0;
     height:100vh;
-    background: linear-gradient(135deg,#ff9ac2,#ffc0cb);
     display:flex;
     flex-direction:column;
     justify-content:center;
     align-items:center;
     font-family:'Fredoka One', cursive;
+    background:#ffc0cb;
     cursor:pointer;
-    overflow:hidden;
 }
-img{
-    width:280px;
-    max-width:80vw;
-    margin-bottom:20px;
-    transition: transform 0.1s;
-}
-img:active{transform:scale(0.95);}
 .counter{
-    font-size:28px;
+    font-size:32px;
     font-weight:bold;
     color:#fff;
     text-shadow:1px 1px 3px #333;
-    margin-bottom:15px;
+    margin-bottom:20px;
 }
-select{
-    margin-top:10px;
-    padding:8px 12px;
-    border-radius:12px;
-    font-size:16px;
+button{
+    padding:20px 40px;
+    font-size:24px;
     border:none;
+    border-radius:12px;
+    background:#ff69b4;
+    color:#fff;
+    cursor:pointer;
 }
 .board{
     margin-top:20px;
@@ -52,16 +46,15 @@ select{
 </head>
 <body>
 
-<img id="img" src="https://firebasestorage.googleapis.com/v0/b/popmeow-43a63.appspot.com/o/popcat%2Fclosed.jpg?alt=media">
-
 <div class="counter">🌍 รวมทั้งหมด: <span id="total">0</span></div>
-
 <select id="country">
     <option value="TH">🇹🇭 ไทย</option>
     <option value="JP">🇯🇵 ญี่ปุ่น</option>
     <option value="US">🇺🇸 อเมริกา</option>
     <option value="KR">🇰🇷 เกาหลี</option>
 </select>
+
+<button id="popBtn">POP!</button>
 
 <div class="board" id="board">กำลังโหลด...</div>
 
@@ -70,7 +63,7 @@ select{
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-// Firebase config ของคุณ
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDcIZWpulJ7PaXpkwFcv2xlgt02W0XqMYI",
   authDomain: "popmeow-43a63.firebaseapp.com",
@@ -84,14 +77,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-const img = document.getElementById("img");
 const totalEl = document.getElementById("total");
 const boardEl = document.getElementById("board");
 const countrySelect = document.getElementById("country");
-
-// รูปจาก Firebase Storage
-const imgClosed = "https://firebasestorage.googleapis.com/v0/b/popmeow-43a63.appspot.com/o/popcat%2Fclosed.jpg?alt=media";
-const imgOpen   = "https://firebasestorage.googleapis.com/v0/b/popmeow-43a63.appspot.com/o/popcat%2Fopen.jpg?alt=media";
+const popBtn = document.getElementById("popBtn");
 
 const docRef = db.collection("popMeow").doc("global");
 
@@ -104,9 +93,6 @@ docRef.get().then(docSnap=>{
 
 // ฟังก์ชันกด
 function pop(){
-    img.src = imgOpen;
-    setTimeout(()=> img.src=imgClosed, 80);
-
     docRef.update({
         total: firebase.firestore.FieldValue.increment(1),
         [`countries.${countrySelect.value}`]: firebase.firestore.FieldValue.increment(1)
@@ -114,30 +100,14 @@ function pop(){
       .catch(err => console.error("Update failed:", err));
 }
 
-// กดได้ทั้งหน้า
-document.body.addEventListener("mousedown", pop);
-document.body.addEventListener("touchstart", pop);
-
-// ฟังก์ชัน tween นับสมูท
-function animateCount(el, newVal){
-    let current = parseInt(el.textContent.replace(/,/g,'')) || 0;
-    const diff = newVal - current;
-    if(diff===0) return;
-    const duration = 300;
-    const steps = 20;
-    let step = 0;
-    const interval = setInterval(()=>{
-        step++;
-        el.textContent = Math.floor(current + diff*(step/steps));
-        if(step>=steps) clearInterval(interval);
-    }, duration/steps);
-}
+// ใช้ปุ่มกด
+popBtn.addEventListener("click", pop);
 
 // เรียลไทม์
 docRef.onSnapshot(docSnap=>{
     if(!docSnap.exists) return;
     const data = docSnap.data();
-    animateCount(totalEl, data.total);
+    totalEl.textContent = data.total;
     boardEl.innerHTML = `
     🌍 คะแนนตามประเทศ<br>
     🇹🇭 ไทย: ${data.countries.TH}<br>
