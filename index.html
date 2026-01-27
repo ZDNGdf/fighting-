@@ -3,166 +3,168 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เกมปรุงสารเคมี 118 ธาตุ (มือถือ)</title>
+<title>เกมปรุงสารเคมี 118 ธาตุ</title>
 <style>
-body {
-    margin:0;
-    font-family:'Segoe UI',sans-serif;
-    background:linear-gradient(to right,#74ebd5,#ACB6E5);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    min-height:100vh;
-}
-h1 {
-    color:#fff;
-    margin-top:15px;
-    text-align:center;
-    text-shadow:2px 2px 5px rgba(0,0,0,0.3);
-}
-.table-container {
-    width:95%;
-    margin:10px 0;
-    overflow-x:auto;
-    display:grid;
-    grid-template-columns:repeat(10,60px);
-    gap:5px;
-}
-.element {
-    width:60px;
-    height:60px;
-    border-radius:10px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    position:relative;
-    user-select:none;
-    touch-action:none;
-    box-shadow:0 3px 10px rgba(0,0,0,0.2);
-}
-.element span {color:#fff;font-weight:bold;font-size:18px;}
+body {margin:0; font-family:'Segoe UI',sans-serif; background:linear-gradient(to right,#74ebd5,#ACB6E5); display:flex; flex-direction:column; align-items:center; min-height:100vh;}
+h1 {color:#fff; margin-top:15px; text-align:center; text-shadow:2px 2px 5px rgba(0,0,0,0.3);}
+.table-container {width:95%; max-width:1000px; margin:10px 0; overflow-x:auto; display:grid; grid-template-columns:repeat(10,60px); gap:5px;}
+.element {width:60px; height:60px; border-radius:10px; display:flex; justify-content:center; align-items:center; position:relative; user-select:none; touch-action:none; box-shadow:0 3px 10px rgba(0,0,0,0.2);}
+.element span {color:#fff; font-weight:bold; font-size:18px;}
 .element.metal {background:linear-gradient(145deg,#ffd700,#ffea00);}
 .element.halogen {background:linear-gradient(145deg,#ff6a00,#ffb347);}
 .element.noble {background:linear-gradient(145deg,#00c6ff,#0072ff);}
 .element.nonmetal {background:linear-gradient(145deg,#8aff00,#00ff55);}
 .element.metalloid {background:linear-gradient(145deg,#ff00ff,#ff77ff);}
-.element.unknown {background:linear-gradient(145deg,#888888,#555555);}
-.tooltip {
-    position:absolute;
-    bottom:70px;
-    background:rgba(0,0,0,0.8);
-    color:#fff;
-    padding:5px 8px;
-    border-radius:8px;
-    font-size:11px;
-    opacity:0;
-    pointer-events:none;
-    transition:opacity 0.3s;
-    white-space:nowrap;
-}
+.element.unknown {background:linear-gradient(145deg,#888,#555);}
+.tooltip {position:absolute; bottom:70px; background:rgba(0,0,0,0.8); color:#fff; padding:5px 8px; border-radius:8px; font-size:11px; opacity:0; pointer-events:none; transition:opacity 0.3s; white-space:nowrap;}
 .element:hover .tooltip {opacity:1;}
-.mix-area {
-    width:95%;
-    max-width:800px;
-    min-height:150px;
-    background:rgba(255,255,255,0.2);
-    border-radius:20px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-wrap:wrap;
-    gap:10px;
-    padding:10px;
-    margin:10px 0;
-}
-button {
-    margin:8px;
-    padding:10px 25px;
-    border:none;
-    border-radius:15px;
-    background:linear-gradient(145deg,#ff6a00,#ffb347);
-    color:#fff;
-    font-size:16px;
-}
-.result {
-    color:#fff;
-    text-align:center;
-    min-height:50px;
-    margin-bottom:20px;
-}
+.mix-area {width:95%; max-width:800px; min-height:150px; background:rgba(255,255,255,0.2); border-radius:20px; display:flex; justify-content:center; align-items:center; flex-wrap:wrap; gap:10px; padding:10px; margin:10px 0;}
+button {margin:8px; padding:10px 25px; border:none; border-radius:15px; background:linear-gradient(145deg,#ff6a00,#ffb347); color:#fff; font-size:16px; cursor:pointer;}
+.result {color:#fff; text-align:center; min-height:50px; margin-bottom:20px;}
 </style>
 </head>
 <body>
-
 <h1>เกมปรุงสารเคมี 118 ธาตุ 🧪</h1>
-
 <div class="table-container" id="elements"></div>
-
-<div class="mix-area" id="mixArea">
-  <p style="color:#fff;">ลากธาตุมาที่นี่เพื่อผสม</p>
-</div>
-
+<div class="mix-area" id="mixArea"><p style="color:#fff;">ลากธาตุมาที่นี่เพื่อผสม</p></div>
 <button id="mixBtn">ผสมสาร</button>
 <button id="resetBtn">รีเซ็ต</button>
-
 <div class="result" id="result"></div>
 
 <script>
-// --- ข้อมูลธาตุ 118 ตัว ---
+// --- ธาตุ 118 ตัว พร้อมชื่อ + tooltip (ตัวอย่างคำอธิบายสั้น) ---
 const elements = [
-  {sym:'H',name:'ไฮโดรเจน',group:'nonmetal',desc:'เบาที่สุดในจักรวาล'},
-  {sym:'He',name:'ฮีเลียม',group:'noble',desc:'ก๊าซเฉื่อย ใช้บอลลูน'},
-  {sym:'Li',name:'ลิเทียม',group:'metal',desc:'ใช้ในแบตเตอรี่'},
-  {sym:'Be',name:'เบริลเลียม',group:'metal',desc:'เบา แข็ง'},
-  {sym:'B',name:'โบรอน',group:'metalloid',desc:'ในแก้วและเซรามิก'},
-  {sym:'C',name:'คาร์บอน',group:'nonmetal',desc:'พื้นฐานของชีวิต'},
-  {sym:'N',name:'ไนโตรเจน',group:'nonmetal',desc:'ก๊าซหลักในอากาศ'},
-  {sym:'O',name:'ออกซิเจน',group:'nonmetal',desc:'ช่วยหายใจ'},
-  {sym:'F',name:'ฟลูออรีน',group:'halogen',desc:'ก๊าซรุนแรง'},
-  {sym:'Ne',name:'นีออน',group:'noble',desc:'ไฟนีออน'},
-  {sym:'Na',name:'โซเดียม',group:'metal',desc:'ปฏิกิริยากับน้ำแรง'},
-  {sym:'Mg',name:'แมกนีเซียม',group:'metal',desc:'ติดไฟเป็นแสง'},
-  {sym:'Al',name:'อะลูมิเนียม',group:'metal',desc:'เบา ไม่ติดไฟง่าย'},
-  {sym:'Si',name:'ซิลิคอน',group:'metalloid',desc:'สารกึ่งตัวนำ'},
-  {sym:'P',name:'ฟอสฟอรัส',group:'nonmetal',desc:'ในปุ๋ย'},
-  {sym:'S',name:'กำมะถัน',group:'nonmetal',desc:'มีกลิ่น'},
-  {sym:'Cl',name:'คลอรีน',group:'halogen',desc:'ฆ่าเชื้อ'},
-  {sym:'Ar',name:'อาร์กอน',group:'noble',desc:'ก๊าซเฉื่อย'},
-  {sym:'K',name:'โพแทสเซียม',group:'metal',desc:'ในอาหาร'},
-  {sym:'Ca',name:'แคลเซียม',group:'metal',desc:'กระดูก'},
-  {sym:'Sc',name:'สแกนเดียม',group:'metal',desc:'โลหะ transition'},
-  {sym:'Ti',name:'ไทเทเนียม',group:'metal',desc:'เบา แข็ง'},
-  {sym:'V',name:'วานาเดียม',group:'metal',desc:'ในเหล็กอัลลอย'},
-  {sym:'Cr',name:'โครเมียม',group:'metal',desc:'กันสนิม'},
-  {sym:'Mn',name:'แมงกานีส',group:'metal',desc:'ในเหล็ก'},
-  {sym:'Fe',name:'เหล็ก',group:'metal',desc:'โครงสร้างหลัก'},
-  {sym:'Co',name:'โคบอลต์',group:'metal',desc:'แม่เหล็ก'},
-  {sym:'Ni',name:'นิกเกิล',group:'metal',desc:'กันกร่อน'},
-  {sym:'Cu',name:'ทองแดง',group:'metal',desc:'นำไฟฟ้า'},
-  {sym:'Zn',name:'สังกะสี',group:'metal',desc:'ชุบกันสนิม'},
-  {sym:'Ga',name:'แกเลียม',group:'metal',desc:'หลอมเหลวต่ำ'},
-  {sym:'Ge',name:'เยอมาเนียม',group:'metalloid',desc:'กึ่งตัวนำ'},
-  {sym:'As',name:'สารหนู',group:'metalloid',desc:'พิษ'},
-  {sym:'Se',name:'ซีลีเนียม',group:'nonmetal',desc:'ในเลนส์กล้อง'},
-  {sym:'Br',name:'โบรมีน',group:'halogen',desc:'ของเหลวพิษ'},
-  {sym:'Kr',name:'คริปทอน',group:'noble',desc:'ก๊าซเฉื่อย'},
-  // ... เติมครบ 118 ตัวตามจริง
-  {sym:'Xe',name:'ซีเรียกซ์',group:'noble',desc:'ก๊าซเฉื่อย'},
-  {sym:'Rn',name:'เรดอน',group:'noble',desc:'ก๊าซกัมมันตรังสี'},
-  {sym:'Og',name:'อ็อกโทเนียม',group:'unknown',desc:'ธาตุหนักสุด'}
+  {sym:'H',name:'Hydrogen',group:'nonmetal',desc:'เบาที่สุดในจักรวาล'},
+  {sym:'He',name:'Helium',group:'noble',desc:'ก๊าซเฉื่อย'},
+  {sym:'Li',name:'Lithium',group:'metal',desc:'ใช้ในแบตเตอรี่'},
+  {sym:'Be',name:'Beryllium',group:'metal',desc:'แข็งและเบา'},
+  {sym:'B',name:'Boron',group:'metalloid',desc:'ในแก้วและเซรามิก'},
+  {sym:'C',name:'Carbon',group:'nonmetal',desc:'พื้นฐานของชีวิต'},
+  {sym:'N',name:'Nitrogen',group:'nonmetal',desc:'ก๊าซหลักในอากาศ'},
+  {sym:'O',name:'Oxygen',group:'nonmetal',desc:'ช่วยหายใจ'},
+  {sym:'F',name:'Fluorine',group:'halogen',desc:'ก๊าซรุนแรง'},
+  {sym:'Ne',name:'Neon',group:'noble',desc:'ไฟนีออน'},
+  {sym:'Na',name:'Sodium',group:'metal',desc:'ปฏิกิริยากับน้ำแรง'},
+  {sym:'Mg',name:'Magnesium',group:'metal',desc:'ติดไฟเป็นแสง'},
+  {sym:'Al',name:'Aluminium',group:'metal',desc:'เบา ไม่ติดไฟง่าย'},
+  {sym:'Si',name:'Silicon',group:'metalloid',desc:'กึ่งตัวนำ'},
+  {sym:'P',name:'Phosphorus',group:'nonmetal',desc:'ในปุ๋ย'},
+  {sym:'S',name:'Sulfur',group:'nonmetal',desc:'มีกลิ่น'},
+  {sym:'Cl',name:'Chlorine',group:'halogen',desc:'ฆ่าเชื้อ'},
+  {sym:'Ar',name:'Argon',group:'noble',desc:'ก๊าซเฉื่อย'},
+  {sym:'K',name:'Potassium',group:'metal',desc:'ในอาหาร'},
+  {sym:'Ca',name:'Calcium',group:'metal',desc:'กระดูก'},
+  {sym:'Sc',name:'Scandium',group:'metal',desc:'โลหะ transition'},
+  {sym:'Ti',name:'Titanium',group:'metal',desc:'เบา แข็ง'},
+  {sym:'V',name:'Vanadium',group:'metal',desc:'ในเหล็กอัลลอย'},
+  {sym:'Cr',name:'Chromium',group:'metal',desc:'กันสนิม'},
+  {sym:'Mn',name:'Manganese',group:'metal',desc:'ในเหล็ก'},
+  {sym:'Fe',name:'Iron',group:'metal',desc:'โครงสร้างหลัก'},
+  {sym:'Co',name:'Cobalt',group:'metal',desc:'แม่เหล็ก'},
+  {sym:'Ni',name:'Nickel',group:'metal',desc:'กันกร่อน'},
+  {sym:'Cu',name:'Copper',group:'metal',desc:'นำไฟฟ้า'},
+  {sym:'Zn',name:'Zinc',group:'metal',desc:'ชุบกันสนิม'},
+  {sym:'Ga',name:'Gallium',group:'metal',desc:'หลอมเหลวต่ำ'},
+  {sym:'Ge',name:'Germanium',group:'metalloid',desc:'กึ่งตัวนำ'},
+  {sym:'As',name:'Arsenic',group:'metalloid',desc:'พิษ'},
+  {sym:'Se',name:'Selenium',group:'nonmetal',desc:'ในเลนส์กล้อง'},
+  {sym:'Br',name:'Bromine',group:'halogen',desc:'ของเหลวพิษ'},
+  {sym:'Kr',name:'Krypton',group:'noble',desc:'ก๊าซเฉื่อย'},
+  {sym:'Rb',name:'Rubidium',group:'metal',desc:'โลหะอัลคาไลน์'},
+  {sym:'Sr',name:'Strontium',group:'metal',desc:'สีไฟแดง'},
+  {sym:'Y',name:'Yttrium',group:'metal',desc:'โลหะ transition'},
+  {sym:'Zr',name:'Zirconium',group:'metal',desc:'ทนต่อสนิม'},
+  {sym:'Nb',name:'Niobium',group:'metal',desc:'ในอัลลอย'},
+  {sym:'Mo',name:'Molybdenum',group:'metal',desc:'ช่วยเหล็กแข็ง'},
+  {sym:'Tc',name:'Technetium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Ru',name:'Ruthenium',group:'metal',desc:'โลหะ transition'},
+  {sym:'Rh',name:'Rhodium',group:'metal',desc:'สะท้อนแสง'},
+  {sym:'Pd',name:'Palladium',group:'metal',desc:'ตัวเร่งปฏิกิริยา'},
+  {sym:'Ag',name:'Silver',group:'metal',desc:'เงิน'},
+  {sym:'Cd',name:'Cadmium',group:'metal',desc:'พิษ'},
+  {sym:'In',name:'Indium',group:'metal',desc:'โลหะอ่อน'},
+  {sym:'Sn',name:'Tin',group:'metal',desc:'ในดีบุก'},
+  {sym:'Sb',name:'Antimony',group:'metalloid',desc:'ใช้ในสารหน่วงไฟ'},
+  {sym:'Te',name:'Tellurium',group:'metalloid',desc:'กึ่งตัวนำ'},
+  {sym:'I',name:'Iodine',group:'halogen',desc:'ฆ่าเชื้อ'},
+  {sym:'Xe',name:'Xenon',group:'noble',desc:'ก๊าซเฉื่อย'},
+  {sym:'Cs',name:'Cesium',group:'metal',desc:'ปฏิกิริยารุนแรง'},
+  {sym:'Ba',name:'Barium',group:'metal',desc:'ในไฟ'},
+  {sym:'La',name:'Lanthanum',group:'metal',desc:'โลหะ lanthanide'},
+  {sym:'Ce',name:'Cerium',group:'metal',desc:'โลหะ lanthanide'},
+  {sym:'Pr',name:'Praseodymium',group:'metal',desc:'โลหะ lanthanide'},
+  {sym:'Nd',name:'Neodymium',group:'metal',desc:'แม่เหล็กแรง'},
+  {sym:'Pm',name:'Promethium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Sm',name:'Samarium',group:'metal',desc:'แม่เหล็ก'},
+  {sym:'Eu',name:'Europium',group:'metal',desc:'ไฟฟ้าเรืองแสง'},
+  {sym:'Gd',name:'Gadolinium',group:'metal',desc:'แม่เหล็กแรง'},
+  {sym:'Tb',name:'Terbium',group:'metal',desc:'เรืองแสง'},
+  {sym:'Dy',name:'Dysprosium',group:'metal',desc:'แม่เหล็กแรง'},
+  {sym:'Ho',name:'Holmium',group:'metal',desc:'แม่เหล็กแรง'},
+  {sym:'Er',name:'Erbium',group:'metal',desc:'เลเซอร์'},
+  {sym:'Tm',name:'Thulium',group:'metal',desc:'เลเซอร์'},
+  {sym:'Yb',name:'Ytterbium',group:'metal',desc:'เลเซอร์'},
+  {sym:'Lu',name:'Lutetium',group:'metal',desc:'หนัก'},
+  {sym:'Hf',name:'Hafnium',group:'metal',desc:'ทนความร้อน'},
+  {sym:'Ta',name:'Tantalum',group:'metal',desc:'ทนความร้อน'},
+  {sym:'W',name:'Tungsten',group:'metal',desc:'ทนความร้อนสูง'},
+  {sym:'Re',name:'Rhenium',group:'metal',desc:'โลหะหายาก'},
+  {sym:'Os',name:'Osmium',group:'metal',desc:'หนักที่สุด'},
+  {sym:'Ir',name:'Iridium',group:'metal',desc:'ทนความร้อนสูง'},
+  {sym:'Pt',name:'Platinum',group:'metal',desc:'โลหะมีค่า'},
+  {sym:'Au',name:'Gold',group:'metal',desc:'ทอง'},
+  {sym:'Hg',name:'Mercury',group:'metal',desc:'ของเหลวโลหะ'},
+  {sym:'Tl',name:'Thallium',group:'metal',desc:'พิษ'},
+  {sym:'Pb',name:'Lead',group:'metal',desc:'หนัก'},
+  {sym:'Bi',name:'Bismuth',group:'metal',desc:'สีเงิน'},
+  {sym:'Po',name:'Polonium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'At',name:'Astatine',group:'halogen',desc:'กัมมันตรังสี'},
+  {sym:'Rn',name:'Radon',group:'noble',desc:'ก๊าซกัมมันตรังสี'},
+  {sym:'Fr',name:'Francium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Ra',name:'Radium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Ac',name:'Actinium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Th',name:'Thorium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Pa',name:'Protactinium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'U',name:'Uranium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Np',name:'Neptunium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Pu',name:'Plutonium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Am',name:'Americium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Cm',name:'Curium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Bk',name:'Berkelium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Cf',name:'Californium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Es',name:'Einsteinium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Fm',name:'Fermium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Md',name:'Mendelevium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'No',name:'Nobelium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Lr',name:'Lawrencium',group:'metal',desc:'กัมมันตรังสี'},
+  {sym:'Rf',name:'Rutherfordium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Db',name:'Dubnium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Sg',name:'Seaborgium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Bh',name:'Bohrium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Hs',name:'Hassium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Mt',name:'Meitnerium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Ds',name:'Darmstadtium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Rg',name:'Roentgenium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Cn',name:'Copernicium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Nh',name:'Nihonium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Fl',name:'Flerovium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Mc',name:'Moscovium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Lv',name:'Livermorium',group:'metal',desc:'สังเกตยาก'},
+  {sym:'Ts',name:'Tennessine',group:'halogen',desc:'สังเกตยาก'},
+  {sym:'Og',name:'Oganesson',group:'noble',desc:'สังเกตยาก'}
 ];
 
-// สร้างตารางธาตุ
-const elContainer=document.getElementById('elements');
+// สร้างตาราง
+const container=document.getElementById('elements');
 elements.forEach(e=>{
   const div=document.createElement('div');
   div.className='element '+e.group;
   div.innerHTML=`<span>${e.sym}</span><div class="tooltip">${e.name}: ${e.desc}</div>`;
   div.dataset.sym=e.sym;
-  elContainer.appendChild(div);
+  container.appendChild(div);
 });
 
-// --- สูตรผสมตัวอย่าง 50+ ชุด ---
+// --- สูตรผสมตัวอย่าง 50+ สูตร ---
 const reactions = {
   "H,O": "น้ำ (H₂O) 💧",
   "Na,Cl": "เกลือแกง (NaCl) 🧂",
@@ -178,96 +180,3 @@ const reactions = {
   "Si,O": "ซิลิคอนไดออกไซด์",
   "Al,O": "อะลูมิเนียมออกไซด์",
   "S,O": "ซัลเฟอร์ไดออกไซด์",
-  "Zn,O": "สังกะสีออกไซด์",
-  "Cu,O": "ทองแดง(I)ออกไซด์",
-  "Co,O": "โคบอลต์ออกไซด์",
-  "Ni,O": "นิกเกิลออกไซด์",
-  "V,O": "วาเนเดียมออกไซด์",
-  "Cr,O": "โครเมียม(III)ออกไซด์",
-  "Mn,O": "แมงกานีสออกไซด์",
-  "Br,Na": "โซเดียมโบรไมด์",
-  "Se,Na": "โซเดียมซีลีไนด์",
-  "B,O": "โบรอนออกไซด์",
-  "Be,O": "เบริลเลียมออกไซด์",
-  "Li,O": "ลิเทียมออกไซด์",
-  "Ar,None": "ก๊าซเฉื่อย ไม่มีปฏิกิริยา",
-  "Ne,None": "ก๊าซเฉื่อย ไม่มีปฏิกิริยา",
-  "He,None": "ก๊าซเฉื่อย ไม่มีปฏิกิริยา",
-  "Xe,None": "ก๊าซเฉื่อย ไม่มีปฏิกิริยา",
-  "Rn,None": "ก๊าซเฉื่อย ไม่มีปฏิกิริยา",
-  "Si,H": "ซิลาน (SiH₄)",
-  "B,H": "โบรฮาيدริด",
-  "C,Cl": "คาร์บอนเตตระคลอไรด์",
-  "P,Cl": "ฟอสฟอรัสคลอไรด์",
-  "S,Cl": "ซัลเฟอร์คลอไรด์",
-  "Fe,Cl": "เหล็กคลอไรด์",
-  "Zn,Cl": "สังกะสีคลอไรด์",
-  "Al,Cl": "อะลูมิเนียมคลอไรด์",
-  "Mg,Cl": "แมกนีเซียมคลอไรด์",
-  "Ca,Cl": "แคลเซียมคลอไรด์",
-  "K,O": "โพแทสเซียมออกไซด์",
-  "Na,H": "ไฮโดรเจนก๊าซ และสารประกอบ",
-  "C,S": "คาร์บอนซัลไฟด์",
-  "Fe,S": "เหล็กซัลไฟด์",
-  "Cu,S": "ทองแดงซัลไฟด์",
-  "Zn,S": "สังกะสีซัลไฟด์",
-  "Ni,S": "นิกเกิลซัลไฟด์"
-};
-
-// Drag & drop (touch friendly)
-const mixArea=document.getElementById('mixArea');
-let dragEl=null,offsetX=0,offsetY=0;
-
-elements.forEach(e=>{
-  const d=elContainer.querySelector(`[data-sym='${e.sym}']`);
-  d.addEventListener('touchstart',ev=>{
-    dragEl=d.cloneNode(true);
-    dragEl.style.position='absolute';
-    dragEl.style.zIndex='1000';
-    document.body.appendChild(dragEl);
-    const t=ev.touches[0];
-    offsetX=t.clientX - d.getBoundingClientRect().left;
-    offsetY=t.clientY - d.getBoundingClientRect().top;
-    dragEl.style.left=`${t.clientX-offsetX}px`;
-    dragEl.style.top=`${t.clientY-offsetY}px`;
-  });
-  d.addEventListener('touchmove',ev=>{
-    if(!dragEl) return;
-    const t=ev.touches[0];
-    dragEl.style.left=`${t.clientX-offsetX}px`;
-    dragEl.style.top=`${t.clientY-offsetY}px`;
-  });
-  d.addEventListener('touchend',()=>{
-    if(!dragEl) return;
-    const mRect=mixArea.getBoundingClientRect();
-    const r=dragEl.getBoundingClientRect();
-    if(r.left+r.width/2>mRect.left && r.left+r.width/2<mRect.right &&
-       r.top+r.height/2>mRect.top && r.top+r.height/2<mRect.bottom){
-      const newEl=dragEl.cloneNode(true);
-      newEl.style.position='static';
-      newEl.style.width='50px';
-      newEl.style.height='50px';
-      mixArea.appendChild(newEl);
-    }
-    dragEl.remove(); dragEl=null;
-  });
-});
-
-// Mix button
-document.getElementById('mixBtn').addEventListener('click',()=>{
-  const syms=[...mixArea.querySelectorAll('.element')].map(d=>d.dataset.sym);
-  if(syms.length===0){document.getElementById('result').innerText='ยังไม่มีธาตุ'; return;}
-  const key=syms.sort().join(',');
-  const res=reactions[key] || 'ไม่เกิดปฏิกิริยา';
-  document.getElementById('result').innerText=res;
-});
-
-// Reset
-document.getElementById('resetBtn').addEventListener('click',()=>{
-  mixArea.innerHTML='<p style="color:#fff;">ลากธาตุมาที่นี่เพื่อผสม</p>';
-  document.getElementById('result').innerText='';
-});
-</script>
-
-</body>
-</html>
