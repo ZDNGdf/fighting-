@@ -3,124 +3,127 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pop Meow Counter</title>
+<title>X O Game</title>
 <style>
-body{
-    margin:0;
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    font-family:'Fredoka One', cursive;
-    background:#ffc0cb;
-    cursor:pointer;
-}
-.counter{
-    font-size:32px;
-    font-weight:bold;
-    color:#fff;
-    text-shadow:1px 1px 3px #333;
-    margin-bottom:20px;
-}
-button{
-    padding:20px 40px;
-    font-size:24px;
-    border:none;
-    border-radius:12px;
-    background:#ff69b4;
-    color:#fff;
-    cursor:pointer;
-}
-.board{
-    margin-top:20px;
+  /* Reset & Font */
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
+  body { display:flex; justify-content:center; align-items:center; height:100vh; background: linear-gradient(135deg, #ff9a9e, #fad0c4); }
+
+  /* Container */
+  .container { display:flex; flex-direction:column; align-items:center; }
+  h1 { color:#fff; margin-bottom:20px; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
+
+  /* Board */
+  .board { display:grid; grid-template-columns:repeat(3, 100px); grid-gap:15px; }
+  .cell {
+    width:100px; height:100px;
     background: rgba(255,255,255,0.9);
-    padding:15px;
-    border-radius:20px;
-    width:300px;
-    text-align:center;
-    font-weight:bold;
-    box-shadow:0 8px 20px rgba(0,0,0,0.25);
-}
+    border-radius:15px;
+    display:flex; justify-content:center; align-items:center;
+    font-size:3rem; color:#ff6f91;
+    cursor:pointer; transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+  .cell:hover { transform: scale(1.1); background: rgba(255,255,255,1); }
+
+  /* X and O animations */
+  .x { color:#ff6f91; animation: pop 0.3s ease; }
+  .o { color:#6a82fb; animation: pop 0.3s ease; }
+  @keyframes pop {
+    0% { transform: scale(0); opacity:0; }
+    100% { transform: scale(1); opacity:1; }
+  }
+
+  /* Result */
+  .result { margin-top:20px; font-size:1.5rem; color:#fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
+  button { margin-top:10px; padding:10px 20px; border:none; border-radius:10px; background:#fff; color:#ff6f91; font-weight:bold; cursor:pointer; transition: all 0.3s ease; }
+  button:hover { transform: scale(1.1); background:#ff6f91; color:#fff; }
 </style>
 </head>
 <body>
 
-<div class="counter">🌍 รวมทั้งหมด: <span id="total">0</span></div>
-<select id="country">
-    <option value="TH">🇹🇭 ไทย</option>
-    <option value="JP">🇯🇵 ญี่ปุ่น</option>
-    <option value="US">🇺🇸 อเมริกา</option>
-    <option value="KR">🇰🇷 เกาหลี</option>
-</select>
-
-<button id="popBtn">POP!</button>
-
-<div class="board" id="board">กำลังโหลด...</div>
-
-<!-- Firebase CDN -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<div class="container">
+  <h1>X O Game</h1>
+  <div class="board" id="board">
+    <div class="cell" data-index="0"></div>
+    <div class="cell" data-index="1"></div>
+    <div class="cell" data-index="2"></div>
+    <div class="cell" data-index="3"></div>
+    <div class="cell" data-index="4"></div>
+    <div class="cell" data-index="5"></div>
+    <div class="cell" data-index="6"></div>
+    <div class="cell" data-index="7"></div>
+    <div class="cell" data-index="8"></div>
+  </div>
+  <div class="result" id="result"></div>
+  <button onclick="resetGame()">เริ่มใหม่</button>
+</div>
 
 <script>
-// Firebase config
-const firebaseConfig = {
-  apiKey: "AIzaSyDcIZWpulJ7PaXpkwFcv2xlgt02W0XqMYI",
-  authDomain: "popmeow-43a63.firebaseapp.com",
-  projectId: "popmeow-43a63",
-  storageBucket: "popmeow-43a63.appspot.com",
-  messagingSenderId: "636808933527",
-  appId: "1:636808933527:web:23f3f5226ee0dab1e5f9d2",
-  measurementId: "G-VL4SH88YBP"
-};
+  const board = document.getElementById('board');
+  const cells = document.querySelectorAll('.cell');
+  const result = document.getElementById('result');
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+  let turn = 'X';
+  let gameOver = false;
+  let boardState = Array(9).fill('');
 
-const totalEl = document.getElementById("total");
-const boardEl = document.getElementById("board");
-const countrySelect = document.getElementById("country");
-const popBtn = document.getElementById("popBtn");
+  const winCombos = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
 
-const docRef = db.collection("popMeow").doc("global");
-
-// สร้าง doc ถ้าไม่มี
-docRef.get().then(docSnap=>{
-    if(!docSnap.exists){
-        docRef.set({ total:0, countries:{TH:0,JP:0,US:0,KR:0} });
+  function checkWinner() {
+    for (const combo of winCombos) {
+      const [a,b,c] = combo;
+      if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+        gameOver = true;
+        result.textContent = `${boardState[a]} ชนะ! 🎉`;
+        highlightWinner(combo);
+        return;
+      }
     }
-});
+    if (!boardState.includes('')) {
+      gameOver = true;
+      result.textContent = `เสมอ! 🤝`;
+    }
+  }
 
-// ฟังก์ชันกด
-function pop(){
-    // ใช้ set + merge แทน update
-    const country = countrySelect.value;
-    docRef.set({
-        total: firebase.firestore.FieldValue.increment(1),
-        countries: {[country]: firebase.firestore.FieldValue.increment(1)}
-    }, {merge:true})
-    .then(()=> console.log("Pop counted!"))
-    .catch(err => console.error("Update failed:", err));
-}
+  function highlightWinner(combo) {
+    combo.forEach(i => {
+      cells[i].style.background = 'linear-gradient(135deg, #f6d365, #fda085)';
+      cells[i].style.color = '#fff';
+      cells[i].style.boxShadow = '0 0 20px rgba(255,255,255,0.6)';
+    });
+  }
 
-// ใช้ปุ่มกด
-popBtn.addEventListener("click", pop);
+  cells.forEach(cell => {
+    cell.addEventListener('click', () => {
+      const index = cell.dataset.index;
+      if (boardState[index] || gameOver) return;
+      boardState[index] = turn;
+      cell.textContent = turn;
+      cell.classList.add(turn.toLowerCase());
+      checkWinner();
+      turn = turn === 'X' ? 'O' : 'X';
+    });
+  });
 
-// เรียลไทม์
-docRef.onSnapshot(docSnap=>{
-    if(!docSnap.exists) return;
-    const data = docSnap.data();
-    totalEl.textContent = data.total;
-    boardEl.innerHTML = `
-    🌍 คะแนนตามประเทศ<br>
-    🇹🇭 ไทย: ${data.countries.TH}<br>
-    🇯🇵 ญี่ปุ่น: ${data.countries.JP}<br>
-    🇺🇸 อเมริกา: ${data.countries.US}<br>
-    🇰🇷 เกาหลี: ${data.countries.KR}
-    `;
-});
+  function resetGame() {
+    boardState.fill('');
+    cells.forEach(cell => {
+      cell.textContent = '';
+      cell.classList.remove('x','o');
+      cell.style.background = 'rgba(255,255,255,0.9)';
+      cell.style.color = '#ff6f91';
+      cell.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
+    });
+    result.textContent = '';
+    turn = 'X';
+    gameOver = false;
+  }
 </script>
 
 </body>
 </html>
-
