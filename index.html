@@ -15,7 +15,7 @@ body {
     justify-content: center;
     align-items: center;
     font-family: sans-serif;
-    cursor: pointer; /* ทำให้เห็นว่ากดได้ทั้งหน้า */
+    cursor: pointer;
 }
 
 img {
@@ -48,7 +48,7 @@ select {
 </head>
 <body>
 
-<img id="img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Cat_Pop_icon.png/240px-Cat_Pop_icon.png" alt="Pop Cat">
+<img id="img" src="https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg" alt="Pop Cat">
 
 <div class="counter">กดไปแล้ว: <span id="count">0</span> ครั้ง</div>
 
@@ -66,6 +66,10 @@ const img = document.getElementById("img");
 const countEl = document.getElementById("count");
 const board = document.getElementById("board");
 const countrySelect = document.getElementById("country");
+
+// รูปตอนอ้าปาก / ปิดปาก
+const imgClosed = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg?ex=6978d7d3&is=69778653&hm=246e30199b0652025c5283829b4a2c32f63c9c2c62fa1611bd992ed8bd01250c&";
+const imgOpen = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg?ex=6978d7d5&is=69778655&hm=d96fa7881e1d67704a0128cf6d4a1043cb641a09c9515832b64b7402da8b2a3c&";
 
 // ใช้ localStorage เก็บข้อมูล
 let data = JSON.parse(localStorage.getItem("popData")) || {
@@ -92,12 +96,12 @@ function updateUI() {
 
 // ฟังก์ชันกด
 function pop() {
-    // เปลี่ยนรูป 1
-    img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Cat_Pop_icon_open.png/240px-Cat_Pop_icon_open.png";
+    // เปลี่ยนรูปตอนอ้าปาก
+    img.src = imgOpen;
     
     // กลับรูปเดิมหลัง 80ms
     setTimeout(() => {
-        img.src = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Cat_Pop_icon.png/240px-Cat_Pop_icon.png";
+        img.src = imgClosed;
     }, 80);
 
     // นับคลิก
