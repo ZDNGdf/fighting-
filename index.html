@@ -3,79 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Floating Bubbles 🌈</title>
+<title>เกมวัดสายตา + ลาก</title>
 <style>
-/* ====== Reset & Font ====== */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Segoe UI', sans-serif;
-}
-body {
-    height: 100vh;
-    background: linear-gradient(135deg, #89f7fe, #66a6ff);
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-/* ====== Title ====== */
-h1 {
-    position: absolute;
-    top: 30px;
-    font-size: 3rem;
-    color: #fff;
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-}
-
-/* ====== Bubble Styles ====== */
-.bubble {
-    position: absolute;
-    border-radius: 50%;
-    opacity: 0.7;
-    animation: floatUp linear infinite;
-}
-
-/* ====== Floating Animation ====== */
-@keyframes floatUp {
-    0% {
-        transform: translateY(100vh) scale(0.5);
-        opacity: 0.7;
-    }
-    50% {
-        opacity: 1;
-    }
-    100% {
-        transform: translateY(-10vh) scale(1);
-        opacity: 0;
-    }
-}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{background:#111;display:flex;justify-content:center;align-items:center;height:100vh;transition:all 1s ease;}
+.container{width:100%;max-width:600px;padding:20px;text-align:center;background: rgba(0,0,0,0.4);border-radius:15px;}
+h1{color:#38bdf8;margin-bottom:10px;}
+#gameArea{position:relative;width:100%;height:60vh;background: rgba(255,255,255,0.05);border-radius:20px;overflow:hidden;border:2px solid rgba(255,255,255,0.1);margin-bottom:15px;}
+.circle{position:absolute;border-radius:50%;width:60px;height:60px;background:#38bdf8;display:flex;justify-content:center;align-items:center;color:white;font-weight:bold;transition:all 0.3s ease;cursor:pointer;}
+#scoreBoard{color:white;margin-top:10px;font-size:18px;text-align:center;}
+#startBtn{padding:25px 50px;font-size:26px;border:none;border-radius:40px;background:linear-gradient(135deg,#38bdf8,#6366f1);color:white;cursor:pointer;transition:all 0.3s ease;width:80%;max-width:400px;margin:auto;display:block;}
+#startBtn:active{transform:scale(0.96);}
 </style>
 </head>
 <body>
-
-<h1>🌊 Floating Bubbles 🌊</h1>
+<div class="container">
+<h1>เกมวัดสายตา + ลาก</h1>
+<p>กดวงกลม หรือบางรอบลากจากจุด A→B</p>
+<button id="startBtn">▶ เริ่มทดสอบ</button>
+<div id="gameArea"></div>
+<div id="scoreBoard">คะแนน: 0</div>
+</div>
 
 <script>
-// ====== JS สร้าง Bubble ======
-const colors = ['#ff6f91', '#ff9671', '#ffc75f', '#f9f871', '#a0e7e5', '#b4f8c8'];
-const bubbleCount = 25;
+const gameArea = document.getElementById("gameArea");
+const scoreBoard = document.getElementById("scoreBoard");
+const startBtn = document.getElementById("startBtn");
 
-for(let i = 0; i < bubbleCount; i++) {
-    const bubble = document.createElement('div');
-    bubble.classList.add('bubble');
-    const size = Math.random() * 60 + 20; // ขนาด 20-80px
-    bubble.style.width = `${size}px`;
-    bubble.style.height = `${size}px`;
-    bubble.style.background = colors[Math.floor(Math.random() * colors.length)];
-    bubble.style.left = `${Math.random() * 100}vw`;
-    bubble.style.animationDuration = `${Math.random() * 10 + 5}s`; // 5-15 วินาที
-    bubble.style.animationDelay = `${Math.random() * 5}s`;
-    document.body.appendChild(bubble);
+let score = 0;
+let active = false;
+let timeout;
+const fixedTime = 1000; // 1 วิ ต่อรอบ
+const circleColors = ["#ff6b6b","#facc15","#38bdf8","#10b981","#f472b6","#a855f7"];
+const bgImages = [
+    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
+    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
+];
+bgImages.forEach(url=>{const img=new Image();img.src=url;});
+
+// กดปุ่มเริ่มทดสอบเริ่มเกม
+startBtn.addEventListener("click",()=>{
+    startBtn.style.display="none"; // ซ่อนปุ่ม
+    startGame();
+});
+
+function startGame(){
+    score=0;
+    scoreBoard.innerText=`คะแนน: ${score}`;
+    document.body.style.backgroundImage=`url(${bgImages[0]})`;
+    nextRound();
+}
+
+function nextRound(){
+    gameArea.innerHTML="";
+    active=true;
+
+    const isDragRound = Math.random()<0.3; // 30% โอกาสเกิดลาก A->B
+
+    if(isDragRound){
+        // วงกลมสองจุดให้ลาก
+        const circleA=document.createElement("div");
+        circleA.className="circle";
+        const circleB=document.createElement("div");
+        circleB.className="circle";
+
+        let colorIndex=Math.floor(score/50)%circleColors.length;
+        circleA.style.background=circleColors[colorIndex];
+        circleB.style.background=circleColors[colorIndex];
+
+        const size=60;
+        const maxX=gameArea.clientWidth-size;
+        const maxY=gameArea.clientHeight-size;
+
+        const ax=Math.random()*maxX;
+        const ay=Math.random()*maxY;
+        const bx=Math.random()*maxX;
+        const by=Math.random()*maxY;
+
+        circleA.style.left=ax+"px";
+        circleA.style.top=ay+"px";
+        circleB.style.left=bx+"px";
+        circleB.style.top=by+"px";
+
+        gameArea.appendChild(circleA);
+        gameArea.appendChild(circleB);
+
+        let dragging=false;
+
+        function startDrag(e){ e.preventDefault(); dragging=true; }
+        function moveDrag(e){
+            if(!dragging) return;
+            let x=e.touches?e.touches[0].clientX:e.clientX;
+            let y=e.touches?e.touches[0].clientY:e.clientY;
+            const rect=gameArea.getBoundingClientRect();
+            x-=rect.left; y-=rect.top;
+
+            const rectA=circleA.getBoundingClientRect();
+            const rectB=circleB.getBoundingClientRect();
+            const axc=rectA.left-rect.left+rectA.width/2;
+            const ayc=rectA.top-rect.top+rectA.height/2;
+            const bxc=rectB.left-rect.left+rectB.width/2;
+            const byc=rectB.top-rect.top+rectB.height/2;
+
+            const distAB=Math.hypot(x-bxc,y-byc);
+            const distBA=Math.hypot(x-axc,y-ayc);
+
+            if(distAB<rectB.width/2 || distBA<rectA.width/2){
+                dragging=false;
+                score++;
+                scoreBoard.innerText=`คะแนน: ${score}`;
+                if(score%100===0){
+                    let bgIndex=Math.floor(score/100)%bgImages.length;
+                    document.body.style.backgroundImage=`url(${bgImages[bgIndex]})`;
+                }
+                clearTimeout(timeout);
+                nextRound();
+            }
+        }
+        function endDrag(){ if(dragging){dragging=false; endGame();} }
+
+        circleA.addEventListener("touchstart",startDrag);
+        circleB.addEventListener("touchstart",startDrag);
+        circleA.addEventListener("mousedown",startDrag);
+        circleB.addEventListener("mousedown",startDrag);
+        gameArea.addEventListener("touchmove",moveDrag);
+        gameArea.addEventListener("mousemove",moveDrag);
+        document.addEventListener("mouseup",endDrag);
+        document.addEventListener("touchend",endDrag);
+
+        timeout=setTimeout(()=>{ if(dragging){dragging=false; endGame();} }, fixedTime);
+
+    } else {
+        // รอบแตะวงกลมเดี่ยว
+        const circle=document.createElement("div");
+        circle.className="circle";
+        let colorIndex=Math.floor(score/50)%circleColors.length;
+        circle.style.background=circleColors[colorIndex];
+
+        const size=60;
+        const maxX=gameArea.clientWidth-size;
+        const maxY=gameArea.clientHeight-size;
+        circle.style.left=Math.random()*maxX+"px";
+        circle.style.top=Math.random()*maxY+"px";
+
+        circle.onclick=(e)=>{
+            e.stopPropagation();
+            if(!active) return;
+            active=false;
+            score++;
+            scoreBoard.innerText=`คะแนน: ${score}`;
+            if(score%100===0){
+                let bgIndex=Math.floor(score/100)%bgImages.length;
+                document.body.style.backgroundImage=`url(${bgImages[bgIndex]})`;
+            }
+            clearTimeout(timeout);
+            nextRound();
+        }
+
+        gameArea.appendChild(circle);
+
+        timeout=setTimeout(()=>{ if(active){endGame();} }, fixedTime);
+    }
+}
+
+// กดผิดที่อื่น = จบเกม
+gameArea.addEventListener("click",e=>{
+    if(!active) return;
+    if(!e.target.classList.contains("circle")){
+        active=false;
+        clearTimeout(timeout);
+        endGame();
+    }
+});
+
+function endGame(){
+    gameArea.innerHTML="";
+    let level="";
+    if(score<50) level="😴 สายตาช้า";
+    else if(score<150) level="🙂 สายตาปกติ";
+    else if(score<400) level="😎 สายตาไว";
+    else level="🔥 สายตาไวสุดยอด!";
+
+    alert(`เกมจบ! คะแนน: ${score}\nระดับสายตา: ${level}`);
 }
 </script>
-
 </body>
 </html>
