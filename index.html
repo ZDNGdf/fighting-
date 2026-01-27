@@ -52,7 +52,7 @@ select{
 </head>
 <body>
 
-<img id="img" src="https://cdn.jsdelivr.net/gh/teekmp/popcat-demo/closed.png">
+<img id="img" src="https://firebasestorage.googleapis.com/v0/b/popmeow-43a63.appspot.com/o/popcat%2Fclosed.jpg?alt=media">
 
 <div class="counter">🌍 รวมทั้งหมด: <span id="total">0</span></div>
 
@@ -89,8 +89,9 @@ const totalEl = document.getElementById("total");
 const boardEl = document.getElementById("board");
 const countrySelect = document.getElementById("country");
 
-const imgClosed = "https://cdn.jsdelivr.net/gh/teekmp/popcat-demo/closed.png";
-const imgOpen = "https://cdn.jsdelivr.net/gh/teekmp/popcat-demo/open.png";
+// รูปจาก Firebase Storage
+const imgClosed = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg?ex=6978d7d3&is=69778653&hm=246e30199b0652025c5283829b4a2c32f63c9c2c62fa1611bd992ed8bd01250c&";
+const imgOpen   = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg?ex=6978d7d5&is=69778655&hm=d96fa7881e1d67704a0128cf6d4a1043cb641a09c9515832b64b7402da8b2a3c&";
 
 const docRef = db.collection("popMeow").doc("global");
 
