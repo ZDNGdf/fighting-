@@ -6,30 +6,50 @@
 <title>Pop Meow</title>
 <style>
 body {
-    margin: 0;
-    height: 100vh;
+    margin:0;
+    height:100vh;
     background: linear-gradient(135deg,#ff9ac2,#ffc0cb);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    font-family: 'Arial', sans-serif;
-    cursor: pointer;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    font-family:'Arial',sans-serif;
+    cursor:pointer;
 }
-img {
-    width: 280px;
-    margin-bottom: 20px;
-    transition: transform 0.1s;
+img{
+    width:280px;
+    margin-bottom:20px;
+    transition:transform 0.1s;
 }
-img:active { transform: scale(0.95); }
-.counter { font-size: 28px; font-weight: bold; color: #fff; text-shadow:1px 1px 3px #333; margin-bottom: 15px; }
-select { margin-top: 10px; padding: 8px 12px; border-radius:12px; font-size:16px; }
-.board { margin-top:20px; background: rgba(255,255,255,0.9); padding:15px; border-radius:20px; width:280px; text-align:center; font-weight:bold; box-shadow:0 8px 20px rgba(0,0,0,0.25);}
+img:active{transform:scale(0.95);}
+.counter{
+    font-size:28px;
+    font-weight:bold;
+    color:#fff;
+    text-shadow:1px 1px 3px #333;
+    margin-bottom:15px;
+}
+select{
+    margin-top:10px;
+    padding:8px 12px;
+    border-radius:12px;
+    font-size:16px;
+}
+.board{
+    margin-top:20px;
+    background: rgba(255,255,255,0.9);
+    padding:15px;
+    border-radius:20px;
+    width:280px;
+    text-align:center;
+    font-weight:bold;
+    box-shadow:0 8px 20px rgba(0,0,0,0.25);
+}
 </style>
 </head>
 <body>
 
-<img id="img" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Cat_Pop_icon.png/240px-Cat_Pop_icon.png">
+<img id="img" src="https://cdn.jsdelivr.net/gh/teekmp/popcat-demo/closed.png">
 
 <div class="counter">🌍 รวมทั้งหมด: <span id="total">0</span></div>
 
@@ -47,7 +67,7 @@ select { margin-top: 10px; padding: 8px 12px; border-radius:12px; font-size:16px
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-// Firebase config
+// Firebase config ของคุณ
 const firebaseConfig = {
   apiKey: "AIzaSyDcIZWpulJ7PaXpkwFcv2xlgt02W0XqMYI",
   authDomain: "popmeow-43a63.firebaseapp.com",
@@ -58,6 +78,7 @@ const firebaseConfig = {
   measurementId: "G-VL4SH88YBP"
 };
 
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -66,14 +87,14 @@ const totalEl = document.getElementById("total");
 const boardEl = document.getElementById("board");
 const countrySelect = document.getElementById("country");
 
-// รูปปิด/อ้าปาก (ใช้ CDN เปิดตรงได้)
-const imgClosed = "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Cat_Pop_icon.png/240px-Cat_Pop_icon.png";
-const imgOpen = "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Cat_Pop_icon_open.png/240px-Cat_Pop_icon_open.png";
+// รูปปิด/อ้าปาก
+const imgClosed = "https://cdn.jsdelivr.net/gh/teekmp/popcat-demo/closed.png";
+const imgOpen = "https://cdn.jsdelivr.net/gh/teekmp/popcat-demo/open.png";
 
 const docRef = db.collection("popMeow").doc("global");
 
 // สร้าง doc ถ้าไม่มี
-docRef.get().then(docSnap => {
+docRef.get().then(docSnap=>{
     if(!docSnap.exists){
         docRef.set({ total:0, countries:{TH:0,JP:0,US:0,KR:0} });
     }
