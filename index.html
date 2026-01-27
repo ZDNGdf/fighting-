@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เกมปรุงสารเคมี 118 ธาตุ</title>
+<title>เกมปรุงสารเคมี มือถือ</title>
 <style>
 body {
     margin: 0;
@@ -13,29 +13,23 @@ body {
     flex-direction: column;
     align-items: center;
     min-height: 100vh;
-    overflow-x: hidden;
 }
 
 h1 {
-    margin-top: 20px;
+    margin-top: 15px;
     color: #fff;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
     text-align: center;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
 }
 
 .table-container {
     width: 95%;
-    max-width: 1200px;
-    margin: 20px 0;
+    max-width: 1000px;
+    margin: 15px 0;
     overflow-x: auto;
-    overflow-y: auto;
-    background: rgba(255,255,255,0.1);
-    border-radius: 20px;
-    padding: 10px;
     display: grid;
-    grid-template-columns: repeat(18, 60px);
+    grid-template-columns: repeat(10, 60px);
     gap: 5px;
-    justify-content: center;
 }
 
 .element {
@@ -43,47 +37,21 @@ h1 {
     height: 60px;
     border-radius: 10px;
     display: flex;
-    flex-direction: column;
     justify-content: center;
     align-items: center;
-    cursor: grab;
-    box-shadow: 0 5px 10px rgba(0,0,0,0.2);
     position: relative;
-    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    user-select: none;
+    touch-action: none;
 }
 
-.element:hover {
-    transform: scale(1.1);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-}
-
-.element span {
-    font-weight: bold;
-    font-size: 18px;
-    color: #fff;
-}
+.element span { color: #fff; font-weight: bold; font-size: 18px; }
 
 .element.metal { background: linear-gradient(145deg, #ffd700, #ffea00); }
 .element.halogen { background: linear-gradient(145deg, #ff6a00, #ffb347); }
 .element.noble { background: linear-gradient(145deg, #00c6ff, #0072ff); }
 .element.nonmetal { background: linear-gradient(145deg, #8aff00, #00ff55); }
 .element.metalloid { background: linear-gradient(145deg, #ff00ff, #ff77ff); }
-
-.tooltip {
-    position: absolute;
-    bottom: 70px;
-    background: rgba(0,0,0,0.8);
-    color: #fff;
-    padding: 5px 10px;
-    border-radius: 8px;
-    font-size: 12px;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s;
-    white-space: nowrap;
-}
-
-.element:hover .tooltip { opacity: 1; }
 
 .mix-area {
     width: 95%;
@@ -94,122 +62,99 @@ h1 {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    padding: 15px;
     flex-wrap: wrap;
-    transition: background 0.5s;
-    margin-bottom: 20px;
+    gap: 10px;
+    padding: 10px;
 }
 
-.mix-area.active { background: rgba(255,255,255,0.4); }
-
 .mix-btn {
-    margin-bottom: 20px;
-    padding: 10px 30px;
+    margin: 15px;
+    padding: 10px 25px;
     border: none;
     border-radius: 15px;
     background: linear-gradient(145deg, #ff6a00, #ffb347);
     color: #fff;
-    font-size: 18px;
-    cursor: pointer;
-    transition: transform 0.3s, box-shadow 0.3s;
+    font-size: 16px;
 }
 
-.mix-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-
-.result {
-    color: #fff;
-    font-size: 18px;
-    text-align: center;
-    min-height: 50px;
-}
-
-/* Bubble Animation */
-.bubble {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.7);
-    pointer-events: none;
-    animation: bubbleUp 1s ease-out forwards;
-}
-
-@keyframes bubbleUp {
-    0% { transform: translateY(0) scale(1); opacity: 1; }
-    100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
-}
+.result { color: #fff; text-align: center; min-height: 50px; margin-bottom:20px; }
 </style>
 </head>
 <body>
-<h1>เกมปรุงสารเคมี 🧪</h1>
+<h1>เกมปรุงสารเคมี มือถือ 🧪</h1>
 
-<div class="table-container" id="elements">
-  <!-- ตารางธาตุ 118 ตัว -->
-</div>
-
-<div class="mix-area" id="mixArea">
-  <p style="color:#fff;">ลากธาตุมาที่นี่เพื่อผสม</p>
-</div>
-
+<div class="table-container" id="elements"></div>
+<div class="mix-area" id="mixArea"><p style="color:#fff;">ลากธาตุมาที่นี่เพื่อผสม</p></div>
 <button class="mix-btn" id="mixBtn">ผสมสาร</button>
 <div class="result" id="result"></div>
 
 <script>
-// ธาตุตัวอย่าง 118 ตัว (เต็มสามารถเพิ่มรายละเอียดได้)
+// ตัวอย่างธาตุ
 const elements = [
-  {symbol:'H',name:'ไฮโดรเจน',group:'nonmetal',desc:'ธาตุที่เบาที่สุดและติดไฟง่าย'},
-  {symbol:'He',name:'ฮีเลียม',group:'noble',desc:'ก๊าซเฉื่อย ไม่ติดไฟ'},
-  {symbol:'Li',name:'ลิเทียม',group:'metal',desc:'โลหะอ่อน ใช้ในแบตเตอรี่'},
-  {symbol:'Be',name:'เบริลเลียม',group:'metal',desc:'โลหะแข็งเบา ใช้ในอากาศยาน'},
-  {symbol:'B',name:'โบรอน',group:'metalloid',desc:'ธาตุกึ่งโลหะ ใช้ในแก้วและเซรามิก'},
-  {symbol:'C',name:'คาร์บอน',group:'nonmetal',desc:'ธาตุพื้นฐานในสิ่งมีชีวิต'},
-  {symbol:'N',name:'ไนโตรเจน',group:'nonmetal',desc:'ก๊าซเฉื่อย ใช้ในอุตสาหกรรมและปุ๋ย'},
-  {symbol:'O',name:'ออกซิเจน',group:'nonmetal',desc:'ก๊าซช่วยหายใจและติดไฟ'},
-  {symbol:'F',name:'ฟลูออรีน',group:'halogen',desc:'ก๊าซพิษมาก ใช้ในฟลูออไรด์'},
-  {symbol:'Ne',name:'นีออน',group:'noble',desc:'ก๊าซเฉื่อย ใช้ไฟนีออน'},
-  // ... (เพิ่มธาตุตัวอื่น ๆ จนครบ 118 ตัว)
-  {symbol:'Na',name:'โซเดียม',group:'metal',desc:'โลหะอ่อน ปฏิกิริยากับน้ำรุนแรง'},
-  {symbol:'Cl',name:'คลอรีน',group:'halogen',desc:'ก๊าซพิษ สีเหลืองเขียว ใช้ฆ่าเชื้อ'},
-  {symbol:'Mg',name:'แมกนีเซียม',group:'metal',desc:'โลหะเบา ติดไฟเป็นแสงสว่าง'},
-  {symbol:'Fe',name:'เหล็ก',group:'metal',desc:'โลหะแข็ง ใช้ทำโครงสร้าง'}
+  {symbol:'H',name:'ไฮโดรเจน',group:'nonmetal'},
+  {symbol:'O',name:'ออกซิเจน',group:'nonmetal'},
+  {symbol:'Na',name:'โซเดียม',group:'metal'},
+  {symbol:'Cl',name:'คลอรีน',group:'halogen'},
+  {symbol:'Mg',name:'แมกนีเซียม',group:'metal'},
+  {symbol:'Fe',name:'เหล็ก',group:'metal'}
 ];
 
 // สร้างตารางธาตุ
 const container = document.getElementById('elements');
-elements.forEach(el => {
-  const div = document.createElement('div');
-  div.className = `element ${el.group}`;
-  div.draggable = true;
-  div.innerHTML = `<span>${el.symbol}</span><div class="tooltip">${el.name}: ${el.desc}</div>`;
-  div.dataset.symbol = el.symbol;
+elements.forEach(el=>{
+  const div=document.createElement('div');
+  div.className=`element ${el.group}`;
+  div.innerHTML=`<span>${el.symbol}</span>`;
+  div.dataset.symbol=el.symbol;
   container.appendChild(div);
-
-  div.addEventListener('dragstart', e => {
-    e.dataTransfer.setData('text/plain', el.symbol);
-  });
 });
 
 // Mix Area
 const mixArea = document.getElementById('mixArea');
-mixArea.addEventListener('dragover', e => e.preventDefault());
-mixArea.addEventListener('drop', e => {
-  e.preventDefault();
-  const symbol = e.dataTransfer.getData('text/plain');
-  const existing = [...mixArea.querySelectorAll('.element')].map(d => d.dataset.symbol);
-  if(!existing.includes(symbol)){
-    const el = elements.find(d=>d.symbol===symbol);
-    const div = document.createElement('div');
-    div.className = 'element';
-    div.style.width='50px';
-    div.style.height='50px';
-    div.innerHTML = `<span>${el.symbol}</span>`;
-    div.dataset.symbol = el.symbol;
-    mixArea.appendChild(div);
-    mixArea.classList.add('active');
-    createBubble(symbol);
-  }
+
+// Touch drag & drop
+let draggingEl = null;
+let offsetX=0, offsetY=0;
+
+elements.forEach(el=>{
+  const div = container.querySelector(`.element[data-symbol='${el.symbol}']`);
+  div.addEventListener('touchstart', e=>{
+    draggingEl = div.cloneNode(true);
+    draggingEl.style.position='absolute';
+    draggingEl.style.zIndex='1000';
+    document.body.appendChild(draggingEl);
+    const touch = e.touches[0];
+    offsetX = touch.clientX - div.getBoundingClientRect().left;
+    offsetY = touch.clientY - div.getBoundingClientRect().top;
+    draggingEl.style.left = `${touch.clientX-offsetX}px`;
+    draggingEl.style.top = `${touch.clientY-offsetY}px`;
+  });
+
+  div.addEventListener('touchmove', e=>{
+    if(!draggingEl) return;
+    const touch = e.touches[0];
+    draggingEl.style.left = `${touch.clientX-offsetX}px`;
+    draggingEl.style.top = `${touch.clientY-offsetY}px`;
+  });
+
+  div.addEventListener('touchend', e=>{
+    if(!draggingEl) return;
+    const mixRect = mixArea.getBoundingClientRect();
+    const dragRect = draggingEl.getBoundingClientRect();
+    // Check if dropped in Mix Area
+    if(dragRect.left+dragRect.width/2 > mixRect.left &&
+       dragRect.left+dragRect.width/2 < mixRect.right &&
+       dragRect.top+dragRect.height/2 > mixRect.top &&
+       dragRect.top+dragRect.height/2 < mixRect.bottom){
+         const newEl = draggingEl.cloneNode(true);
+         newEl.style.position='static';
+         newEl.style.width='50px';
+         newEl.style.height='50px';
+         mixArea.appendChild(newEl);
+    }
+    draggingEl.remove();
+    draggingEl = null;
+  });
 });
 
 // ปุ่มผสมสาร
@@ -218,31 +163,12 @@ const resultDiv = document.getElementById('result');
 
 mixBtn.addEventListener('click', ()=>{
   const symbols = [...mixArea.querySelectorAll('.element')].map(d=>d.dataset.symbol).sort();
-  let resultText = 'ไม่เกิดปฏิกิริยาอะไร';
-
-  // สูตรตัวอย่าง
-  if(symbols.includes('H') && symbols.includes('O') && symbols.length===2){
-    resultText = 'เกิดน้ำ (H₂O) 💧';
-  } else if(symbols.includes('Na') && symbols.includes('Cl') && symbols.length===2){
-    resultText = 'เกิดเกลือแกง (NaCl) 🧂';
-  } else if(symbols.includes('Mg') && symbols.includes('O') && symbols.length===2){
-    resultText = 'เกิดแมกนีเซียมออกไซด์ (MgO) 🔥';
-  }
-
+  let resultText = 'ไม่เกิดปฏิกิริยา';
+  if(symbols.includes('H') && symbols.includes('O') && symbols.length===2) resultText='เกิดน้ำ (H₂O) 💧';
+  else if(symbols.includes('Na') && symbols.includes('Cl') && symbols.length===2) resultText='เกิดเกลือแกง (NaCl) 🧂';
+  else if(symbols.includes('Mg') && symbols.includes('O') && symbols.length===2) resultText='เกิดแมกนีเซียมออกไซด์ (MgO) 🔥';
   resultDiv.innerHTML = resultText;
 });
-
-// Bubble Animation
-function createBubble(symbol){
-  const bubble = document.createElement('div');
-  bubble.className='bubble';
-  bubble.style.width='20px';
-  bubble.style.height='20px';
-  bubble.style.left=`${Math.random()*window.innerWidth}px`;
-  bubble.style.bottom='50px';
-  document.body.appendChild(bubble);
-  setTimeout(()=>bubble.remove(),1000);
-}
 </script>
 </body>
 </html>
