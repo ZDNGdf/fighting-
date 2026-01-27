@@ -3,54 +3,69 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pop Friend</title>
+<title>Pop Meow</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet">
 
 <style>
 body {
     margin: 0;
     height: 100vh;
-    background: #ffc0cb;
+    background: linear-gradient(135deg,#ff9ac2,#ffc0cb);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    font-family: sans-serif;
+    font-family: 'Fredoka One', cursive;
     cursor: pointer;
 }
 
 img {
     width: 280px;
     max-width: 80vw;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
+    transition: transform 0.1s;
+}
+
+img:active {
+    transform: scale(0.95);
 }
 
 .counter {
-    font-size: 22px;
+    font-size: 28px;
     font-weight: bold;
+    color: #fff;
+    text-shadow: 1px 1px 3px #333;
+    margin-bottom: 15px;
 }
 
 select {
     margin-top: 10px;
-    padding: 8px;
-    border-radius: 10px;
+    padding: 8px 12px;
+    border-radius: 12px;
     font-size: 16px;
+    border: none;
+    outline: none;
 }
 
 .board {
-    margin-top: 15px;
-    background: white;
+    margin-top: 20px;
+    background: rgba(255,255,255,0.9);
     padding: 15px;
-    border-radius: 15px;
-    width: 260px;
+    border-radius: 20px;
+    width: 280px;
     text-align: center;
+    font-weight: bold;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
 }
 </style>
 </head>
 <body>
 
-<img id="img" src="https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg" alt="Pop Cat">
+<img id="img" src="https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg" alt="Pop Meow">
 
-<div class="counter">กดไปแล้ว: <span id="count">0</span> ครั้ง</div>
+<div class="counter">🌍 รวมทั้งหมด: <span id="total">0</span></div>
 
 <select id="country">
     <option value="TH">🇹🇭 ไทย</option>
@@ -59,64 +74,80 @@ select {
     <option value="KR">🇰🇷 เกาหลี</option>
 </select>
 
-<div class="board" id="board"></div>
+<div class="board" id="board">กำลังโหลด...</div>
 
-<script>
-const img = document.getElementById("img");
-const countEl = document.getElementById("count");
-const board = document.getElementById("board");
-const countrySelect = document.getElementById("country");
+<script type="module">
+// Import Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// รูปตอนอ้าปาก / ปิดปาก
-const imgClosed = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg?ex=6978d7d3&is=69778653&hm=246e30199b0652025c5283829b4a2c32f63c9c2c62fa1611bd992ed8bd01250c&";
-const imgOpen = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg?ex=6978d7d5&is=69778655&hm=d96fa7881e1d67704a0128cf6d4a1043cb641a09c9515832b64b7402da8b2a3c&";
-
-// ใช้ localStorage เก็บข้อมูล
-let data = JSON.parse(localStorage.getItem("popData")) || {
-    total: 0,
-    country: { TH: 0, JP: 0, US: 0, KR: 0 }
+// Your Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyDcIZWpulJ7PaXpkwFcv2xlgt02W0XqMYI",
+  authDomain: "popmeow-43a63.firebaseapp.com",
+  projectId: "popmeow-43a63",
+  storageBucket: "popmeow-43a63.appspot.com",
+  messagingSenderId: "636808933527",
+  appId: "1:636808933527:web:23f3f5226ee0dab1e5f9d2",
+  measurementId: "G-VL4SH88YBP"
 };
 
-// บันทึก
-function save() {
-    localStorage.setItem("popData", JSON.stringify(data));
-}
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// อัปเดต UI
-function updateUI() {
-    countEl.textContent = data.total;
-    board.innerHTML = `
-        🌍 ตารางคะแนน<br>
-        🇹🇭 ไทย: ${data.country.TH}<br>
-        🇯🇵 ญี่ปุ่น: ${data.country.JP}<br>
-        🇺🇸 อเมริกา: ${data.country.US}<br>
-        🇰🇷 เกาหลี: ${data.country.KR}
-    `;
+const img = document.getElementById("img");
+const totalEl = document.getElementById("total");
+const boardEl = document.getElementById("board");
+const countrySelect = document.getElementById("country");
+
+// รูปปิด/อ้าปาก
+const imgClosed = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg";
+const imgOpen = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg";
+
+// Firestore doc
+const docRef = doc(db, "popMeow", "global");
+
+// เริ่มระบบ: สร้าง doc ถ้าไม่มี
+async function init() {
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+        await setDoc(docRef, {
+            total: 0,
+            countries: { TH: 0, JP: 0, US: 0, KR: 0 }
+        });
+    }
 }
+init();
 
 // ฟังก์ชันกด
-function pop() {
-    // เปลี่ยนรูปตอนอ้าปาก
+async function pop() {
     img.src = imgOpen;
-    
-    // กลับรูปเดิมหลัง 80ms
-    setTimeout(() => {
-        img.src = imgClosed;
-    }, 80);
+    setTimeout(() => img.src = imgClosed, 80);
 
-    // นับคลิก
-    data.total++;
-    data.country[countrySelect.value]++;
-    save();
-    updateUI();
+    // อัปเดต Firestore
+    await updateDoc(docRef, {
+        total: increment(1),
+        [`countries.${countrySelect.value}`]: increment(1)
+    });
 }
 
 // กดได้ทั้งหน้า
 document.body.addEventListener("mousedown", pop);
 document.body.addEventListener("touchstart", pop);
 
-// โหลดตอนเริ่ม
-updateUI();
+// เรียลไทม์
+onSnapshot(docRef, (docSnap) => {
+    const data = docSnap.data();
+    totalEl.textContent = data.total;
+    boardEl.innerHTML = `
+        🌍 คะแนนตามประเทศ<br>
+        🇹🇭 ไทย: ${data.countries.TH}<br>
+        🇯🇵 ญี่ปุ่น: ${data.countries.JP}<br>
+        🇺🇸 อเมริกา: ${data.countries.US}<br>
+        🇰🇷 เกาหลี: ${data.countries.KR}
+    `;
+});
 </script>
 
 </body>
