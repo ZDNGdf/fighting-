@@ -3,20 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pop World</title>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<title>Pop Friend</title>
 
 <style>
 body {
     margin: 0;
+    height: 100vh;
     background: #ffc0cb;
     display: flex;
     flex-direction: column;
-    align-items: center;
     justify-content: center;
-    height: 100vh;
+    align-items: center;
     font-family: sans-serif;
 }
 
@@ -26,16 +23,23 @@ img {
 }
 
 .counter {
-    margin-top: 10px;
     font-size: 22px;
+    margin-top: 10px;
     font-weight: bold;
 }
 
+select {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
 .board {
+    margin-top: 15px;
     background: white;
     padding: 15px;
     border-radius: 15px;
-    margin-top: 15px;
     width: 260px;
 }
 </style>
@@ -44,72 +48,65 @@ img {
 
 <img id="img" src="https://media.discordapp.net/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg">
 
-<div class="counter">🌍 รวมทั้งหมด: <span id="total">0</span></div>
+<div class="counter">กดไปแล้ว: <span id="count">0</span> ครั้ง</div>
 
-<div class="board" id="board">กำลังโหลด...</div>
+<select id="country">
+    <option value="TH">🇹🇭 ไทย</option>
+    <option value="JP">🇯🇵 ญี่ปุ่น</option>
+    <option value="US">🇺🇸 อเมริกา</option>
+    <option value="KR">🇰🇷 เกาหลี</option>
+</select>
+
+<div class="board" id="board"></div>
 
 <script>
-const firebaseConfig = {
-  apiKey: "ใส่ของคุณ",
-  authDomain: "ใส่ของคุณ",
-  projectId: "ใส่ของคุณ",
+const img = document.getElementById("img");
+const countEl = document.getElementById("count");
+const board = document.getElementById("board");
+const countrySelect = document.getElementById("country");
+
+let data = JSON.parse(localStorage.getItem("popData")) || {
+    total: 0,
+    country: {
+        TH: 0,
+        JP: 0,
+        US: 0,
+        KR: 0
+    }
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-const img = document.getElementById("img");
-const totalEl = document.getElementById("total");
-const boardEl = document.getElementById("board");
-
-const country = "TH"; // เปลี่ยนได้
-
-const docRef = db.collection("pop").doc("global");
-
-async function init() {
-    const doc = await docRef.get();
-    if (!doc.exists) {
-        await docRef.set({
-            total: 0,
-            countries: {
-                TH: 0,
-                JP: 0,
-                US: 0,
-                KR: 0
-            }
-        });
-    }
+function save() {
+    localStorage.setItem("popData", JSON.stringify(data));
 }
 
-async function pop() {
+function updateUI() {
+    countEl.textContent = data.total;
+    board.innerHTML = `
+        🌍 ตารางคะแนน<br>
+        🇹🇭 ไทย: ${data.country.TH}<br>
+        🇯🇵 ญี่ปุ่น: ${data.country.JP}<br>
+        🇺🇸 อเมริกา: ${data.country.US}<br>
+        🇰🇷 เกาหลี: ${data.country.KR}
+    `;
+}
+
+function pop() {
     img.src = "https://media.discordapp.net/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg";
 
     setTimeout(() => {
         img.src = "https://media.discordapp.net/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg";
     }, 80);
 
-    await docRef.update({
-        total: firebase.firestore.FieldValue.increment(1),
-        [`countries.${country}`]: firebase.firestore.FieldValue.increment(1)
-    });
+    data.total++;
+    data.country[countrySelect.value]++;
+    save();
+    updateUI();
 }
 
 img.addEventListener("mousedown", pop);
 img.addEventListener("touchstart", pop);
 
-docRef.onSnapshot(doc => {
-    const data = doc.data();
-    totalEl.textContent = data.total;
-
-    boardEl.innerHTML = `
-    🇹🇭 ไทย: ${data.countries.TH}<br>
-    🇯🇵 ญี่ปุ่น: ${data.countries.JP}<br>
-    🇺🇸 อเมริกา: ${data.countries.US}<br>
-    🇰🇷 เกาหลี: ${data.countries.KR}
-    `;
-});
-
-init();
+updateUI();
 </script>
 
 </body>
