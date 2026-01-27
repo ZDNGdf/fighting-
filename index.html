@@ -3,158 +3,230 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>เกมหมากฮอต</title>
+<title>เกมปรุงยา/เคมี</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#ff9a9e,#fad0c4);}
-.container{display:flex;flex-direction:column;align-items:center;position:relative;}
-h1{color:#fff;margin-bottom:20px;text-shadow:2px 2px 5px rgba(0,0,0,0.3);}
-.board-container{position:relative;width:480px;height:480px;}
-.board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%;border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
-.cell{width:100%;height:100%;display:flex;justify-content:center;align-items:center;transition:all 0.3s ease;}
-.cell.dark{background:#b58863;}
-.cell.light{background:#f0d9b5;}
-.piece{width:55px;height:55px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:all 0.3s ease;position:absolute;z-index:5;}
-.red{background:#ff4b5c;box-shadow:0 4px 10px rgba(255,75,92,0.5);}
-.black{background:#333;box-shadow:0 4px 10px rgba(0,0,0,0.5);}
-.selected{box-shadow:0 0 15px 5px yellow !important;}
-.result{margin-top:20px;font-size:1.5rem;color:#fff;text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
-button{margin-top:10px;padding:10px 20px;border:none;border-radius:10px;background:#fff;color:#ff6f91;font-weight:bold;cursor:pointer;transition:all 0.3s ease;}
-button:hover{transform:scale(1.1);background:#ff6f91;color:#fff;}
-.popup-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:10;}
-.popup{background:#fff;padding:30px;border-radius:20px;text-align:center;max-width:320px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.4);}
-.popup h2{margin-bottom:20px;color:#333;}
-.mode-btn{margin:10px 0;padding:12px 15px;width:100%;border:none;border-radius:10px;cursor:pointer;transition:all 0.3s;font-weight:bold;font-size:1rem;}
-.mode-btn:hover{transform:scale(1.05);}
-.level-btn{background:#6a82fb;color:#fff;}
-.pvp-btn{background:#ff6f91;color:#fff;}
+  body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(to right, #74ebd5, #ACB6E5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    margin-top: 20px;
+    color: #fff;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.3);
+  }
+
+  .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 15px;
+  }
+
+  .element {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(145deg, #ffd700, #ffea00);
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+  }
+
+  .element:hover {
+    transform: scale(1.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  }
+
+  .element span {
+    font-weight: bold;
+    font-size: 20px;
+  }
+
+  .tooltip {
+    position: absolute;
+    bottom: 90px;
+    background: rgba(0,0,0,0.8);
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+
+  .element:hover .tooltip {
+    opacity: 1;
+  }
+
+  .mix-area {
+    margin-top: 30px;
+    width: 90%;
+    max-width: 600px;
+    min-height: 150px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+    flex-wrap: wrap;
+    transition: background 0.5s;
+  }
+
+  .mix-area.active {
+    background: rgba(255,255,255,0.4);
+  }
+
+  .mix-btn {
+    margin-top: 20px;
+    padding: 10px 30px;
+    border: none;
+    border-radius: 15px;
+    background: linear-gradient(145deg, #ff6a00, #ffb347);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+
+  .mix-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  }
+
+  .result {
+    margin-top: 20px;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+    min-height: 50px;
+  }
+
+  /* Animation bubble effect */
+  .bubble {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+    pointer-events: none;
+    animation: bubbleUp 1s ease-out forwards;
+  }
+
+  @keyframes bubbleUp {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-100px) scale(0.5); opacity: 0; }
+  }
 </style>
 </head>
 <body>
+<h1>เกมปรุงสารเคมี 🧪</h1>
 
-<div class="container">
-<h1>เกมหมากฮอต</h1>
-<div class="board-container">
-<div class="board" id="board"></div>
+<div class="container" id="elements">
+  <!-- ธาตุตัวอย่าง -->
 </div>
+
+<div class="mix-area" id="mixArea">
+  <p style="color:#fff;">ลากธาตุมาที่นี่เพื่อผสม</p>
+</div>
+
+<button class="mix-btn" id="mixBtn">ผสมสาร</button>
+
 <div class="result" id="result"></div>
-<button onclick="resetGame()">เริ่มใหม่</button>
-</div>
-
-<!-- Popup เลือกโหมด -->
-<div class="popup-bg" id="popup">
-<div class="popup">
-<h2>เลือกโหมดเกม</h2>
-<button class="mode-btn pvp-btn" onclick="startGame('pvp')">ผู้เล่น vs ผู้เล่น</button>
-<button class="mode-btn level-btn" onclick="chooseBot()">ผู้เล่น vs บอท</button>
-</div>
-</div>
-
-<!-- Popup เลือกระดับบอท -->
-<div class="popup-bg" id="botPopup" style="display:none;">
-<div class="popup">
-<h2>เลือกระดับบอท</h2>
-<button class="mode-btn level-btn" onclick="startGame('bot',1)">Level 1 (ง่าย)</button>
-<button class="mode-btn level-btn" onclick="startGame('bot',2)">Level 2 (ปานกลาง)</button>
-<button class="mode-btn level-btn" onclick="startGame('bot',3)">Level 3 (ยาก)</button>
-</div>
-</div>
 
 <script>
-const boardEl=document.getElementById('board');
-const resultEl=document.getElementById('result');
-const popup=document.getElementById('popup');
-const botPopup=document.getElementById('botPopup');
+const elements = [
+  { symbol: 'H', name: 'ไฮโดรเจน', description: 'ธาตุที่เบาที่สุดและติดไฟง่าย' },
+  { symbol: 'O', name: 'ออกซิเจน', description: 'ก๊าซช่วยหายใจและติดไฟ' },
+  { symbol: 'Na', name: 'โซเดียม', description: 'โลหะอ่อน ปฏิกิริยารุนแรงกับน้ำ' },
+  { symbol: 'Cl', name: 'คลอรีน', description: 'ก๊าซพิษ สีเหลืองเขียว ใช้ฆ่าเชื้อ' },
+  { symbol: 'Mg', name: 'แมกนีเซียม', description: 'โลหะเบา ติดไฟเป็นแสงสว่าง' },
+  { symbol: 'C', name: 'คาร์บอน', description: 'ธาตุพื้นฐานในสิ่งมีชีวิต' },
+  { symbol: 'Fe', name: 'เหล็ก', description: 'โลหะแข็ง ใช้ทำโครงสร้าง' }
+];
 
-let board=[], pieces=[], mode='', botLevel=0, turn='red', selectedPiece=null, gameOver=false;
-const size=60;
+// สร้าง UI ธาตุ
+const elementsContainer = document.getElementById('elements');
+elements.forEach(el => {
+  const div = document.createElement('div');
+  div.className = 'element';
+  div.draggable = true;
+  div.innerHTML = `<span>${el.symbol}</span>
+                   <div class="tooltip">${el.name}: ${el.description}</div>`;
+  div.dataset.symbol = el.symbol;
+  elementsContainer.appendChild(div);
 
-function initBoard(){
-  boardEl.innerHTML=''; board=[]; pieces=[];
-  for(let r=0;r<8;r++){
-    board[r]=[];
-    for(let c=0;c<8;c++){
-      let cell=document.createElement('div');
-      cell.classList.add('cell',(r+c)%2?'dark':'light');
-      cell.dataset.row=r; cell.dataset.col=c;
-      boardEl.appendChild(cell);
-      board[r][c]=(r<3&&(r+c)%2)?'black':(r>4&&(r+c)%2)?'red':null;
-      if(board[r][c]){
-        let piece=document.createElement('div');
-        piece.classList.add('piece',board[r][c]);
-        piece.style.top=r*size+'px';
-        piece.style.left=c*size+'px';
-        piece.dataset.row=r; piece.dataset.col=c;
-        boardEl.appendChild(piece); pieces.push(piece);
-      }
-    }
-  }
-}
-
-function chooseBot(){popup.style.display='none';botPopup.style.display='flex';}
-function startGame(selectedMode,level=0){mode=selectedMode; botLevel=level; popup.style.display='none'; botPopup.style.display='none'; initBoard(); turn='red'; selectedPiece=null; resultEl.textContent=''; gameOver=false;}
-function resetGame(){popup.style.display='flex'; botPopup.style.display='none'; initBoard(); resultEl.textContent=''; turn='red'; selectedPiece=null; gameOver=false;}
-
-function getPieceAt(row,col){return pieces.find(p=>parseInt(p.dataset.row)===row && parseInt(p.dataset.col)===col);}
-function isValidMove(piece,toRow,toCol){
-  let r=parseInt(piece.dataset.row),c=parseInt(piece.dataset.col);
-  let dir=piece.classList.contains('red')?-1:1;
-  if(Math.abs(toCol-c)===1 && toRow===r+dir && !getPieceAt(toRow,toCol)) return true;
-  if(Math.abs(toCol-c)===2 && toRow===r+dir*2){
-    let mid=getPieceAt(r+dir,(c+toCol)/2);
-    if(mid && mid.classList.contains(turn==='red'?'black':'red')) return true;
-  }
-  return false;
-}
-function movePiece(piece,toRow,toCol){
-  let r=parseInt(piece.dataset.row),c=parseInt(piece.dataset.col);
-  if(Math.abs(toRow-r)===2){
-    let midRow=(r+toRow)/2, midCol=(c+toCol)/2;
-    let mid=getPieceAt(midRow,midCol);
-    if(mid){mid.remove(); pieces=pieces.filter(p=>p!==mid);}
-  }
-  piece.dataset.row=toRow; piece.dataset.col=toCol;
-  piece.style.top=toRow*size+'px'; piece.style.left=toCol*size+'px';
-  checkWin(); turn=turn==='red'?'black':'red'; selectedPiece=null;
-  if(mode==='bot' && turn==='black' && !gameOver) setTimeout(botMove,300);
-}
-
-boardEl.addEventListener('click',e=>{
-  if(gameOver) return;
-  if(!e.target.classList.contains('piece') && !e.target.classList.contains('cell')) return;
-  let row=parseInt(e.target.dataset.row), col=parseInt(e.target.dataset.col);
-  if(selectedPiece){
-    if(isValidMove(selectedPiece,row,col)) movePiece(selectedPiece,row,col);
-    else selectedPiece=null;
-  } else if(e.target.classList.contains(turn)){
-    selectedPiece=e.target;
-    selectedPiece.classList.add('selected');
-  }
-  pieces.forEach(p=>{if(p!==selectedPiece)p.classList.remove('selected');});
+  div.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', el.symbol);
+  });
 });
 
-function checkWin(){
-  let redLeft=pieces.filter(p=>p.classList.contains('red')).length;
-  let blackLeft=pieces.filter(p=>p.classList.contains('black')).length;
-  if(redLeft===0){resultEl.textContent='ดำชนะ! 🎉'; gameOver=true;}
-  if(blackLeft===0){resultEl.textContent='แดงชนะ! 🎉'; gameOver=true;}
-}
+// Mix Area
+const mixArea = document.getElementById('mixArea');
+mixArea.addEventListener('dragover', e => e.preventDefault());
+mixArea.addEventListener('drop', e => {
+  e.preventDefault();
+  const symbol = e.dataTransfer.getData('text/plain');
+  const existing = [...mixArea.querySelectorAll('.element')].map(d => d.dataset.symbol);
+  if (!existing.includes(symbol)) {
+    const el = elements.find(d => d.symbol === symbol);
+    const div = document.createElement('div');
+    div.className = 'element';
+    div.style.width = '60px';
+    div.style.height = '60px';
+    div.innerHTML = `<span>${el.symbol}</span>`;
+    div.dataset.symbol = el.symbol;
+    mixArea.appendChild(div);
+    mixArea.classList.add('active');
+    createBubble(symbol);
+  }
+});
 
-function botMove(){
-  let botPieces=pieces.filter(p=>p.classList.contains('black'));
-  let moves=[];
-  botPieces.forEach(p=>{
-    for(let r=Math.max(0,parseInt(p.dataset.row)-2);r<=Math.min(7,parseInt(p.dataset.row)+2);r++){
-      for(let c=Math.max(0,parseInt(p.dataset.col)-2);c<=Math.min(7,parseInt(p.dataset.col)+2);c++){
-        if(isValidMove(p,r,c)) moves.push({piece:p,row:r,col:c});
-      }
-    }
-  });
-  if(moves.length===0) return;
-  let move=moves[Math.floor(Math.random()*moves.length)];
-  movePiece(move.piece,move.row,move.col);
+// ปุ่มผสมสาร
+const mixBtn = document.getElementById('mixBtn');
+const resultDiv = document.getElementById('result');
+
+mixBtn.addEventListener('click', () => {
+  const symbols = [...mixArea.querySelectorAll('.element')].map(d => d.dataset.symbol).sort();
+  let resultText = 'ไม่เกิดปฏิกิริยาอะไร';
+
+  // ตัวอย่างสูตรผสม
+  if (symbols.includes('H') && symbols.includes('O') && symbols.length === 2) {
+    resultText = 'เกิดน้ำ (H₂O) 💧';
+  } else if (symbols.includes('Na') && symbols.includes('Cl') && symbols.length === 2) {
+    resultText = 'เกิดเกลือแกง (NaCl) 🧂';
+  } else if (symbols.includes('Mg') && symbols.includes('O') && symbols.length === 2) {
+    resultText = 'เกิดแมกนีเซียมออกไซด์ (MgO) 🔥';
+  }
+
+  resultDiv.innerHTML = resultText;
+});
+
+// Bubble Animation
+function createBubble(symbol) {
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  bubble.style.width = '20px';
+  bubble.style.height = '20px';
+  bubble.style.left = `${Math.random() * window.innerWidth}px`;
+  bubble.style.bottom = '50px';
+  document.body.appendChild(bubble);
+  setTimeout(() => bubble.remove(), 1000);
 }
 </script>
-
 </body>
 </html>
