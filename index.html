@@ -90,8 +90,8 @@ const boardEl = document.getElementById("board");
 const countrySelect = document.getElementById("country");
 
 // รูปจาก Firebase Storage
-const imgClosed = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg?ex=6978d7d3&is=69778653&hm=246e30199b0652025c5283829b4a2c32f63c9c2c62fa1611bd992ed8bd01250c&";
-const imgOpen   = "https://cdn.discordapp.com/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg?ex=6978d7d5&is=69778655&hm=d96fa7881e1d67704a0128cf6d4a1043cb641a09c9515832b64b7402da8b2a3c&";
+const imgClosed = "https://firebasestorage.googleapis.com/v0/b/popmeow-43a63.appspot.com/o/popcat%2Fclosed.jpg?alt=media";
+const imgOpen   = "https://firebasestorage.googleapis.com/v0/b/popmeow-43a63.appspot.com/o/popcat%2Fopen.jpg?alt=media";
 
 const docRef = db.collection("popMeow").doc("global");
 
@@ -110,7 +110,8 @@ function pop(){
     docRef.update({
         total: firebase.firestore.FieldValue.increment(1),
         [`countries.${countrySelect.value}`]: firebase.firestore.FieldValue.increment(1)
-    });
+    }).then(()=> console.log("Pop counted!"))
+      .catch(err => console.error("Update failed:", err));
 }
 
 // กดได้ทั้งหน้า
@@ -134,6 +135,7 @@ function animateCount(el, newVal){
 
 // เรียลไทม์
 docRef.onSnapshot(docSnap=>{
+    if(!docSnap.exists) return;
     const data = docSnap.data();
     animateCount(totalEl, data.total);
     boardEl.innerHTML = `
