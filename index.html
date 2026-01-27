@@ -93,11 +93,14 @@ docRef.get().then(docSnap=>{
 
 // ฟังก์ชันกด
 function pop(){
-    docRef.update({
+    // ใช้ set + merge แทน update
+    const country = countrySelect.value;
+    docRef.set({
         total: firebase.firestore.FieldValue.increment(1),
-        [`countries.${countrySelect.value}`]: firebase.firestore.FieldValue.increment(1)
-    }).then(()=> console.log("Pop counted!"))
-      .catch(err => console.error("Update failed:", err));
+        countries: {[country]: firebase.firestore.FieldValue.increment(1)}
+    }, {merge:true})
+    .then(()=> console.log("Pop counted!"))
+    .catch(err => console.error("Update failed:", err));
 }
 
 // ใช้ปุ่มกด
@@ -120,3 +123,4 @@ docRef.onSnapshot(docSnap=>{
 
 </body>
 </html>
+
