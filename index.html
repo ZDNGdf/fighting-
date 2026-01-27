@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Task List UI สวยๆ</title>
+<title>Floating Bubbles 🌈</title>
 <style>
 /* ====== Reset & Font ====== */
 * {
@@ -13,132 +13,67 @@
     font-family: 'Segoe UI', sans-serif;
 }
 body {
-    background: linear-gradient(135deg, #ff9a9e, #fad0c4);
+    height: 100vh;
+    background: linear-gradient(135deg, #89f7fe, #66a6ff);
+    overflow: hidden;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
-/* ====== Task Container ====== */
-.container {
-    background: #fff;
-    width: 350px;
-    padding: 30px;
-    border-radius: 20px;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.3s ease;
-}
-.container:hover {
-    transform: translateY(-5px);
-}
-
-/* ====== Header ====== */
+/* ====== Title ====== */
 h1 {
-    color: #ff6f91;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-/* ====== Input & Button ====== */
-.input-group {
-    display: flex;
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-.input-group input {
-    flex: 1;
-    padding: 10px 15px;
-    border: 2px solid #ff6f91;
-    border-radius: 10px 0 0 10px;
-    outline: none;
-    transition: border 0.3s ease;
-}
-.input-group input:focus {
-    border-color: #ff3f7f;
-}
-.input-group button {
-    padding: 10px 20px;
-    border: none;
-    background: #ff6f91;
+    position: absolute;
+    top: 30px;
+    font-size: 3rem;
     color: #fff;
-    border-radius: 0 10px 10px 0;
-    cursor: pointer;
-    transition: background 0.3s ease;
-}
-.input-group button:hover {
-    background: #ff3f7f;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.2);
 }
 
-/* ====== Task List ====== */
-ul {
-    list-style: none;
-    width: 100%;
+/* ====== Bubble Styles ====== */
+.bubble {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.7;
+    animation: floatUp linear infinite;
 }
 
-ul li {
-    background: #ffe0e9;
-    margin-bottom: 10px;
-    padding: 10px 15px;
-    border-radius: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: background 0.3s ease;
-}
-ul li.completed {
-    text-decoration: line-through;
-    background: #d3ffd3;
-}
-
-li button {
-    border: none;
-    background: transparent;
-    color: #ff3f7f;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 16px;
-}
-li button:hover {
-    color: #ff1f5f;
+/* ====== Floating Animation ====== */
+@keyframes floatUp {
+    0% {
+        transform: translateY(100vh) scale(0.5);
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-10vh) scale(1);
+        opacity: 0;
+    }
 }
 </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>Task List 🌸</h1>
-    <div class="input-group">
-        <input type="text" placeholder="เพิ่มงานใหม่..." id="taskInput">
-        <button onclick="addTask()">เพิ่ม</button>
-    </div>
-    <ul id="taskList"></ul>
-</div>
+<h1>🌊 Floating Bubbles 🌊</h1>
 
 <script>
-// ====== JS ======
-const taskList = document.getElementById('taskList');
-const taskInput = document.getElementById('taskInput');
+// ====== JS สร้าง Bubble ======
+const colors = ['#ff6f91', '#ff9671', '#ffc75f', '#f9f871', '#a0e7e5', '#b4f8c8'];
+const bubbleCount = 25;
 
-function addTask() {
-    const taskText = taskInput.value.trim();
-    if(taskText === "") return;
-
-    const li = document.createElement('li');
-    li.innerHTML = `${taskText} <button onclick="removeTask(this)">✖</button>`;
-    li.addEventListener('click', () => {
-        li.classList.toggle('completed');
-    });
-    taskList.appendChild(li);
-    taskInput.value = "";
-}
-
-function removeTask(btn) {
-    btn.parentElement.remove();
+for(let i = 0; i < bubbleCount; i++) {
+    const bubble = document.createElement('div');
+    bubble.classList.add('bubble');
+    const size = Math.random() * 60 + 20; // ขนาด 20-80px
+    bubble.style.width = `${size}px`;
+    bubble.style.height = `${size}px`;
+    bubble.style.background = colors[Math.floor(Math.random() * colors.length)];
+    bubble.style.left = `${Math.random() * 100}vw`;
+    bubble.style.animationDuration = `${Math.random() * 10 + 5}s`; // 5-15 วินาที
+    bubble.style.animationDelay = `${Math.random() * 5}s`;
+    document.body.appendChild(bubble);
 }
 </script>
 
