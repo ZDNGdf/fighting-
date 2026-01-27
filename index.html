@@ -6,33 +6,37 @@
 <title>เกมหมากฮอต</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
-body{display:flex;justify-content:center;align-items:center;height:100vh;background: linear-gradient(135deg,#ff9a9e,#fad0c4);}
+body{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#ff9a9e,#fad0c4);}
 .container{display:flex;flex-direction:column;align-items:center;position:relative;}
 h1{color:#fff;margin-bottom:20px;text-shadow:2px 2px 5px rgba(0,0,0,0.3);}
-.board{display:grid;grid-template-columns:repeat(8,60px);grid-template-rows:repeat(8,60px);gap:0;}
-.cell{width:60px;height:60px;display:flex;justify-content:center;align-items:center;transition:all 0.3s ease;}
+.board-container{position:relative;width:480px;height:480px;}
+.board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:100%;height:100%;border-radius:15px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.3);}
+.cell{width:100%;height:100%;display:flex;justify-content:center;align-items:center;transition:all 0.3s ease;}
 .cell.dark{background:#b58863;}
 .cell.light{background:#f0d9b5;}
-.piece{width:50px;height:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:all 0.3s ease;position:absolute;}
-.red{background:#ff4b5c;}
-.black{background:#333;}
-.selected{box-shadow:0 0 15px 5px yellow;}
+.piece{width:55px;height:55px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:all 0.3s ease;position:absolute;z-index:5;}
+.red{background:#ff4b5c;box-shadow:0 4px 10px rgba(255,75,92,0.5);}
+.black{background:#333;box-shadow:0 4px 10px rgba(0,0,0,0.5);}
+.selected{box-shadow:0 0 15px 5px yellow !important;}
 .result{margin-top:20px;font-size:1.5rem;color:#fff;text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
 button{margin-top:10px;padding:10px 20px;border:none;border-radius:10px;background:#fff;color:#ff6f91;font-weight:bold;cursor:pointer;transition:all 0.3s ease;}
 button:hover{transform:scale(1.1);background:#ff6f91;color:#fff;}
 .popup-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:10;}
-.popup{background:#fff;padding:30px;border-radius:20px;text-align:center;max-width:300px;width:80%;box-shadow:0 10px 40px rgba(0,0,0,0.4);}
+.popup{background:#fff;padding:30px;border-radius:20px;text-align:center;max-width:320px;width:90%;box-shadow:0 10px 40px rgba(0,0,0,0.4);}
 .popup h2{margin-bottom:20px;color:#333;}
-.mode-btn{margin:10px 0;padding:10px 15px;width:100%;border:none;border-radius:10px;cursor:pointer;transition:all 0.3s;font-weight:bold;}
+.mode-btn{margin:10px 0;padding:12px 15px;width:100%;border:none;border-radius:10px;cursor:pointer;transition:all 0.3s;font-weight:bold;font-size:1rem;}
 .mode-btn:hover{transform:scale(1.05);}
 .level-btn{background:#6a82fb;color:#fff;}
 .pvp-btn{background:#ff6f91;color:#fff;}
 </style>
 </head>
 <body>
+
 <div class="container">
 <h1>เกมหมากฮอต</h1>
+<div class="board-container">
 <div class="board" id="board"></div>
+</div>
 <div class="result" id="result"></div>
 <button onclick="resetGame()">เริ่มใหม่</button>
 </div>
@@ -57,56 +61,42 @@ button:hover{transform:scale(1.1);background:#ff6f91;color:#fff;}
 </div>
 
 <script>
-const boardEl = document.getElementById('board');
-const resultEl = document.getElementById('result');
-const popup = document.getElementById('popup');
-const botPopup = document.getElementById('botPopup');
+const boardEl=document.getElementById('board');
+const resultEl=document.getElementById('result');
+const popup=document.getElementById('popup');
+const botPopup=document.getElementById('botPopup');
 
-let board=[], pieces=[];
-let mode='', botLevel=0;
-let turn='red', selectedPiece=null;
+let board=[], pieces=[], mode='', botLevel=0, turn='red', selectedPiece=null, gameOver=false;
 const size=60;
 
 function initBoard(){
-  boardEl.innerHTML='';
-  board=[]; pieces=[];
+  boardEl.innerHTML=''; board=[]; pieces=[];
   for(let r=0;r<8;r++){
     board[r]=[];
     for(let c=0;c<8;c++){
       let cell=document.createElement('div');
       cell.classList.add('cell',(r+c)%2?'dark':'light');
-      cell.dataset.row=r;
-      cell.dataset.col=c;
+      cell.dataset.row=r; cell.dataset.col=c;
       boardEl.appendChild(cell);
-      board[r][c]=(r<3 && (r+c)%2)?'black':(r>4 && (r+c)%2)?'red':null;
+      board[r][c]=(r<3&&(r+c)%2)?'black':(r>4&&(r+c)%2)?'red':null;
       if(board[r][c]){
         let piece=document.createElement('div');
         piece.classList.add('piece',board[r][c]);
         piece.style.top=r*size+'px';
         piece.style.left=c*size+'px';
-        piece.dataset.row=r;
-        piece.dataset.col=c;
-        boardEl.appendChild(piece);
-        pieces.push(piece);
+        piece.dataset.row=r; piece.dataset.col=c;
+        boardEl.appendChild(piece); pieces.push(piece);
       }
     }
   }
 }
 
 function chooseBot(){popup.style.display='none';botPopup.style.display='flex';}
-
-function startGame(selectedMode,level=0){
-  mode=selectedMode; botLevel=level;
-  popup.style.display='none'; botPopup.style.display='none';
-  initBoard();
-  turn='red'; selectedPiece=null;
-  resultEl.textContent='';
-}
-
-function resetGame(){popup.style.display='flex'; botPopup.style.display='none'; initBoard(); resultEl.textContent=''; turn='red'; selectedPiece=null;}
+function startGame(selectedMode,level=0){mode=selectedMode; botLevel=level; popup.style.display='none'; botPopup.style.display='none'; initBoard(); turn='red'; selectedPiece=null; resultEl.textContent=''; gameOver=false;}
+function resetGame(){popup.style.display='flex'; botPopup.style.display='none'; initBoard(); resultEl.textContent=''; turn='red'; selectedPiece=null; gameOver=false;}
 
 function getPieceAt(row,col){return pieces.find(p=>parseInt(p.dataset.row)===row && parseInt(p.dataset.col)===col);}
-function isValidMove(piece,toRow,toCol){ //simplified rules
+function isValidMove(piece,toRow,toCol){
   let r=parseInt(piece.dataset.row),c=parseInt(piece.dataset.col);
   let dir=piece.classList.contains('red')?-1:1;
   if(Math.abs(toCol-c)===1 && toRow===r+dir && !getPieceAt(toRow,toCol)) return true;
@@ -116,27 +106,18 @@ function isValidMove(piece,toRow,toCol){ //simplified rules
   }
   return false;
 }
-
 function movePiece(piece,toRow,toCol){
   let r=parseInt(piece.dataset.row),c=parseInt(piece.dataset.col);
-  //กินหมาก
   if(Math.abs(toRow-r)===2){
     let midRow=(r+toRow)/2, midCol=(c+toCol)/2;
     let mid=getPieceAt(midRow,midCol);
     if(mid){mid.remove(); pieces=pieces.filter(p=>p!==mid);}
   }
   piece.dataset.row=toRow; piece.dataset.col=toCol;
-  piece.style.top=toRow*size+'px';
-  piece.style.left=toCol*size+'px';
-  checkWin();
-  turn=turn==='red'?'black':'red';
-  selectedPiece=null;
-  if(mode==='bot' && turn==='black' && !checkWin()){
-    setTimeout(botMove,300);
-  }
+  piece.style.top=toRow*size+'px'; piece.style.left=toCol*size+'px';
+  checkWin(); turn=turn==='red'?'black':'red'; selectedPiece=null;
+  if(mode==='bot' && turn==='black' && !gameOver) setTimeout(botMove,300);
 }
-
-pieces=[]; initBoard();
 
 boardEl.addEventListener('click',e=>{
   if(gameOver) return;
@@ -152,7 +133,6 @@ boardEl.addEventListener('click',e=>{
   pieces.forEach(p=>{if(p!==selectedPiece)p.classList.remove('selected');});
 });
 
-let gameOver=false;
 function checkWin(){
   let redLeft=pieces.filter(p=>p.classList.contains('red')).length;
   let blackLeft=pieces.filter(p=>p.classList.contains('black')).length;
@@ -160,7 +140,6 @@ function checkWin(){
   if(blackLeft===0){resultEl.textContent='แดงชนะ! 🎉'; gameOver=true;}
 }
 
-// บอทง่ายๆ (random move)
 function botMove(){
   let botPieces=pieces.filter(p=>p.classList.contains('black'));
   let moves=[];
@@ -172,12 +151,10 @@ function botMove(){
     }
   });
   if(moves.length===0) return;
-  let move;
-  if(botLevel===1) move=moves[Math.floor(Math.random()*moves.length)];
-  else if(botLevel===2) move=moves[Math.floor(Math.random()*moves.length)];
-  else move=moves[Math.floor(Math.random()*moves.length)]; //Level3สามารถปรับล็อกผลได้
+  let move=moves[Math.floor(Math.random()*moves.length)];
   movePiece(move.piece,move.row,move.col);
 }
 </script>
+
 </body>
 </html>
