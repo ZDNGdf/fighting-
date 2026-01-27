@@ -3,206 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>X O Advanced</title>
+<title>เกมหมากฮอต</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
-  body { display:flex; justify-content:center; align-items:center; height:100vh; background: linear-gradient(135deg,#ff9a9e,#fad0c4); }
-
-  /* Container */
-  .container { display:flex; flex-direction:column; align-items:center; position:relative; }
-
-  h1 { color:#fff; margin-bottom:20px; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
-
-  /* Board */
-  .board { display:grid; grid-template-columns:repeat(3,100px); grid-gap:15px; }
-  .cell {
-    width:100px;height:100px;
-    background: rgba(255,255,255,0.9);
-    border-radius:15px;
-    display:flex; justify-content:center; align-items:center;
-    font-size:3rem; color:#ff6f91;
-    cursor:pointer; transition: all 0.3s ease;
-    box-shadow:0 5px 15px rgba(0,0,0,0.2);
-  }
-  .cell:hover { transform:scale(1.1); background: rgba(255,255,255,1); }
-
-  /* X/O Animations */
-  .x { color:#ff6f91; animation: pop 0.3s ease; }
-  .o { color:#6a82fb; animation: pop 0.3s ease; }
-  @keyframes pop { 0%{transform:scale(0);opacity:0;} 100%{transform:scale(1);opacity:1;} }
-
-  /* Result */
-  .result { margin-top:20px; font-size:1.5rem; color:#fff; text-shadow:1px 1px 3px rgba(0,0,0,0.3); }
-  button { margin-top:10px; padding:10px 20px; border:none; border-radius:10px; background:#fff; color:#ff6f91; font-weight:bold; cursor:pointer; transition:all 0.3s ease; }
-  button:hover { transform:scale(1.1); background:#ff6f91; color:#fff; }
-
-  /* Popup */
-  .popup-bg { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:10; }
-  .popup { background:#fff; padding:30px; border-radius:20px; text-align:center; max-width:300px; width:80%; box-shadow:0 10px 40px rgba(0,0,0,0.4); }
-  .popup h2 { margin-bottom:20px; color:#333; }
-  .mode-btn { margin:10px 0; padding:10px 15px; width:100%; border:none; border-radius:10px; cursor:pointer; transition:all 0.3s; font-weight:bold; }
-  .mode-btn:hover { transform:scale(1.05); }
-  .level-btn { background:#6a82fb; color:#fff; }
-  .pvp-btn { background:#ff6f91; color:#fff; }
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{display:flex;justify-content:center;align-items:center;height:100vh;background: linear-gradient(135deg,#ff9a9e,#fad0c4);}
+.container{display:flex;flex-direction:column;align-items:center;position:relative;}
+h1{color:#fff;margin-bottom:20px;text-shadow:2px 2px 5px rgba(0,0,0,0.3);}
+.board{display:grid;grid-template-columns:repeat(8,60px);grid-template-rows:repeat(8,60px);gap:0;}
+.cell{width:60px;height:60px;display:flex;justify-content:center;align-items:center;transition:all 0.3s ease;}
+.cell.dark{background:#b58863;}
+.cell.light{background:#f0d9b5;}
+.piece{width:50px;height:50px;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;transition:all 0.3s ease;position:absolute;}
+.red{background:#ff4b5c;}
+.black{background:#333;}
+.selected{box-shadow:0 0 15px 5px yellow;}
+.result{margin-top:20px;font-size:1.5rem;color:#fff;text-shadow:1px 1px 3px rgba(0,0,0,0.3);}
+button{margin-top:10px;padding:10px 20px;border:none;border-radius:10px;background:#fff;color:#ff6f91;font-weight:bold;cursor:pointer;transition:all 0.3s ease;}
+button:hover{transform:scale(1.1);background:#ff6f91;color:#fff;}
+.popup-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:flex;justify-content:center;align-items:center;z-index:10;}
+.popup{background:#fff;padding:30px;border-radius:20px;text-align:center;max-width:300px;width:80%;box-shadow:0 10px 40px rgba(0,0,0,0.4);}
+.popup h2{margin-bottom:20px;color:#333;}
+.mode-btn{margin:10px 0;padding:10px 15px;width:100%;border:none;border-radius:10px;cursor:pointer;transition:all 0.3s;font-weight:bold;}
+.mode-btn:hover{transform:scale(1.05);}
+.level-btn{background:#6a82fb;color:#fff;}
+.pvp-btn{background:#ff6f91;color:#fff;}
 </style>
 </head>
 <body>
-
 <div class="container">
-  <h1>X O Game</h1>
-  <div class="board" id="board">
-    <div class="cell" data-index="0"></div>
-    <div class="cell" data-index="1"></div>
-    <div class="cell" data-index="2"></div>
-    <div class="cell" data-index="3"></div>
-    <div class="cell" data-index="4"></div>
-    <div class="cell" data-index="5"></div>
-    <div class="cell" data-index="6"></div>
-    <div class="cell" data-index="7"></div>
-    <div class="cell" data-index="8"></div>
-  </div>
-  <div class="result" id="result"></div>
-  <button onclick="resetGame()">เริ่มใหม่</button>
+<h1>เกมหมากฮอต</h1>
+<div class="board" id="board"></div>
+<div class="result" id="result"></div>
+<button onclick="resetGame()">เริ่มใหม่</button>
 </div>
 
 <!-- Popup เลือกโหมด -->
 <div class="popup-bg" id="popup">
-  <div class="popup">
-    <h2>เลือกโหมดเกม</h2>
-    <button class="mode-btn pvp-btn" onclick="startGame('pvp')">ผู้เล่น vs ผู้เล่น</button>
-    <button class="mode-btn level-btn" onclick="chooseBot()">ผู้เล่น vs บอท</button>
-  </div>
+<div class="popup">
+<h2>เลือกโหมดเกม</h2>
+<button class="mode-btn pvp-btn" onclick="startGame('pvp')">ผู้เล่น vs ผู้เล่น</button>
+<button class="mode-btn level-btn" onclick="chooseBot()">ผู้เล่น vs บอท</button>
+</div>
 </div>
 
 <!-- Popup เลือกระดับบอท -->
 <div class="popup-bg" id="botPopup" style="display:none;">
-  <div class="popup">
-    <h2>เลือกระดับบอท</h2>
-    <button class="mode-btn level-btn" onclick="startGame('bot',1)">Level 1 (ง่าย)</button>
-    <button class="mode-btn level-btn" onclick="startGame('bot',2)">Level 2 (ปานกลาง)</button>
-    <button class="mode-btn level-btn" onclick="startGame('bot',3)">Level 3 (ยาก)</button>
-  </div>
+<div class="popup">
+<h2>เลือกระดับบอท</h2>
+<button class="mode-btn level-btn" onclick="startGame('bot',1)">Level 1 (ง่าย)</button>
+<button class="mode-btn level-btn" onclick="startGame('bot',2)">Level 2 (ปานกลาง)</button>
+<button class="mode-btn level-btn" onclick="startGame('bot',3)">Level 3 (ยาก)</button>
+</div>
 </div>
 
 <script>
-const board = document.getElementById('board');
-const cells = document.querySelectorAll('.cell');
-const result = document.getElementById('result');
+const boardEl = document.getElementById('board');
+const resultEl = document.getElementById('result');
 const popup = document.getElementById('popup');
 const botPopup = document.getElementById('botPopup');
 
-let turn = 'X';
-let gameOver = false;
-let boardState = Array(9).fill('');
-let mode = '';
-let botLevel = 0;
+let board=[], pieces=[];
+let mode='', botLevel=0;
+let turn='red', selectedPiece=null;
+const size=60;
 
-const winCombos = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
-];
-
-function chooseBot() {
-  popup.style.display='none';
-  botPopup.style.display='flex';
-}
-
-function startGame(selectedMode, level=0) {
-  mode = selectedMode;
-  botLevel = level;
-  popup.style.display='none';
-  botPopup.style.display='none';
-}
-
-function checkWinner() {
-  for (const combo of winCombos) {
-    const [a,b,c] = combo;
-    if(boardState[a] && boardState[a]===boardState[b] && boardState[a]===boardState[c]){
-      gameOver = true;
-      result.textContent = `${boardState[a]} ชนะ! 🎉`;
-      highlightWinner(combo);
-      return;
+function initBoard(){
+  boardEl.innerHTML='';
+  board=[]; pieces=[];
+  for(let r=0;r<8;r++){
+    board[r]=[];
+    for(let c=0;c<8;c++){
+      let cell=document.createElement('div');
+      cell.classList.add('cell',(r+c)%2?'dark':'light');
+      cell.dataset.row=r;
+      cell.dataset.col=c;
+      boardEl.appendChild(cell);
+      board[r][c]=(r<3 && (r+c)%2)?'black':(r>4 && (r+c)%2)?'red':null;
+      if(board[r][c]){
+        let piece=document.createElement('div');
+        piece.classList.add('piece',board[r][c]);
+        piece.style.top=r*size+'px';
+        piece.style.left=c*size+'px';
+        piece.dataset.row=r;
+        piece.dataset.col=c;
+        boardEl.appendChild(piece);
+        pieces.push(piece);
+      }
     }
   }
-  if(!boardState.includes('')) {
-    gameOver = true;
-    result.textContent = 'เสมอ! 🤝';
+}
+
+function chooseBot(){popup.style.display='none';botPopup.style.display='flex';}
+
+function startGame(selectedMode,level=0){
+  mode=selectedMode; botLevel=level;
+  popup.style.display='none'; botPopup.style.display='none';
+  initBoard();
+  turn='red'; selectedPiece=null;
+  resultEl.textContent='';
+}
+
+function resetGame(){popup.style.display='flex'; botPopup.style.display='none'; initBoard(); resultEl.textContent=''; turn='red'; selectedPiece=null;}
+
+function getPieceAt(row,col){return pieces.find(p=>parseInt(p.dataset.row)===row && parseInt(p.dataset.col)===col);}
+function isValidMove(piece,toRow,toCol){ //simplified rules
+  let r=parseInt(piece.dataset.row),c=parseInt(piece.dataset.col);
+  let dir=piece.classList.contains('red')?-1:1;
+  if(Math.abs(toCol-c)===1 && toRow===r+dir && !getPieceAt(toRow,toCol)) return true;
+  if(Math.abs(toCol-c)===2 && toRow===r+dir*2){
+    let mid=getPieceAt(r+dir,(c+toCol)/2);
+    if(mid && mid.classList.contains(turn==='red'?'black':'red')) return true;
+  }
+  return false;
+}
+
+function movePiece(piece,toRow,toCol){
+  let r=parseInt(piece.dataset.row),c=parseInt(piece.dataset.col);
+  //กินหมาก
+  if(Math.abs(toRow-r)===2){
+    let midRow=(r+toRow)/2, midCol=(c+toCol)/2;
+    let mid=getPieceAt(midRow,midCol);
+    if(mid){mid.remove(); pieces=pieces.filter(p=>p!==mid);}
+  }
+  piece.dataset.row=toRow; piece.dataset.col=toCol;
+  piece.style.top=toRow*size+'px';
+  piece.style.left=toCol*size+'px';
+  checkWin();
+  turn=turn==='red'?'black':'red';
+  selectedPiece=null;
+  if(mode==='bot' && turn==='black' && !checkWin()){
+    setTimeout(botMove,300);
   }
 }
 
-function highlightWinner(combo){
-  combo.forEach(i=>{
-    cells[i].style.background='linear-gradient(135deg,#f6d365,#fda085)';
-    cells[i].style.color='#fff';
-    cells[i].style.boxShadow='0 0 20px rgba(255,255,255,0.6)';
-  });
-}
+pieces=[]; initBoard();
 
-function botMove(){
+boardEl.addEventListener('click',e=>{
   if(gameOver) return;
-
-  let empty = boardState.map((v,i)=>v===''?i:null).filter(v=>v!==null);
-  if(empty.length===0) return;
-
-  let move;
-  if(botLevel===1){
-    // Level 1: random
-    move = empty[Math.floor(Math.random()*empty.length)];
-  } else if(botLevel===2){
-    // Level 2: try block win (simplified)
-    move = empty[Math.floor(Math.random()*empty.length)];
-  } else {
-    // Level 3: โอกาสชนะผู้เล่น 0.1
-    if(Math.random()<0.1){
-      move = empty[Math.floor(Math.random()*empty.length)];
-    } else {
-      // เลือกช่องที่ผู้เล่นจะชนะไม่ได้
-      move = empty[Math.floor(Math.random()*empty.length)];
-    }
+  if(!e.target.classList.contains('piece') && !e.target.classList.contains('cell')) return;
+  let row=parseInt(e.target.dataset.row), col=parseInt(e.target.dataset.col);
+  if(selectedPiece){
+    if(isValidMove(selectedPiece,row,col)) movePiece(selectedPiece,row,col);
+    else selectedPiece=null;
+  } else if(e.target.classList.contains(turn)){
+    selectedPiece=e.target;
+    selectedPiece.classList.add('selected');
   }
-  boardState[move] = turn;
-  const cell = cells[move];
-  cell.textContent = turn;
-  cell.classList.add(turn.toLowerCase());
-  checkWinner();
-  turn = turn==='X'?'O':'X';
-}
-
-cells.forEach(cell=>{
-  cell.addEventListener('click', ()=>{
-    const index = cell.dataset.index;
-    if(boardState[index] || gameOver) return;
-
-    boardState[index] = turn;
-    cell.textContent = turn;
-    cell.classList.add(turn.toLowerCase());
-    checkWinner();
-
-    if(mode==='bot' && !gameOver){
-      turn = turn==='X'?'O':'X';
-      setTimeout(botMove,300);
-    } else {
-      turn = turn==='X'?'O':'X';
-    }
-  });
+  pieces.forEach(p=>{if(p!==selectedPiece)p.classList.remove('selected');});
 });
 
-function resetGame(){
-  boardState.fill('');
-  cells.forEach(cell=>{
-    cell.textContent='';
-    cell.classList.remove('x','o');
-    cell.style.background='rgba(255,255,255,0.9)';
-    cell.style.color='#ff6f91';
-    cell.style.boxShadow='0 5px 15px rgba(0,0,0,0.2)';
+let gameOver=false;
+function checkWin(){
+  let redLeft=pieces.filter(p=>p.classList.contains('red')).length;
+  let blackLeft=pieces.filter(p=>p.classList.contains('black')).length;
+  if(redLeft===0){resultEl.textContent='ดำชนะ! 🎉'; gameOver=true;}
+  if(blackLeft===0){resultEl.textContent='แดงชนะ! 🎉'; gameOver=true;}
+}
+
+// บอทง่ายๆ (random move)
+function botMove(){
+  let botPieces=pieces.filter(p=>p.classList.contains('black'));
+  let moves=[];
+  botPieces.forEach(p=>{
+    for(let r=Math.max(0,parseInt(p.dataset.row)-2);r<=Math.min(7,parseInt(p.dataset.row)+2);r++){
+      for(let c=Math.max(0,parseInt(p.dataset.col)-2);c<=Math.min(7,parseInt(p.dataset.col)+2);c++){
+        if(isValidMove(p,r,c)) moves.push({piece:p,row:r,col:c});
+      }
+    }
   });
-  result.textContent='';
-  turn='X';
-  gameOver=false;
-  popup.style.display='flex';
+  if(moves.length===0) return;
+  let move;
+  if(botLevel===1) move=moves[Math.floor(Math.random()*moves.length)];
+  else if(botLevel===2) move=moves[Math.floor(Math.random()*moves.length)];
+  else move=moves[Math.floor(Math.random()*moves.length)]; //Level3สามารถปรับล็อกผลได้
+  movePiece(move.piece,move.row,move.col);
 }
 </script>
-
 </body>
 </html>
