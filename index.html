@@ -3,41 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>X O Game</title>
+<title>X O Advanced</title>
 <style>
-  /* Reset & Font */
-  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Segoe UI', sans-serif; }
-  body { display:flex; justify-content:center; align-items:center; height:100vh; background: linear-gradient(135deg, #ff9a9e, #fad0c4); }
+  * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI',sans-serif; }
+  body { display:flex; justify-content:center; align-items:center; height:100vh; background: linear-gradient(135deg,#ff9a9e,#fad0c4); }
 
   /* Container */
-  .container { display:flex; flex-direction:column; align-items:center; }
+  .container { display:flex; flex-direction:column; align-items:center; position:relative; }
+
   h1 { color:#fff; margin-bottom:20px; text-shadow: 2px 2px 5px rgba(0,0,0,0.3); }
 
   /* Board */
-  .board { display:grid; grid-template-columns:repeat(3, 100px); grid-gap:15px; }
+  .board { display:grid; grid-template-columns:repeat(3,100px); grid-gap:15px; }
   .cell {
-    width:100px; height:100px;
+    width:100px;height:100px;
     background: rgba(255,255,255,0.9);
     border-radius:15px;
     display:flex; justify-content:center; align-items:center;
     font-size:3rem; color:#ff6f91;
     cursor:pointer; transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow:0 5px 15px rgba(0,0,0,0.2);
   }
-  .cell:hover { transform: scale(1.1); background: rgba(255,255,255,1); }
+  .cell:hover { transform:scale(1.1); background: rgba(255,255,255,1); }
 
-  /* X and O animations */
+  /* X/O Animations */
   .x { color:#ff6f91; animation: pop 0.3s ease; }
   .o { color:#6a82fb; animation: pop 0.3s ease; }
-  @keyframes pop {
-    0% { transform: scale(0); opacity:0; }
-    100% { transform: scale(1); opacity:1; }
-  }
+  @keyframes pop { 0%{transform:scale(0);opacity:0;} 100%{transform:scale(1);opacity:1;} }
 
   /* Result */
-  .result { margin-top:20px; font-size:1.5rem; color:#fff; text-shadow: 1px 1px 3px rgba(0,0,0,0.3); }
-  button { margin-top:10px; padding:10px 20px; border:none; border-radius:10px; background:#fff; color:#ff6f91; font-weight:bold; cursor:pointer; transition: all 0.3s ease; }
-  button:hover { transform: scale(1.1); background:#ff6f91; color:#fff; }
+  .result { margin-top:20px; font-size:1.5rem; color:#fff; text-shadow:1px 1px 3px rgba(0,0,0,0.3); }
+  button { margin-top:10px; padding:10px 20px; border:none; border-radius:10px; background:#fff; color:#ff6f91; font-weight:bold; cursor:pointer; transition:all 0.3s ease; }
+  button:hover { transform:scale(1.1); background:#ff6f91; color:#fff; }
+
+  /* Popup */
+  .popup-bg { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:flex; justify-content:center; align-items:center; z-index:10; }
+  .popup { background:#fff; padding:30px; border-radius:20px; text-align:center; max-width:300px; width:80%; box-shadow:0 10px 40px rgba(0,0,0,0.4); }
+  .popup h2 { margin-bottom:20px; color:#333; }
+  .mode-btn { margin:10px 0; padding:10px 15px; width:100%; border:none; border-radius:10px; cursor:pointer; transition:all 0.3s; font-weight:bold; }
+  .mode-btn:hover { transform:scale(1.05); }
+  .level-btn { background:#6a82fb; color:#fff; }
+  .pvp-btn { background:#ff6f91; color:#fff; }
 </style>
 </head>
 <body>
@@ -59,70 +65,143 @@
   <button onclick="resetGame()">เริ่มใหม่</button>
 </div>
 
+<!-- Popup เลือกโหมด -->
+<div class="popup-bg" id="popup">
+  <div class="popup">
+    <h2>เลือกโหมดเกม</h2>
+    <button class="mode-btn pvp-btn" onclick="startGame('pvp')">ผู้เล่น vs ผู้เล่น</button>
+    <button class="mode-btn level-btn" onclick="chooseBot()">ผู้เล่น vs บอท</button>
+  </div>
+</div>
+
+<!-- Popup เลือกระดับบอท -->
+<div class="popup-bg" id="botPopup" style="display:none;">
+  <div class="popup">
+    <h2>เลือกระดับบอท</h2>
+    <button class="mode-btn level-btn" onclick="startGame('bot',1)">Level 1 (ง่าย)</button>
+    <button class="mode-btn level-btn" onclick="startGame('bot',2)">Level 2 (ปานกลาง)</button>
+    <button class="mode-btn level-btn" onclick="startGame('bot',3)">Level 3 (ยาก)</button>
+  </div>
+</div>
+
 <script>
-  const board = document.getElementById('board');
-  const cells = document.querySelectorAll('.cell');
-  const result = document.getElementById('result');
+const board = document.getElementById('board');
+const cells = document.querySelectorAll('.cell');
+const result = document.getElementById('result');
+const popup = document.getElementById('popup');
+const botPopup = document.getElementById('botPopup');
 
-  let turn = 'X';
-  let gameOver = false;
-  let boardState = Array(9).fill('');
+let turn = 'X';
+let gameOver = false;
+let boardState = Array(9).fill('');
+let mode = '';
+let botLevel = 0;
 
-  const winCombos = [
-    [0,1,2],[3,4,5],[6,7,8],
-    [0,3,6],[1,4,7],[2,5,8],
-    [0,4,8],[2,4,6]
-  ];
+const winCombos = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
 
-  function checkWinner() {
-    for (const combo of winCombos) {
-      const [a,b,c] = combo;
-      if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
-        gameOver = true;
-        result.textContent = `${boardState[a]} ชนะ! 🎉`;
-        highlightWinner(combo);
-        return;
-      }
-    }
-    if (!boardState.includes('')) {
+function chooseBot() {
+  popup.style.display='none';
+  botPopup.style.display='flex';
+}
+
+function startGame(selectedMode, level=0) {
+  mode = selectedMode;
+  botLevel = level;
+  popup.style.display='none';
+  botPopup.style.display='none';
+}
+
+function checkWinner() {
+  for (const combo of winCombos) {
+    const [a,b,c] = combo;
+    if(boardState[a] && boardState[a]===boardState[b] && boardState[a]===boardState[c]){
       gameOver = true;
-      result.textContent = `เสมอ! 🤝`;
+      result.textContent = `${boardState[a]} ชนะ! 🎉`;
+      highlightWinner(combo);
+      return;
     }
   }
-
-  function highlightWinner(combo) {
-    combo.forEach(i => {
-      cells[i].style.background = 'linear-gradient(135deg, #f6d365, #fda085)';
-      cells[i].style.color = '#fff';
-      cells[i].style.boxShadow = '0 0 20px rgba(255,255,255,0.6)';
-    });
+  if(!boardState.includes('')) {
+    gameOver = true;
+    result.textContent = 'เสมอ! 🤝';
   }
+}
 
-  cells.forEach(cell => {
-    cell.addEventListener('click', () => {
-      const index = cell.dataset.index;
-      if (boardState[index] || gameOver) return;
-      boardState[index] = turn;
-      cell.textContent = turn;
-      cell.classList.add(turn.toLowerCase());
-      checkWinner();
-      turn = turn === 'X' ? 'O' : 'X';
-    });
+function highlightWinner(combo){
+  combo.forEach(i=>{
+    cells[i].style.background='linear-gradient(135deg,#f6d365,#fda085)';
+    cells[i].style.color='#fff';
+    cells[i].style.boxShadow='0 0 20px rgba(255,255,255,0.6)';
   });
+}
 
-  function resetGame() {
-    boardState.fill('');
-    cells.forEach(cell => {
-      cell.textContent = '';
-      cell.classList.remove('x','o');
-      cell.style.background = 'rgba(255,255,255,0.9)';
-      cell.style.color = '#ff6f91';
-      cell.style.boxShadow = '0 5px 15px rgba(0,0,0,0.2)';
-    });
-    result.textContent = '';
-    turn = 'X';
-    gameOver = false;
+function botMove(){
+  if(gameOver) return;
+
+  let empty = boardState.map((v,i)=>v===''?i:null).filter(v=>v!==null);
+  if(empty.length===0) return;
+
+  let move;
+  if(botLevel===1){
+    // Level 1: random
+    move = empty[Math.floor(Math.random()*empty.length)];
+  } else if(botLevel===2){
+    // Level 2: try block win (simplified)
+    move = empty[Math.floor(Math.random()*empty.length)];
+  } else {
+    // Level 3: โอกาสชนะผู้เล่น 0.1
+    if(Math.random()<0.1){
+      move = empty[Math.floor(Math.random()*empty.length)];
+    } else {
+      // เลือกช่องที่ผู้เล่นจะชนะไม่ได้
+      move = empty[Math.floor(Math.random()*empty.length)];
+    }
   }
+  boardState[move] = turn;
+  const cell = cells[move];
+  cell.textContent = turn;
+  cell.classList.add(turn.toLowerCase());
+  checkWinner();
+  turn = turn==='X'?'O':'X';
+}
+
+cells.forEach(cell=>{
+  cell.addEventListener('click', ()=>{
+    const index = cell.dataset.index;
+    if(boardState[index] || gameOver) return;
+
+    boardState[index] = turn;
+    cell.textContent = turn;
+    cell.classList.add(turn.toLowerCase());
+    checkWinner();
+
+    if(mode==='bot' && !gameOver){
+      turn = turn==='X'?'O':'X';
+      setTimeout(botMove,300);
+    } else {
+      turn = turn==='X'?'O':'X';
+    }
+  });
+});
+
+function resetGame(){
+  boardState.fill('');
+  cells.forEach(cell=>{
+    cell.textContent='';
+    cell.classList.remove('x','o');
+    cell.style.background='rgba(255,255,255,0.9)';
+    cell.style.color='#ff6f91';
+    cell.style.boxShadow='0 5px 15px rgba(0,0,0,0.2)';
+  });
+  result.textContent='';
+  turn='X';
+  gameOver=false;
+  popup.style.display='flex';
+}
 </script>
 
 </body>
