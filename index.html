@@ -3,165 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>วัดความไวสายตา</title>
-<style>
-* { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: all 0.5s ease; }
-body { margin:0; background-size: cover; background-position: center; color:white; display:flex; justify-content:center; align-items:center; height:100vh; transition: all 1s ease;}
-.container { width:100%; max-width:600px; padding:20px; text-align:center; transition: all 1s ease; background: rgba(0,0,0,0.4); border-radius: 15px;}
-h1 { color:#38bdf8; margin-bottom:5px; transition: all 1s ease;}
-p { opacity:0.8; }
-#gameArea { position:relative; width:100%; height:60vh; background: rgba(255,255,255,0.05); border-radius:20px; overflow:hidden; border:2px solid rgba(255,255,255,0.1); margin-bottom:15px; transition: all 1s ease;}
-.circle { position:absolute; border-radius:50%; cursor:pointer; animation:pop 0.2s ease-out; transition: all 0.3s ease; }
+<title>Pop Friend</title>
 
-/* เพิ่ม hitbox ใหญ่ขึ้น 30px รอบวงกลม */
-.circle::before {
-    content: "";
-    position: absolute;
-    top: -15px;
-    left: -15px;
-    width: calc(100% + 30px);
-    height: calc(100% + 30px);
+<style>
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #ffc0cb;
+    flex-direction: column;
 }
 
-@keyframes pop { from { transform: scale(0.6);} to { transform: scale(1);} }
-button { width:100%; max-width:300px; padding:18px; font-size:20px; border-radius:40px; border:none; background: linear-gradient(135deg,#38bdf8,#6366f1); color:white; cursor:pointer; margin-top:10px; transition: all 1s ease;}
-button:active { transform: scale(0.96); }
-#result { font-size:20px; margin-top:15px; color:#facc15; transition: all 1s ease;}
-#certificate { margin-top:20px; padding:15px; border:2px dashed #38bdf8; border-radius:15px; background: rgba(0,0,0,0.3); transition: all 1s ease;}
+img {
+    width: 300px;
+    max-width: 80vw;
+}
+
+.counter {
+    margin-top: 15px;
+    font-size: 24px;
+    font-weight: bold;
+}
 </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>👁️ วัดความไวสายตา</h1>
-    <p>แตะวงกลมเท่านั้น! กดผิด = จบเกมทันที</p>
-    <div id="gameArea"></div>
-    <button onclick="startGame()">▶ เริ่มทดสอบ</button>
-    <div id="result"></div>
-    <div id="certificate"></div>
+<img id="img" src="https://media.discordapp.net/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg">
+
+<div class="counter">
+    POP: <span id="count">0</span>
 </div>
 
 <script>
-const fixedTime = 1000; // 1 วิ ต่อรอบ
-let score = 0;
-let active = false;
-let timeout;
+let count = 0;
 
-// วงกลมเปลี่ยนสีทุก 50 คะแนน
-const circleColors = ["#ff6b6b","#facc15","#38bdf8","#10b981","#f472b6","#a855f7"];
+const img = document.getElementById("img");
+const counter = document.getElementById("count");
 
-// 15 รูปพื้นหลัง
-const bgImages = [
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
-    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2",
-    "https://images.unsplash.com/photo-1493244040629-496f6d136cc3",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    "https://images.unsplash.com/photo-1519608487953-e999c86e7455",
-    "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
-    "https://images.unsplash.com/photo-1521295121783-8a321d551ad2"
-];
+// รูป
+const normalImg = "https://media.discordapp.net/attachments/1351475770370953226/1465184686492880937/Messenger_creation_9299DE20-9320-4418-8D2A-613E2737FF97.jpg";
+const openImg1 = "https://media.discordapp.net/attachments/1351475770370953226/1465184695624142919/Messenger_creation_4466CA51-C0A8-42D0-962E-A575370349F1.jpg";
+const openImg2 = "https://YOUR_IMAGE_3_HERE.jpg"; // 👈 รูปที่ 3 ใส่ตรงนี้
 
-// preload รูปทั้งหมด
-bgImages.forEach(url => {
-    const img = new Image();
-    img.src = url;
-});
+function press() {
+    count++;
+    counter.textContent = count;
 
-const gameArea = document.getElementById("gameArea");
-const result = document.getElementById("result");
-const certificate = document.getElementById("certificate");
-const body = document.body;
-
-function startGame(){
-    score = 0;
-    result.innerHTML = "";
-    certificate.innerHTML = "";
-    body.style.backgroundImage = `url(${bgImages[0]})`;
-    gameArea.addEventListener("click", clickOutsideCircle);
-    nextRound();
-}
-
-// ตรวจว่ากดผิด
-function clickOutsideCircle(e){
-    if(!active) return;
-    if(!e.target.classList.contains("circle")){
-        active = false;
-        clearTimeout(timeout);
-        endGame();
+    if (count >= 100) {
+        img.src = openImg2; // โหมดขั้นสอง
+    } else {
+        img.src = openImg1;
     }
 }
 
-function nextRound(){
-    gameArea.innerHTML = "";
-    active = true;
-
-    const circle = document.createElement("div");
-    circle.className = "circle";
-
-    const size = 70 + Math.random()*30;
-    circle.style.width = size + "px";
-    circle.style.height = size + "px";
-
-    // วงกลมเปลี่ยนสีทุก 50 คะแนน
-    let colorIndex = Math.floor(score/50) % circleColors.length;
-    circle.style.background = circleColors[colorIndex];
-
-    const maxX = gameArea.clientWidth - size;
-    const maxY = gameArea.clientHeight - size;
-    circle.style.left = Math.random()*maxX + "px";
-    circle.style.top = Math.random()*maxY + "px";
-
-    // กดวงกลมสำเร็จ
-    circle.onclick = (e) => {
-        e.stopPropagation();
-        if(!active) return;
-        active = false;
-        score++;
-        result.innerHTML = `คะแนน: ${score}`;
-
-        // เปลี่ยนพื้นหลังทุก 100 คะแนน
-        if(score % 100 === 0){
-            let bgIndex = Math.floor(score/100) % bgImages.length;
-            body.style.backgroundImage = `url(${bgImages[bgIndex]})`;
-        }
-
-        clearTimeout(timeout);
-        nextRound();
-    }
-
-    gameArea.appendChild(circle);
-
-    timeout = setTimeout(() => {
-        active = false;
-        endGame();
-    }, fixedTime);
+function release() {
+    img.src = normalImg;
 }
 
-function endGame(){
-    gameArea.innerHTML = "";
-    result.innerHTML = `คุณกดได้ทั้งหมด ${score} ครั้ง`;
+document.addEventListener("mousedown", press);
+document.addEventListener("mouseup", release);
 
-    let level = "";
-    if(score < 50) level = "😴 สายตาช้า";
-    else if(score < 150) level = "🙂 สายตาปกติ";
-    else if(score < 400) level = "😎 สายตาไว";
-    else level = "🔥 สายตาไวสุดยอด!";
-
-    certificate.innerHTML = `
-        <h2>📜 ใบรับรองความไวสายตา</h2>
-        <p>คะแนนของคุณ: ${score}</p>
-        <p>ระดับสายตา: ${level}</p>
-        <p>ทดสอบโดย: ระบบวัดความไวสายตาออนไลน์</p>
-    `;
-}
+document.addEventListener("touchstart", press);
+document.addEventListener("touchend", release);
 </script>
 
 </body>
